@@ -68,6 +68,12 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-19 — Usage recipes + runnable examples
+- Wrote `docs/04-usage.md` with one-line-adoption snippets for: OpenAI SDK (Node + Python), LangChain (Node + Python), AutoGen, Anthropic SDK, LlamaIndex, plus a "my framework hides the HTTP client" escape-hatch using `wrap()` and a "verifying you're actually using Blindfold" debugging section, plus rotation, plus an honest "what Blindfold does *not* protect" note.
+- Created `examples/` folder with four runnable apps: `openai-node-quickstart`, `openai-python-quickstart`, `langchain-summarizer`, `anthropic-quickstart`. Each is ~20 lines.
+- Added a "Recipes & runnable examples" table to the main README pointing to the doc anchors + example folders, and added 04-usage.md to the living-docs index.
+- These are independent of the workspaces (not in `workspaces: ["packages/*", "demo"]`) so they don't get picked up by the monorepo install.
+
 ### 2026-06-19 — Steps 4a–d + 5 complete (full build end-to-end)
 - **4a (Agent A leaks):** mock-LLM-driven agent fetches a booby-trapped page, follows the embedded injection, reads `OPENAI_API_KEY` via the `get_env` tool, exfiltrates to a local attacker server. Run with `npm run demo:a` — leak confirmed.
 - **4b (Blindfold wrapper):**

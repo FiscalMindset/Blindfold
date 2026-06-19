@@ -258,6 +258,24 @@ Useful when you can't easily set environment variables (e.g. inside a managed ru
 
 ---
 
+## Recipes & runnable examples
+
+The exact one-line snippet for the stack you use:
+
+| Stack | Recipe | Runnable example |
+|---|---|---|
+| OpenAI SDK · Node | [`docs/04-usage.md`](docs/04-usage.md#openai-sdk--nodejs-the-official-openai-package) | [`examples/openai-node-quickstart/`](examples/openai-node-quickstart/) |
+| OpenAI SDK · Python | [`docs/04-usage.md`](docs/04-usage.md#openai-sdk--python-the-official-openai-package-v1) | [`examples/openai-python-quickstart/`](examples/openai-python-quickstart/) |
+| LangChain · Node / Python | [`docs/04-usage.md`](docs/04-usage.md#langchain-node-or-python) | [`examples/langchain-summarizer/`](examples/langchain-summarizer/) |
+| AutoGen | [`docs/04-usage.md`](docs/04-usage.md#autogen-microsoft) | — |
+| Anthropic SDK | [`docs/04-usage.md`](docs/04-usage.md#anthropic-sdk) | [`examples/anthropic-quickstart/`](examples/anthropic-quickstart/) |
+| LlamaIndex | [`docs/04-usage.md`](docs/04-usage.md#llamaindex-node-or-python) | — |
+| “My framework hides the HTTP client” | [`docs/04-usage.md`](docs/04-usage.md#the-my-framework-hides-the-http-client-escape-hatch) | — |
+
+Each runnable example is ~20 lines. The pattern is always the same: set the base URL to `http://127.0.0.1:8787/v1`, set the API key to `__BLINDFOLD__`, ship it.
+
+---
+
 ## Quickstart
 
 <details>
@@ -398,6 +416,7 @@ This is a **hackathon-stage demo** focused on the structural security claim. The
 | [`docs/01-problem-analysis.md`](docs/01-problem-analysis.md) | First-principles: why agents leak; why existing fixes fail |
 | [`docs/02-terminal3-analysis.md`](docs/02-terminal3-analysis.md) | What T3 surface Blindfold uses (with NEEDS VERIFICATION flags) |
 | [`docs/03-architecture.md`](docs/03-architecture.md) | Architecture, file tree, dev experience, leak-audit table |
+| [`docs/04-usage.md`](docs/04-usage.md) | One-line adoption recipes for OpenAI / LangChain / AutoGen / Anthropic / LlamaIndex |
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Onboarding for any future coding agent working on this repo |
 
 ---
