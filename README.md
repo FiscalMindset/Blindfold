@@ -365,11 +365,11 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 
 | Capability | Status | Note |
 |---|---|---|
-| Handshake + authenticate against testnet | ✅ verified | `npm run blindfold -- verify` |
-| Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ wired | one-time per secret |
+| Handshake + authenticate against testnet | ✅ verified live | `npm run blindfold -- verify` |
+| Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` |
 | Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
-| Publish the contract via `tenant.contracts.register` | ⏳ ready, untested at HEAD | runtime depends on canonical host WIT files matching our stubs |
-| Per-request proxy → enclave forwarding via `tenant.contracts.execute` | ⏳ ready, untested at HEAD | same dependency as publish |
+| Publish the contract via `tenant.contracts.register` | ✅ **verified live** | got `contract_id` back from T3 testnet |
+| Per-request `tenant.contracts.execute` (in-enclave secret substitution) | 🚧 publishes fine; execute returns HTTP 500 | almost certainly a WIT-stub signature mismatch with T3's real host interface; needs canonical WITs from T3 to close |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 
@@ -496,6 +496,7 @@ This is a **hackathon-stage demo** focused on the structural security claim. The
 | [`docs/02-terminal3-analysis.md`](docs/02-terminal3-analysis.md) | What T3 surface Blindfold uses (with NEEDS VERIFICATION flags) |
 | [`docs/03-architecture.md`](docs/03-architecture.md) | Architecture, file tree, dev experience, leak-audit table |
 | [`docs/04-usage.md`](docs/04-usage.md) | One-line adoption recipes for OpenAI / LangChain / AutoGen / Anthropic / LlamaIndex |
+| [`docs/05-compatibility.md`](docs/05-compatibility.md) | Which agent CLIs Blindfold protects (Claude Code, OpenCode, Aider, Cursor, …) + the two-property test |
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Onboarding for any future coding agent working on this repo |
 
 ---

@@ -19,6 +19,7 @@ import { startProxy } from "../src/proxy.ts";
 import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
+import { runCompat } from "../src/compat.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -108,6 +109,11 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "compat": {
+      await runCompat({ json: !!argv.flags.json });
+      return;
+    }
+
     case "dashboard": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const handle = await startDashboard({ port });
@@ -175,6 +181,7 @@ function printHelp(): void {
 Commands:
   init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
   verify                                            Handshake + auth against T3 (smoke test).
+  compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
   register --name <KV_KEY> --from-env <ENV_VAR>    Seal a secret into the enclave (one-time).
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).

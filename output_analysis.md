@@ -68,6 +68,15 @@ The script lives at `scripts/run-tests.ts` and exits non-zero if any check fails
 ## Test runs
 
 <!-- TEST_RUNS_BELOW -->
+### Real-T3 run 2026-06-19 18:34:12 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894051" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=234; wasm=1,57,989B |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [280a8685-a21b-494b-ae8b-b8e64a3ce382] ({"code":"internal_error","request_id":"280a8685-a21b-494b-ae8b-b8e64a3ce382"}) |
+
 ### Run 2026-06-19 18:18:14 UTC
 
 **✅ ALL PASS** — 9/9 tests passed.

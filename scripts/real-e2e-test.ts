@@ -1,0 +1,161 @@
+/**
+ * Real end-to-end test against live T3 testnet.
+ *
+ *   npm run test:real
+ *
+ * Performs three operations against the real network:
+ *   1. Handshake + authenticate (already known to work via `verify`).
+ *   2. Seal a uniquely-named test secret via executeControl("map-entry-set", …).
+ *   3. (Best-effort) Publish the WASM contract via tenant.contracts.register.
+ *   4. (Best-effort) Execute the contract against https://httpbin.org/anything,
+ *      a public echo endpoint. Expected to fail with `host/http.egress_denied`
+ *      unless egress for httpbin.org has been granted — which is itself
+ *      informative ("the wire works; the grant doesn't include this host").
+ *
+ * Every operation captures the exact T3 response (success or error) and
+ * appends a block to `output_analysis.md` so you have a permanent record.
+ */
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadBlindfoldEnv } from "../packages/blindfold/src/env.ts";
+import { openT3Client } from "../packages/blindfold/src/t3-client.ts";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(HERE, "..");
+const REPORT = path.join(ROOT, "output_analysis.md");
+const WASM_PATH = path.join(ROOT, "contract", "target", "wasm32-wasip2", "release", "blindfold_proxy.wasm");
+const HEAD_MARK = "<!-- TEST_RUNS_BELOW -->";
+
+interface StepResult {
+  step: string;
+  status: "ok" | "skipped" | "error";
+  detail: string;
+}
+
+const results: StepResult[] = [];
+
+function log(msg: string): void { process.stdout.write(msg + "\n"); }
+function record(step: string, status: StepResult["status"], detail: string): void {
+  results.push({ step, status, detail });
+  const mark = status === "ok" ? "✅" : status === "error" ? "🚨" : "⚠️ ";
+  log(`  ${mark}  ${step}  ${detail.slice(0, 140)}`);
+}
+
+async function main(): Promise<void> {
+  log("\n═══ Blindfold REAL end-to-end test (live T3) ═══\n");
+
+  const env = loadBlindfoldEnv();
+  if (env.mock) {
+    log("✖ This script needs REAL mode. Set T3N_API_KEY + DID in .env first.");
+    process.exit(1);
+  }
+  log(`  T3 env:       ${env.t3Env}`);
+  log(`  tenant DID:   ${env.did}`);
+  log("");
+
+  /* 1. Auth */
+  let t3;
+  try {
+    t3 = await openT3Client(env);
+    if (!t3.isReal) throw new Error("Got mock client; env misconfigured.");
+    record("S1 — handshake + authenticate", "ok", "round-trip succeeded");
+  } catch (e) {
+    record("S1 — handshake + authenticate", "error", (e as Error).message);
+    await flushReport();
+    process.exit(1);
+  }
+
+  /* 2. Seal test secret */
+  const secretName = `blindfold_test_${Math.floor(Date.now() / 1000)}`;
+  const secretValue = `TEST-VALUE-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+  try {
+    await t3.seedSecret(secretName, secretValue);
+    record(
+      "S2 — executeControl(map-entry-set)",
+      "ok",
+      `wrote key="${secretName}" len=${secretValue.length} (value never logged)`,
+    );
+  } catch (e) {
+    record("S2 — executeControl(map-entry-set)", "error", (e as Error).message);
+  }
+
+  /* 3. Register the WASM contract */
+  let publishOk = false;
+  if (!existsSync(WASM_PATH)) {
+    record("S3 — contracts.register", "skipped", `WASM artifact missing — run \`cargo build --target wasm32-wasip2 --release\` in contract/ first`);
+  } else {
+    try {
+      const wasm = readFileSync(WASM_PATH);
+      const r = await t3.registerContract(new Uint8Array(wasm.buffer, wasm.byteOffset, wasm.byteLength));
+      record("S3 — contracts.register", "ok", `contract_id=${r.contractId}; wasm=${wasm.byteLength.toLocaleString()}B`);
+      publishOk = true;
+    } catch (e) {
+      const msg = (e as Error).message;
+      if (/version.*not higher/i.test(msg)) {
+        record("S3 — contracts.register", "ok", `already registered at this version (idempotent): ${msg.slice(0, 100)}`);
+        publishOk = true;
+      } else {
+        record("S3 — contracts.register", "error", msg);
+      }
+    }
+  }
+
+  /* 4. Execute against httpbin echo endpoint */
+  if (!publishOk) {
+    record("S4 — contracts.execute", "skipped", "contract not published — can't exercise execute path");
+  } else {
+    try {
+      const resp = await t3.invokeForward({
+        method: "GET",
+        url: "https://httpbin.org/anything",
+        headers: [["Authorization", "Bearer __BLINDFOLD__"]],
+        secret_key: secretName,
+      });
+      const echoed = typeof resp.body === "string" ? resp.body : Buffer.from(resp.body).toString("utf8");
+      const hadSecret = echoed.includes(secretValue);
+      const detail = `status=${resp.status}; bytes=${echoed.length}; sentinel_replaced=${hadSecret ? "YES" : "no/uncertain"}`;
+      record("S4 — contracts.execute (httpbin echo)", "ok", detail);
+    } catch (e) {
+      const msg = (e as Error).message;
+      const hint = /egress_denied/i.test(msg)
+        ? " (expected if your tenant grant doesn't allowlist httpbin.org)"
+        : "";
+      record("S4 — contracts.execute (httpbin echo)", "error", msg + hint);
+    }
+  }
+
+  await t3.close();
+  await flushReport();
+
+  log("");
+  log(`Wrote results to ${path.relative(ROOT, REPORT)}.`);
+  log(
+    results.every((r) => r.status === "ok")
+      ? "✅ Full REAL pipeline succeeded end-to-end."
+      : "ℹ️  Partial — see the appended block for details.",
+  );
+}
+
+async function flushReport(): Promise<void> {
+  const date = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+  const block = [
+    "",
+    `### Real-T3 run ${date}`,
+    "",
+    `| # | Step | Status | Detail |`,
+    `|---|------|--------|--------|`,
+    ...results.map((r) => `| ${r.step.split(" — ")[0]} | ${r.step.split(" — ")[1] ?? r.step} | ${r.status === "ok" ? "✅" : r.status === "error" ? "🚨" : "⚠️"} | ${r.detail.replace(/\|/g, "\\|").slice(0, 240)} |`),
+    "",
+  ].join("\n");
+  if (!existsSync(REPORT)) writeFileSync(REPORT, `# Blindfold — Output & Test Analysis\n\n## Test runs\n\n${HEAD_MARK}\n`);
+  let report = readFileSync(REPORT, "utf8");
+  if (!report.includes(HEAD_MARK)) report += "\n" + HEAD_MARK + "\n";
+  report = report.replace(HEAD_MARK, HEAD_MARK + block);
+  writeFileSync(REPORT, report);
+}
+
+main().catch((e) => {
+  log("✖ unexpected: " + (e as Error).message);
+  process.exit(1);
+});
