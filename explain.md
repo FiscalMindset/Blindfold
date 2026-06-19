@@ -69,6 +69,14 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-19 — Two-command onramp
+- `npm run setup` now runs `blindfold init` as a single npm script — entire fresh-machine flow is `npm install && npm run setup`.
+- `init` now **interactively bootstraps `.env`** when T3 credentials are missing: prints the T3 claim URL, accepts pasted T3N_API_KEY + DID with format validation (5 attempts), writes them via `upsertEnvLines` so existing lines are overwritten instead of duplicated. Non-interactive (`--yes`) mode fails with the same clear pointer instead of prompting.
+- `init` now **auto-detects missing cargo** and falls back to skip-build (with a friendly warning + rustup link) instead of dying.
+- `init --start` execs into `blindfold proxy` at the end so the long-running process inherits the terminal — true zero-extra-commands flow.
+- README's quickstart is now literally two lines (`npm install` + `npm run setup`) with everything else handled by the wizard.
+- All 9 mock-mode tests still pass.
+
 ### 2026-06-19 — REAL T3 mode wired + `blindfold init` wizard
 - Inspected the actual `@terminal3/t3n-sdk` v3.9 surface (NODE_URLS, T3nClient, TenantClient, contracts.register/execute, executeControl). Rewrote `packages/blindfold/src/t3-client.ts` to match — the previous code was based on docs that pre-dated v3.
 - **`npm run blindfold -- verify`** now does a real handshake + authenticate against T3 testnet using `T3N_API_KEY` + `DID`. **VERIFIED LIVE: round-trip succeeded** on the user's credentials.
