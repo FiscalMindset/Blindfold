@@ -117,10 +117,87 @@ Architecture in detail: [`docs/03-architecture.md`](docs/03-architecture.md).
 
 ---
 
+## How Terminal 3 is used here
+
+Blindfold is a **thin shell** around a small set of Terminal 3 primitives. Nothing in T3 is bent or extended — Blindfold just composes the existing pieces. Concretely:
+
+### 1. A small Rust → WASM contract that runs inside the TDX enclave
+
+`contract/wit/world.wit` declares the **only four capabilities** the contract is allowed to use — the principle of least privilege, enforced by T3 at load time:
+
+```wit
+world blindfold-proxy {
+  import host:tenant/tenant-context@1.0.0;     // know which tenant's secrets to read
+  import host:interfaces/logging@2.1.0;        // structured logging (no secret values)
+  import host:interfaces/kv-store@2.1.0;       // read the developer's API key
+  import host:interfaces/http@2.1.0;           // make the outbound call from in-enclave
+  export contracts;
+}
+```
+
+No file-system, no signing, no inbox, no extra HTTP variants — only what's needed. If the contract were ever compromised, this is the blast radius.
+
+### 2. The developer's API key is **sealed** into the tenant's secrets map (one-time)
+
+`packages/blindfold/src/register.ts` performs **the one and only** control-plane write Blindfold ever makes that touches a plaintext value:
+
+```ts
+await tenant.executeControl("map-entry-set", {
+  map_name: tenant.canonicalName("secrets"),   // → z:<tid>:secrets
+  key:      "openai_api_key",
+  value:    process.env.OPENAI_API_KEY!,        // ⚠️ ONLY line in repo that touches plaintext
+});
+```
+
+After this returns, the local binding is dropped. From here on, the value lives at `z:<tid>:secrets` inside the enclave's encrypted KV — only decryptable from inside an **attested** TDX node.
+
+### 3. At runtime, the contract reads the secret **inside the enclave** and substitutes
+
+`contract/src/forward.rs` (the only place plaintext ever materialises again, and only briefly, in TDX memory):
+
+```rust
+let api_key = read_secret(&input.secret_key)?;             // KV read inside TDX
+let substituted = input.headers.into_iter()
+    .map(|(k, v)| (k, v.replace("__BLINDFOLD__", &api_key))) // sentinel → real value
+    .collect();
+http::call(&http::Request { method, url, headers: Some(substituted), payload }) // outbound
+```
+
+The sentinel `__BLINDFOLD__` is what the agent (and Blindfold's local proxy) actually send. The substitution happens **after** the request has crossed into the enclave — never on the developer's machine, never in the wrapper's process.
+
+### 4. The agent invokes the contract via T3's signed RPC
+
+`packages/blindfold/src/t3-client.ts` calls `executeAndDecode` on every proxied API request:
+
+```ts
+await tenant.executeAndDecode({
+  script_name:    `z:${tidHex}:blindfold-proxy`,
+  script_version: 1,
+  function_name:  "forward",
+  input: { method, url, headers, body, secret_key: "openai_api_key" },
+});
+```
+
+Auth is handled by T3's Ethereum-style signing (`T3N_API_KEY` is a secp256k1 private key whose tenant DID is `did:t3n:<id>`).
+
+### 5. Two T3-level safety nets
+
+- **Egress allowlist** — the tenant's grant defines which hosts the contract may call (`api.openai.com`, etc.). An attacker who somehow tampered with the URL field would hit `host/http.egress_denied` at the T3 boundary.
+- **TDX attestation** — the contract's WASM is content-addressed and runs only on T3 nodes that produce a valid Intel TDX attestation. The host operator can't peek at the secrets map at rest or in use.
+
+### What Blindfold deliberately does NOT use
+
+T3 also offers [`http-with-placeholders`](https://docs.terminal3.io/developers/adk/tips/placeholders-outbound-calls) with `{{profile.<field>}}` markers — but that primitive is for *end-user PII delegated by a separate user*, not for a developer's own API key. For Blindfold's "protect-the-API-key" use case, the **secrets-map + `http`** path is the right primitive. (We may add `http-with-placeholders` later for end-user data flowing through agents.)
+
+A line-by-line analysis of the T3 surface (with verbatim quotes from the live docs and 6 items flagged `NEEDS VERIFICATION`) is in [`docs/02-terminal3-analysis.md`](docs/02-terminal3-analysis.md).
+
+---
+
 ## Proof of blindness — the side-by-side demo
 
 ```bash
-git clone <this-repo> blindfold && cd blindfold
+git clone https://github.com/FiscalMindset/Blindfold.git blindfold
+cd blindfold
 ./scripts/one-time-setup.sh        # npm install + build contract
 npm run demo                       # ← the money shot
 ```
@@ -330,3 +407,47 @@ This is a **hackathon-stage demo** focused on the structural security claim. The
 MIT — do what you want; if it helps you, tell us.
 
 Built for the Terminal 3 hackathon, 2026.
+
+---
+
+## About the author
+
+<table>
+<tr>
+<td width="140" valign="top" align="center">
+  <a href="https://github.com/FiscalMindset">
+    <img src="https://avatars.githubusercontent.com/u/254638087?v=4" width="120" height="120" alt="Vicky Kumar" style="border-radius:50%"/>
+  </a>
+  <br/>
+  <sub><b>Vicky Kumar</b></sub>
+  <br/>
+  <sub><code>@FiscalMindset</code></sub>
+</td>
+<td valign="top">
+
+<h3>👋 Hi, I'm Vicky</h3>
+
+<p><i>Building AI products and real-world systems.</i></p>
+
+<p>
+  <img src="https://img.shields.io/badge/role-AI%20%2B%20full--stack%20builder-6e44ff?style=flat-square" alt="role"/>
+  <img src="https://img.shields.io/badge/focus-agents%20%C2%B7%20secure%20compute%20%C2%B7%20DX-0071c5?style=flat-square" alt="focus"/>
+  <img src="https://img.shields.io/badge/status-hireable-2ea44f?style=flat-square" alt="hireable"/>
+</p>
+
+<p>
+  <a href="https://github.com/FiscalMindset"><img src="https://img.shields.io/badge/GitHub-FiscalMindset-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  &nbsp;
+  <a href="mailto:algsoch@gmail.com"><img src="https://img.shields.io/badge/Email-algsoch%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
+</p>
+
+<p>
+  Blindfold was built solo for the Terminal 3 hackathon as a small wager: that the
+  most useful security tools are the ones a developer can adopt by changing a
+  single line. If you're working on agent infrastructure, confidential compute,
+  or anywhere the two overlap — say hi.
+</p>
+
+</td>
+</tr>
+</table>
