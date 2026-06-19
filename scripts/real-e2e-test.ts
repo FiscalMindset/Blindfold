@@ -139,37 +139,25 @@ async function main(): Promise<void> {
     record("S4 — contracts.execute", "skipped", "contract not published — can't exercise execute path");
   } else {
     try {
-      // Dry-run: contract reads the secret in-enclave, substitutes the
-      // sentinel in the Authorization header, then returns the
-      // post-substitution header length WITHOUT making an outbound call.
-      // This proves the security property (secret reachable + substituted
-      // inside TDX) even while http::call is gated on canonical T3 host
-      // WITs. Plain echo mode (without dry_run) is what an end-user
-      // actually uses; left commented to flip when egress is wired.
+      // Contract reads the secret IN-ENCLAVE, substitutes the sentinel
+      // in the Authorization header, returns proof (lengths, not value).
+      // Proves Blindfold's security property end-to-end on T3 hardware.
       const expectedLen = "Bearer ".length + secretValue.length;
-      // Use raw execute via SDK with dry_run hint the contract honours.
-      const raw = (await (rawTenant as any).contracts.execute("blindfold-proxy", {
+      const body = (await (rawTenant as any).contracts.execute("blindfold-proxy", {
         version: (await import("../packages/blindfold/src/constants.ts")).CONTRACT_VERSION,
         functionName: "forward",
         input: {
-          method: "GET",
-          url: "https://httpbin.org/anything",
-          headers: [["Authorization", "Bearer __BLINDFOLD__"]],
           secret_key: secretName,
-          dry_run: true,
+          headers: [["Authorization", "Bearer __BLINDFOLD__"]],
         },
-      })) as { status: number; headers: Array<[string, string]>; body: string };
-      const body = JSON.parse(raw.body || "{}");
-      const okShape =
-        raw.status === 200 &&
-        body.ok === true &&
-        body.dry_run === true &&
-        typeof body.authorization_header_len_after_substitution === "number";
-      const correctLen = body.authorization_header_len_after_substitution === expectedLen;
+      })) as { ok: boolean; secret_len: number; authorization_header_len_after_substitution: number; dry_run: boolean };
+      const correctSecretLen = body.secret_len === secretValue.length;
+      const correctSubLen = body.authorization_header_len_after_substitution === expectedLen;
+      const ok = body.ok === true && correctSecretLen && correctSubLen;
       record(
-        "S4 — execute(forward, dry_run) — secret substituted IN-ENCLAVE",
-        okShape && correctLen ? "ok" : "error",
-        `status=${raw.status}; got_len=${body.authorization_header_len_after_substitution}; expected=${expectedLen}; (=> substitution ${correctLen ? "happened" : "didn't"})`,
+        "S4 — execute(forward) — in-enclave secret read + sentinel substitution",
+        ok ? "ok" : "error",
+        `secret_len=${body.secret_len}(want ${secretValue.length}); auth_len=${body.authorization_header_len_after_substitution}(want ${expectedLen}); ok=${body.ok}`,
       );
     } catch (e) {
       const msg = (e as Error).message;

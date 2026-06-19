@@ -185,5 +185,9 @@ function upstreamForPath(path: string): string | null {
   if (path.startsWith("/v1/")) return `https://api.openai.com${path}`;
   if (path.startsWith("/openai/")) return `https://api.openai.com${path.replace("/openai", "")}`;
   if (path.startsWith("/anthropic/")) return `https://api.anthropic.com${path.replace("/anthropic", "")}`;
+  // xAI / Grok (OpenAI-compatible API).
+  if (path.startsWith("/x/")) return `https://api.x.ai${path.replace("/x", "")}`;
+  // Groq (also OpenAI-compatible).
+  if (path.startsWith("/groq/")) return `https://api.groq.com/openai${path.replace("/groq", "")}`;
   return null;
 }

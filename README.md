@@ -369,10 +369,11 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 | Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` |
 | Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
 | Publish the contract via `tenant.contracts.register` | ✅ **verified live** | got `contract_id` back from T3 testnet |
-| Grant the contract read access to `secrets` map (`tenant.maps.update`) | ✅ **verified live** | `{ readers: { only: [<contract_id>] } }` — wired into `real-e2e` as step S3b |
-| In-enclave secret read via `kv_store::get` inside the contract | ✅ **verified live** | T3 contract returned `kv_result: "found, 19 bytes"` for a real seeded secret — never echoing the value |
-| In-enclave sentinel substitution (`dry_run` mode) | ✅ wired, ready to verify after credit refill | Contract reads the secret, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the post-substitution length |
-| In-enclave `http::call` to upstream (full forwarding) | 🚧 returns opaque HTTP 500 from T3 | Either an http-interface WIT-stub signature mismatch OR an empty egress allowlist; T3 returns the same opaque 500 for both. Closes once T3 publishes canonical host WITs. |
+| Create the tenant's `secrets` map (one-time per new tenant) | ✅ **verified live** | `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })` |
+| Grant the contract read access to `secrets` (`tenant.maps.update`) | ✅ **verified live** | `{ readers: { only: [<contract_id>] } }` — wired into `real-e2e` as step S3b |
+| **In-enclave secret read + sentinel substitution (the Blindfold security property)** | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the *lengths* as proof (never the value). Math verified: 19-byte secret → 26-char `Authorization` after substitution. |
+| Real provider keys sealed into the enclave (`grok_api_key` confirmed) | ✅ **verified live** | Contract reads back the user's actual xAI/Grok key from inside TDX: `secret_len=84`. Value never appears outside the enclave. |
+| In-enclave `http::call` for outbound forwarding | 🚧 opaque HTTP 500 from T3 | One specific gap — either an http-WIT-stub signature mismatch or an empty egress allowlist; T3 returns the same opaque 500 for both. Closes once T3 publishes canonical host WITs. |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 

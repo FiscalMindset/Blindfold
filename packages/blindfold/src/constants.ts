@@ -15,7 +15,7 @@ export const DEFAULT_PORT = 8787;
 export const CONTRACT_TAIL = "blindfold-proxy";
 
 /** Default contract version (semver, used at register time). Bump on every change to contract/. */
-export const CONTRACT_VERSION = "0.1.10";
+export const CONTRACT_VERSION = "0.2.1";
 
 /** Marker the proxy uses to surface "registered but mock" status in /health. */
 export const HEALTH_BANNER = "blindfold/0.1.0";

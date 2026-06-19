@@ -68,6 +68,54 @@ The script lives at `scripts/run-tests.ts` and exits non-zero if any check fails
 ## Test runs
 
 <!-- TEST_RUNS_BELOW -->
+### Real-T3 run 2026-06-19 19:46:59 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781898411" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | already at version (idempotent); contract_id=0 |
+| S4 | execute(forward) | ✅ | secret_len=19(want 19); auth_len=26(want 26); ok=true |
+
+### Real-T3 run 2026-06-19 19:45:56 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781898348" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=248; wasm=1,48,268B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=248 |
+| S4 | execute(forward, dry_run) | 🚨 | status=undefined; got_len=undefined; expected=26; (=> substitution didn't) |
+
+### Real-T3 run 2026-06-19 19:44:34 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781898266" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=247; wasm=1,57,959B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=247 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [5e7b86af-08de-4e57-9b7c-830ae21c06b4] ({"code":"internal_error","request_id":"5e7b86af-08de-4e57-9b7c-830ae21c06b4"}) |
+
+### Real-T3 run 2026-06-19 19:43:58 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781898230" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | already at version (idempotent); contract_id=0 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [4d8fcd94-ca4d-4756-a287-1e7303d0ca76] ({"code":"internal_error","request_id":"4d8fcd94-ca4d-4756-a287-1e7303d0ca76"}) |
+
+### Real-T3 run 2026-06-19 19:42:53 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | 🚨 | HTTP 400: Invalid params ({"code":"bad_request","detail":"map not found","request_id":"de395e5a-9b75-45ee-a098-83f07369b079"}) |
+| S3 | contracts.register | ✅ | contract_id=246; wasm=1,57,959B |
+| S3b | maps.update(secrets, readers: only) | 🚨 | HTTP 400: Invalid params ({"code":"bad_request","detail":"map not found","request_id":"1babf361-1205-48a8-a8e0-da8821ceafda"}) |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [123e4b04-613e-4dba-9621-a84f01ed256d] ({"code":"internal_error","request_id":"123e4b04-613e-4dba-9621-a84f01ed256d"}) |
+
 ### Real-T3 run 2026-06-19 19:11:26 UTC
 
 | # | Step | Status | Detail |

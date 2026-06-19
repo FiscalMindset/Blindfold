@@ -1,10 +1,10 @@
-// Blindfold proxy contract — full surface for the end-to-end forward.
+// No http import — testing whether the http capability itself is
+// what's failing instantiation on the new tenant.
 package z:blindfold@0.1.0;
 
 world blindfold-proxy {
   import host:tenant/tenant-context@1.0.0;
   import host:interfaces/kv-store@2.1.0;
-  import host:interfaces/http@2.1.0;
 
   export contracts;
 }
@@ -15,6 +15,5 @@ interface contracts {
     user-profile: option<list<u8>>,
     context:      option<list<u8>>,
   }
-
   forward: func(req: generic-input) -> result<list<u8>, string>;
 }
