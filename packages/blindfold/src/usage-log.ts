@@ -79,6 +79,8 @@ export function providerForUpstream(upstream: string): string {
     if (h.endsWith("openai.com")) return "openai";
     if (h.endsWith("anthropic.com")) return "anthropic";
     if (h.endsWith("googleapis.com")) return "google";
+    if (h.endsWith("x.ai")) return "xai";
+    if (h.endsWith("groq.com")) return "groq";
     return h;
   } catch {
     return "unknown";

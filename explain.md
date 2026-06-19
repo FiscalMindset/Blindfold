@@ -69,6 +69,20 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-20 — REAL T3 e2e fully green + Grok key sealed
+- Fixed two .env typos (`TT3N_API_KEY` → `T3N_API_KEY`; `grok_api_key` → `GROK_API_KEY` since the value starts with `xai-` not `gsk_`, confirming it's xAI's Grok, not Groq the inference company).
+- New T3 tenant `did:t3n:3abddb60dd62cbd6a95175771a4e642daee81729` (testnet) — re-verified handshake + authenticate ✅.
+- Discovered new tenants need explicit map creation. Wrote `scripts/init-tenant.ts` that calls `tenant.tenant.claim()` + `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })`. Created the secrets map for this tenant.
+- **Full real-mode pipeline now passes end-to-end on T3 testnet:**
+  - S1 handshake + authenticate ✅
+  - S2 executeControl(map-entry-set) seal secret ✅
+  - S3 contracts.register publish ✅
+  - S3b maps.update grant readers ✅
+  - **S4 in-enclave secret read + sentinel substitution ✅** — contract reads the 19-byte test secret, replaces `__BLINDFOLD__` in the Authorization header with the real value, returns `secret_len=19, auth_len=26` (= "Bearer " + 19). Math checks. **The Blindfold security property is proven on real T3 hardware.**
+- **Sealed the user's real Grok API key** into `z:<tid>:secrets` under the name `grok_api_key`. Contract reads it back from the enclave and reports `secret_len=84, auth_len=91` (= "Bearer " + 84) — without ever echoing the value. User can now safely delete `GROK_API_KEY` from `.env`.
+- Added `/x/*` and `/groq/*` proxy upstream routes; usage-log recognizes `xai` and `groq` providers. (Actual outbound call still gated on http::call WIT — but routing + key sealing are ready.)
+- New tenant has `log_max_entries: 1000` (vs 0 on old tenant) — contract logs would surface if we added logging back in.
+
 ### 2026-06-20 — Fix S4 — deep diagnostic against live T3
 - Goal: turn the opaque "HTTP 500 internal_error" from S4 into a fix. Did **incremental WASM bisection** against the live testnet (10+ contract versions registered, 234 → 245). Each version isolated a single capability to identify what T3 actually rejects.
 - **Proven live (inside the TDX enclave):**
