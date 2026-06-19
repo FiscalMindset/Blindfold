@@ -1,0 +1,22 @@
+{
+  "name": "blindfold-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Blindfold — make any AI agent's API keys un-leakable by sealing them inside a Terminal 3 TDX enclave.",
+  "workspaces": [
+    "packages/*",
+    "demo"
+  ],
+  "scripts": {
+    "build:contract": "bash scripts/build-contract.sh",
+    "blindfold": "tsx packages/blindfold/bin/blindfold.ts",
+    "demo": "tsx demo/run-demo.ts",
+    "demo:a": "tsx demo/agent-a-leaks/index.ts",
+    "demo:b": "tsx demo/agent-b-blindfolded/index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0"
+  }
+}
