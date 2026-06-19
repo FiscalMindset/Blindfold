@@ -23,6 +23,10 @@ impl exports::z::blindfold::contracts::Guest for Component {
         let input = req.input.ok_or("forward: missing input")?;
         forward::forward(&input)
     }
+    fn release_to_tenant(req: exports::z::blindfold::contracts::GenericInput) -> Result<Vec<u8>, String> {
+        let input = req.input.ok_or("release_to_tenant: missing input")?;
+        forward::release_to_tenant(&input)
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
