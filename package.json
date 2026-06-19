@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build:contract": "bash scripts/build-contract.sh",
+    "setup": "tsx packages/blindfold/bin/blindfold.ts init",
     "blindfold": "tsx packages/blindfold/bin/blindfold.ts",
     "demo": "tsx demo/run-demo.ts",
     "demo:a": "tsx demo/agent-a-leaks/index.ts",

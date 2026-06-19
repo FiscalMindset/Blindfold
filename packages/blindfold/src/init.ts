@@ -5,22 +5,25 @@
  * command, answer a couple of prompts, and end up with a working
  * REAL-mode Blindfold setup.
  *
- * The wizard NEVER asks for a secret on the command line. Secrets are
- * always read from environment variables that the developer already
- * has in their .env. When a step fails, the wizard prints exactly what
- * went wrong and what to try next — no stack traces, no jargon.
+ * The wizard NEVER asks for an API-style secret on the command line
+ * (the T3N_API_KEY for the T3 account itself is a one-off bootstrap
+ * value and is written to .env). When a step fails, the wizard prints
+ * exactly what went wrong and what to try next.
  */
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
-import { loadBlindfoldEnv, pluckSecret } from "./env.ts";
+import { loadBlindfoldEnv, loadEnvFromFile, pluckSecret } from "./env.ts";
 import { openT3Client } from "./t3-client.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
+const ENV_PATH = path.join(REPO_ROOT, ".env");
+const ENV_EXAMPLE_PATH = path.join(REPO_ROOT, ".env.example");
 const WASM_PATH = path.join(REPO_ROOT, "contract", "target", "wasm32-wasip2", "release", "blindfold_proxy.wasm");
+const T3_CLAIM_URL = "https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens";
 
 /* ─── tiny styling helpers (no deps) ─────────────────────────────── */
 const colour = process.stdout.isTTY ? (c: string, s: string) => `\x1b[${c}m${s}\x1b[0m` : (_: string, s: string) => s;
@@ -39,7 +42,9 @@ function info(line: string): void { process.stdout.write(`  ${dim("·")} ${line}
 function warn(line: string): void { process.stdout.write(`  ${yellow("!")} ${line}\n`); }
 function fail(line: string, fixHint?: string): void {
   process.stdout.write(`  ${red("✖")} ${line}\n`);
-  if (fixHint) process.stdout.write(`    ${dim("→")} ${cyan(fixHint)}\n`);
+  if (fixHint) {
+    for (const ln of fixHint.split("\n")) process.stdout.write(`    ${dim("→")} ${cyan(ln)}\n`);
+  }
 }
 
 function run(cmd: string, args: string[], opts: { cwd?: string; env?: Record<string, string> } = {}): Promise<{ code: number; out: string; err: string }> {
@@ -70,25 +75,33 @@ async function ask(prompt: string): Promise<string> {
 export interface InitOpts {
   skipBuild?: boolean;
   skipPublish?: boolean;
-  /** If set, seed this secret after publish. Format: "<KV_KEY>:<ENV_VAR>". Can pass multiple. */
+  /** Seed a secret. Format: "<KV_KEY>:<ENV_VAR>". May appear many times. */
   seed?: string[];
   /** Non-interactive — fail rather than ask. */
   yes?: boolean;
+  /** After success, exec into `blindfold proxy` rather than just printing. */
+  start?: boolean;
 }
 
 export async function runInit(opts: InitOpts = {}): Promise<void> {
   const total = 5;
-  process.stdout.write(`\n${bold("🛡️  Blindfold — first-time setup")}\n${dim("This wizard sets up REAL T3 mode end-to-end. It never asks for a secret on screen — values come from your .env.")}\n`);
+  process.stdout.write(`\n${bold("🛡️  Blindfold — first-time setup")}\n${dim("This wizard sets up REAL T3 mode end-to-end. Secrets are read from your .env, never typed onto the command line.")}\n`);
 
-  /* 1. preflight */
+  /* ── Step 1: preflight (with interactive .env bootstrap) ──────── */
   header(1, total, "Preflight");
+
+  // 1a. Ensure .env exists with T3 credentials.
+  await ensureEnvOrPrompt(opts);
+  // After this call, .env exists and we re-load it so loadBlindfoldEnv() sees fresh values.
+  loadEnvFromFile(ENV_PATH);
   const env = loadBlindfoldEnv();
   if (env.mock) {
-    fail("Blindfold is in MOCK mode — T3N_API_KEY or DID is missing.", "Edit .env and set both, then re-run `blindfold init`.");
+    fail("Blindfold is still in MOCK mode after .env walkthrough — T3N_API_KEY or DID is empty.", "Open .env, paste the two values, and re-run `blindfold init`.");
     throw new Error("preflight failed");
   }
   ok(`T3 ${env.t3Env} · tenant ${dim(env.did)}`);
 
+  // 1b. SDK present?
   const haveSdk = await isSdkInstalled();
   if (!haveSdk) {
     fail("@terminal3/t3n-sdk is not installed.", "Run: npm install @terminal3/t3n-sdk");
@@ -96,33 +109,38 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
   }
   ok("@terminal3/t3n-sdk present");
 
-  if (!opts.skipBuild) {
+  // 1c. Rust + wasm32-wasip2 (only if we plan to build).
+  let canBuild = !opts.skipBuild;
+  if (canBuild) {
     const cargo = await run("which", ["cargo"]);
     if (cargo.code !== 0) {
-      fail("cargo (Rust toolchain) not found.", "Install rust: https://rustup.rs  ·  then re-run `blindfold init`");
-      throw new Error("cargo missing");
-    }
-    const targets = await run("rustup", ["target", "list", "--installed"]);
-    if (!targets.out.includes("wasm32-wasip2")) {
-      info("Installing wasm32-wasip2 target …");
-      const add = await run("rustup", ["target", "add", "wasm32-wasip2"]);
-      if (add.code !== 0) {
-        fail("Could not install wasm32-wasip2.", "Run manually: rustup target add wasm32-wasip2");
-        throw new Error("wasm target missing");
+      warn("cargo (Rust toolchain) not found — auto-skipping contract build.");
+      info(`Install rust at https://rustup.rs and re-run \`blindfold init\` to build the contract locally.`);
+      canBuild = false;
+    } else {
+      const targets = await run("rustup", ["target", "list", "--installed"]);
+      if (!targets.out.includes("wasm32-wasip2")) {
+        info("Installing wasm32-wasip2 target …");
+        const add = await run("rustup", ["target", "add", "wasm32-wasip2"]);
+        if (add.code !== 0) {
+          warn("Could not install wasm32-wasip2 automatically; skipping contract build.");
+          info("Run manually: rustup target add wasm32-wasip2");
+          canBuild = false;
+        }
       }
+      if (canBuild) ok("Rust toolchain + wasm32-wasip2 target ready");
     }
-    ok("Rust toolchain + wasm32-wasip2 target ready");
   }
 
-  /* 2. build contract */
-  if (!opts.skipBuild) {
+  /* ── Step 2: build contract ───────────────────────────────────── */
+  if (canBuild) {
     header(2, total, "Build contract  (Rust → WASM)");
     info("cargo build --target wasm32-wasip2 --release");
     const build = await run("cargo", ["build", "--target", "wasm32-wasip2", "--release"], {
       cwd: path.join(REPO_ROOT, "contract"),
     });
     if (build.code !== 0) {
-      fail("Contract build failed.", `Inspect: cd contract && cargo build --target wasm32-wasip2 --release\nstderr tail:\n${build.err.slice(-800)}`);
+      fail("Contract build failed.", `Inspect with: cd contract && cargo build --target wasm32-wasip2 --release\nstderr tail:\n${build.err.slice(-800)}`);
       throw new Error("contract build failed");
     }
     if (!existsSync(WASM_PATH)) {
@@ -133,23 +151,22 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
     ok(`Built ${WASM_PATH} (${wasmBytes.byteLength.toLocaleString()} bytes)`);
   } else {
     header(2, total, "Build contract  (skipped)");
-    info("Skipping --skip-build was passed.");
   }
 
-  /* 3. authenticate */
+  /* ── Step 3: authenticate ─────────────────────────────────────── */
   header(3, total, "Authenticate to T3");
   let t3;
   try {
     t3 = await openT3Client(env);
-    if (!t3.isReal) throw new Error("Mock client returned — env probably misconfigured.");
+    if (!t3.isReal) throw new Error("Mock client returned — env misconfigured.");
     ok("Handshake + authenticate succeeded ✨");
   } catch (e) {
-    fail("Could not connect to T3.", `Error: ${(e as Error).message}\nCheck your T3N_API_KEY + DID match a real T3 account (testnet / production matches BLINDFOLD_T3_ENV).`);
+    fail("Could not connect to T3.", `Error: ${(e as Error).message}\nCheck T3N_API_KEY + DID match a real T3 account (and BLINDFOLD_T3_ENV matches their environment).`);
     throw e;
   }
 
-  /* 4. publish contract */
-  if (!opts.skipPublish) {
+  /* ── Step 4: publish contract ─────────────────────────────────── */
+  if (!opts.skipPublish && canBuild) {
     header(4, total, "Publish the wrapper contract to your tenant");
     try {
       const wasm = readFileSync(WASM_PATH);
@@ -160,37 +177,111 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
       if (/version.*not higher/i.test(msg)) {
         warn(`Already published at v0.1.0 — skipping. (${msg})`);
       } else {
-        fail("Publish failed.", `Error: ${msg}\nIf this is a "tenant suspended" error, contact T3 support. Otherwise, retry with --skip-build to avoid rebuilding.`);
+        fail("Publish failed.", `Error: ${msg}\nRetry with --skip-build to avoid rebuilding.`);
         throw e;
       }
     }
   } else {
-    header(4, total, "Publish (skipped)");
+    header(4, total, opts.skipPublish ? "Publish (skipped: --skip-publish)" : "Publish (skipped: no contract built)");
   }
 
-  /* 5. seed secrets */
+  /* ── Step 5: seed secrets ─────────────────────────────────────── */
   header(5, total, "Seal a secret into the enclave");
   const toSeed = collectSeedPlan(opts);
   if (toSeed.length === 0) {
-    info("No --seed given. Run later with:  blindfold register --name openai_api_key --from-env OPENAI_API_KEY");
+    info("No --seed flag given.");
+    info(`Later, after dropping an OPENAI_API_KEY into .env:  ${cyan("blindfold register --name openai_api_key --from-env OPENAI_API_KEY")}`);
   }
   for (const { name, fromEnv } of toSeed) {
     try {
       const value = pluckSecret(fromEnv);
       await t3.seedSecret(name, value);
-      ok(`Sealed ${bold(name)} (read from ${fromEnv}, then dropped). You can now delete ${fromEnv} from .env.`);
+      ok(`Sealed ${bold(name)} (read from ${fromEnv}, then dropped). You can DELETE ${fromEnv} from .env now.`);
     } catch (e) {
-      fail(`Could not seal "${name}".`, `Error: ${(e as Error).message}\nMake sure ${fromEnv} is set in .env (it will be removed by you after sealing).`);
+      fail(`Could not seal "${name}".`, `Error: ${(e as Error).message}\nMake sure ${fromEnv} is set in .env (you can delete it after sealing).`);
     }
   }
 
   await t3.close();
 
+  /* ── Done — either auto-start or print copy-ready command ─────── */
   process.stdout.write(`\n${green(bold("✓ All done."))}\n`);
-  process.stdout.write(`${dim("Next steps:")}\n`);
+
+  if (opts.start) {
+    process.stdout.write(`${dim("Starting the proxy now (Ctrl+C to stop) …")}\n`);
+    // Exec into the proxy long-running command. We use spawn-with-stdio-inherited
+    // so the dev sees its output directly and Ctrl+C reaches it.
+    const proxy = spawn(process.execPath, [process.argv[1] ?? "", "proxy"], {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
+    proxy.on("exit", (code) => process.exit(code ?? 0));
+    return;
+  }
+
+  process.stdout.write(`${dim("Next:")}\n`);
   process.stdout.write(`  ${cyan("npm run blindfold -- proxy")}        ${dim("# leave this running")}\n`);
-  process.stdout.write(`  ${cyan("npm run dashboard")}                 ${dim("# open http://127.0.0.1:8799 in a browser")}\n`);
-  process.stdout.write(`  ${dim("Then point your agent at:")}  ${cyan("OPENAI_BASE_URL=http://127.0.0.1:8787/v1  OPENAI_API_KEY=__BLINDFOLD__")}\n`);
+  process.stdout.write(`  ${cyan("npm run dashboard")}                 ${dim("# open http://127.0.0.1:8799")}\n`);
+  process.stdout.write(`  ${dim("Then point your agent at:")} ${cyan("OPENAI_BASE_URL=http://127.0.0.1:8787/v1  OPENAI_API_KEY=__BLINDFOLD__")}\n`);
+  process.stdout.write(`${dim("Or re-run with")} ${cyan("--start")} ${dim("to launch the proxy automatically.")}\n`);
+}
+
+/* ─── helpers ─────────────────────────────────────────────────────── */
+
+async function ensureEnvOrPrompt(opts: InitOpts): Promise<void> {
+  loadEnvFromFile(ENV_PATH);
+  const haveBoth = !!process.env.T3N_API_KEY && !!process.env.DID;
+  if (haveBoth) return;
+
+  // .env missing or incomplete. In --yes mode this is fatal; otherwise walk through.
+  if (opts.yes) {
+    fail(".env is missing T3N_API_KEY and/or DID.", `Claim them here: ${T3_CLAIM_URL}\nThen put them in .env and re-run.`);
+    throw new Error("env missing");
+  }
+
+  if (!existsSync(ENV_PATH) && existsSync(ENV_EXAMPLE_PATH)) {
+    const template = readFileSync(ENV_EXAMPLE_PATH, "utf8");
+    writeFileSync(ENV_PATH, template);
+    info("Created .env from .env.example.");
+  }
+
+  warn(".env is missing your T3 credentials.");
+  info(`Claim them (free, takes 30 seconds): ${cyan(T3_CLAIM_URL)}`);
+  const proceed = await ask(`  Paste them now? [Y/n] `);
+  if (proceed.toLowerCase().startsWith("n")) {
+    info("OK — open .env, paste both values, and re-run `npm run setup`.");
+    process.exit(0);
+  }
+
+  const apiKey = await promptUntilMatches("  T3N_API_KEY  (0x… 32-byte hex): ", /^0x[0-9a-fA-F]{64}$/, "expected 0x followed by 64 hex chars");
+  const did = await promptUntilMatches("  DID          (did:t3n:…):       ", /^did:t3n:[0-9a-fA-F]+$/, "expected did:t3n:<hex>");
+
+  upsertEnvLines(ENV_PATH, { T3N_API_KEY: apiKey, DID: did });
+  ok("Wrote .env (T3N_API_KEY + DID).");
+  // Reload so the rest of the wizard sees the new values.
+  loadEnvFromFile(ENV_PATH);
+  process.env.T3N_API_KEY = apiKey;
+  process.env.DID = did;
+}
+
+async function promptUntilMatches(prompt: string, re: RegExp, hint: string): Promise<string> {
+  for (let i = 0; i < 5; i++) {
+    const v = await ask(prompt);
+    if (re.test(v)) return v;
+    warn(`That doesn't look right — ${hint}. Try again.`);
+  }
+  fail("Too many invalid attempts.", "Run the wizard again when you have the right values.");
+  process.exit(1);
+}
+
+function upsertEnvLines(envPath: string, kv: Record<string, string>): void {
+  let body = existsSync(envPath) ? readFileSync(envPath, "utf8") : "";
+  for (const [k, v] of Object.entries(kv)) {
+    const re = new RegExp(`^${k}=.*$`, "m");
+    if (re.test(body)) body = body.replace(re, `${k}=${v}`);
+    else body += (body.endsWith("\n") || body === "" ? "" : "\n") + `${k}=${v}\n`;
+  }
+  writeFileSync(envPath, body);
 }
 
 function collectSeedPlan(opts: InitOpts): Array<{ name: string; fromEnv: string }> {
@@ -234,14 +325,11 @@ export async function runVerify(): Promise<void> {
     process.exitCode = 1;
   }
 
-  // (Optional) write to a JSONL log under .blindfold/verify.jsonl so the
-  // user can see verification history.
   try {
     const p = path.join(REPO_ROOT, ".blindfold", "verify.jsonl");
-    const dir = path.dirname(p);
-    if (!existsSync(dir)) require("node:fs").mkdirSync(dir, { recursive: true });
+    mkdirSync(path.dirname(p), { recursive: true });
     const line = JSON.stringify({ t: new Date().toISOString(), mode: env.mock ? "mock" : "real", t3Env: env.t3Env, ok: !process.exitCode });
-    writeFileSync(p, line + "\n", { flag: "a" });
+    appendFileSync(p, line + "\n");
   } catch {
     /* non-fatal */
   }

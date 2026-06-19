@@ -98,6 +98,7 @@ async function main(): Promise<void> {
         skipPublish: !!argv.flags["skip-publish"],
         seed: seedArr,
         yes: !!argv.flags.yes,
+        start: !!argv.flags.start,
       });
       return;
     }
@@ -172,7 +173,7 @@ function printHelp(): void {
   console.log(`Blindfold — protect your AI agent's API keys with Terminal 3 enclaves.
 
 Commands:
-  init     [--seed KV:ENV]...                       One-command zero-knowledge setup.
+  init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
   verify                                            Handshake + auth against T3 (smoke test).
   register --name <KV_KEY> --from-env <ENV_VAR>    Seal a secret into the enclave (one-time).
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.

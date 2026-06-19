@@ -278,22 +278,27 @@ Each runnable example is ~20 lines. The pattern is always the same: set the base
 
 ## Quickstart
 
-> **The zero-knowledge path.** You don't need to know Rust or any Terminal 3 internals. One command does the whole setup.
+> **The zero-knowledge path.** Two commands. The wizard walks you through everything else — including getting your T3 credentials and starting the proxy.
 
 ```bash
 npm install
-npm run blindfold -- init
-# → preflight  ·  builds the Rust contract  ·  handshakes with T3  ·  publishes the contract  ·  seals your first secret
+npm run setup
 ```
 
-Each step prints what it did and what to try if it fails. The wizard never asks for a secret on screen — values come from your `.env` and go straight to the enclave.
+That's it. `npm run setup` runs the interactive bootstrap:
 
-To seed your OpenAI key as part of the same flow:
+1. **Preflight** — if `.env` doesn't have your T3 credentials yet, the wizard prints the [T3 claim page URL](https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens), waits for you to paste the values, validates them, writes the file.
+2. **Build the contract** — `cargo build` if you have Rust; auto-skips with a friendly note if you don't.
+3. **Authenticate to T3** — real handshake against testnet.
+4. **Publish the contract** to your tenant.
+5. **Seal a secret** if you passed `--seed`.
+
+To seed your OpenAI key + auto-launch the proxy as part of the same flow:
 
 ```bash
 # Put OPENAI_API_KEY=sk-... in .env temporarily, then:
-npm run blindfold -- init --seed openai_api_key:OPENAI_API_KEY
-# After it finishes: delete OPENAI_API_KEY from .env. The plaintext never goes anywhere else.
+npm run setup -- --seed openai_api_key:OPENAI_API_KEY --start
+# DELETE OPENAI_API_KEY from .env after. The plaintext never goes anywhere else.
 ```
 
 You can also use the lower-level commands directly:
