@@ -1,0 +1,12 @@
+{
+  "name": "blindfold-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "agent-a": "tsx agent-a-leaks/index.ts",
+    "agent-b": "tsx agent-b-blindfolded/index.ts",
+    "demo": "tsx run-demo.ts"
+  },
+  "dependencies": {}
+}

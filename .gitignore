@@ -1,0 +1,30 @@
+# env files — never commit secrets
+.env
+.env.local
+
+# node
+node_modules/
+dist/
+*.log
+.npm/
+.pnpm-store/
+
+# rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# macOS
+.DS_Store
+._*
+
+# editors
+.idea/
+.vscode/
+
+# Claude Code local settings
+.claude/
+
+# test / coverage
+coverage/
+.nyc_output/
