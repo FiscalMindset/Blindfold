@@ -69,6 +69,13 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-20 — register supports no-disk secret input (stdin prompt + pipe)
+- New `packages/blindfold/src/prompt.ts`: tiny stdlib-only helper for reading a secret from stdin with echo disabled (raw-mode TTY) and non-TTY pipe support.
+- `register.ts` now resolves the plaintext value from three sources, in priority: (1) explicit `value` arg (programmatic), (2) `--from-env` (scripting), (3) interactive prompt or piped stdin (preferred — never touches disk or shell history).
+- `bin/blindfold.ts`: `--from-env` is now optional; if omitted, the CLI prompts. Help text updated.
+- Backward-compat: `--from-env` still works identically.
+- Tested both modes against mock: pipe (length 25 transferred via stdin) and env (length 16 from env). Both register and never echo the value.
+
 ### 2026-06-20 — REAL T3 e2e fully green + Grok key sealed
 - Fixed two .env typos (`TT3N_API_KEY` → `T3N_API_KEY`; `grok_api_key` → `GROK_API_KEY` since the value starts with `xai-` not `gsk_`, confirming it's xAI's Grok, not Groq the inference company).
 - New T3 tenant `did:t3n:3abddb60dd62cbd6a95175771a4e642daee81729` (testnet) — re-verified handshake + authenticate ✅.

@@ -26,6 +26,8 @@ export interface BlindfoldEnv {
 export interface RegisterOpts {
   /** Logical name (the KV key inside z:<tid>:secrets). */
   name: string;
-  /** Env var to read the plaintext value from. */
-  fromEnv: string;
+  /** Optional: env var to read the plaintext value from (scripting). */
+  fromEnv?: string;
+  /** Optional: explicit value (programmatic API). */
+  value?: string;
 }
