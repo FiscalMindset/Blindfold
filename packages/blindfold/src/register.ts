@@ -18,6 +18,7 @@
  */
 import { loadBlindfoldEnv, pluckSecret } from "./env.ts";
 import { safeLog } from "./log.ts";
+import { readSecretLine } from "./prompt.ts";
 import { openT3Client } from "./t3-client.ts";
 import type { RegisterOpts } from "./types.ts";
 
@@ -26,15 +27,30 @@ export async function registerSecret(opts: RegisterOpts): Promise<void> {
   const t3 = await openT3Client(env);
 
   try {
-    // Touch the plaintext exactly once. The local binding `value` exists
-    // here, is passed to `seedSecret`, and is then dropped.
-    const value = pluckSecret(opts.fromEnv);
+    // Resolve the plaintext exactly once. Three input modes, in priority:
+    //   1. opts.value     — explicit (programmatic API)
+    //   2. opts.fromEnv   — read process.env[<name>]
+    //   3. interactive    — prompt the terminal with echo disabled
+    // The local binding `value` exists here, is passed to seedSecret, then dropped.
+    let source = "stdin";
+    let value: string;
+    if (opts.value !== undefined) {
+      value = opts.value;
+      source = "explicit";
+    } else if (opts.fromEnv) {
+      value = pluckSecret(opts.fromEnv);
+      source = `env:${opts.fromEnv}`;
+    } else {
+      value = await readSecretLine(`  Value for "${opts.name}" (input is hidden): `);
+      if (!value) throw new Error("empty value");
+    }
+
     await t3.seedSecret(opts.name, value);
-    // Do NOT log the value. Log only the name and the source env var.
     safeLog("info", {
       msg: "registered",
       name: opts.name,
-      from_env: opts.fromEnv,
+      source,
+      length: value.length,
       mode: env.mock ? "mock" : "real",
     });
   } finally {

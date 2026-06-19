@@ -53,13 +53,17 @@ async function main(): Promise<void> {
   switch (cmd) {
     case "register": {
       const name = String(argv.flags.name ?? "");
-      const fromEnv = String(argv.flags["from-env"] ?? "");
-      if (!name || !fromEnv) {
-        die("usage: blindfold register --name <KV_KEY> --from-env <ENV_VAR>");
+      const fromEnv = argv.flags["from-env"] ? String(argv.flags["from-env"]) : undefined;
+      if (!name) {
+        die("usage: blindfold register --name <KV_KEY> [--from-env <ENV_VAR>]");
       }
       await registerSecret({ name, fromEnv });
-      console.log(`✓ Registered "${name}" (value read from ${fromEnv} once, then dropped).`);
-      console.log(`  You can now DELETE ${fromEnv} from your .env.`);
+      if (fromEnv) {
+        console.log(`✓ Registered "${name}" (value read from ${fromEnv} once, then dropped).`);
+        console.log(`  You can now DELETE ${fromEnv} from your .env.`);
+      } else {
+        console.log(`✓ Registered "${name}" — value lives only in the enclave.`);
+      }
       return;
     }
 
@@ -182,7 +186,7 @@ Commands:
   init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
-  register --name <KV_KEY> --from-env <ENV_VAR>    Seal a secret into the enclave (one-time).
+  register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
   dashboard [--port 8799]                           Live HTML dashboard of proxy usage.

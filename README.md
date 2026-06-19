@@ -372,11 +372,22 @@ npm run blindfold -- publish
 <details>
 <summary><b>4. Seal your real API key inside the enclave</b></summary>
 
+Three input modes, in order of preference:
+
 ```bash
-# Add OPENAI_API_KEY to .env temporarily, then:
+# (a) Interactive — value never touches disk or shell history. Preferred.
+npm run blindfold -- register --name openai_api_key
+#  Value for "openai_api_key" (input is hidden): ●●●●●●●●●● ↵
+#  ✓ Registered "openai_api_key" — value lives only in the enclave.
+
+# (b) Piped — for scripts. Same on-disk-free property.
+echo "$OPENAI_API_KEY" | npm run blindfold -- register --name openai_api_key
+
+# (c) From an env var you already have (e.g. set by a vault tool).
 npm run blindfold -- register --name openai_api_key --from-env OPENAI_API_KEY
-# Then DELETE OPENAI_API_KEY from .env. The plaintext is gone from your machine.
 ```
+
+Mode (a) is the friendliest: no `.env` edit, no leftover line to delete. Use (c) only when the value is *already* in env for another reason — then this is just a transfer.
 
 </details>
 
