@@ -95,8 +95,8 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
   // After this call, .env exists and we re-load it so loadBlindfoldEnv() sees fresh values.
   loadEnvFromFile(ENV_PATH);
   const env = loadBlindfoldEnv();
-  if (env.mock) {
-    fail("Blindfold is still in MOCK mode after .env walkthrough — T3N_API_KEY or DID is empty.", "Open .env, paste the two values, and re-run `blindfold init`.");
+  if (!env.t3nApiKey || !env.did) {
+    fail("Still missing T3N_API_KEY and/or DID after .env walkthrough.", "Open .env, paste the two values, and re-run `npm run setup`.");
     throw new Error("preflight failed");
   }
   ok(`T3 ${env.t3Env} · tenant ${dim(env.did)}`);
@@ -165,19 +165,25 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
     throw e;
   }
 
-  /* ── Step 4: publish contract ─────────────────────────────────── */
+  /* ── Step 4: publish contract + grant ACLs ────────────────────── */
+  // Ensure tenant scaffolding (claim, create secrets + authorised-hosts maps) — idempotent.
+  await ensureTenantScaffolding(env);
+
   if (!opts.skipPublish && canBuild) {
-    header(4, total, "Publish the wrapper contract to your tenant");
+    header(4, total, "Publish the wrapper contract + grant ACLs");
     try {
       const wasm = readFileSync(WASM_PATH);
       const r = await t3.registerContract(new Uint8Array(wasm.buffer, wasm.byteOffset, wasm.byteLength));
-      ok(`Published "blindfold-proxy" v0.1.0  ·  contract_id=${r.contractId}`);
+      const contractId = Number(r.contractId);
+      ok(`Published "blindfold-proxy"  ·  contract_id=${contractId}`);
+      await grantContractReads(env, contractId);
+      ok(`Granted read access on z:tid:secrets to contract ${contractId}`);
     } catch (e) {
       const msg = (e as Error).message;
-      if (/version.*not higher/i.test(msg)) {
-        warn(`Already published at v0.1.0 — skipping. (${msg})`);
+      if (/version.*not higher|already.*registered/i.test(msg)) {
+        warn(`Already published at this version — skipping. (${msg.slice(0, 100)})`);
       } else {
-        fail("Publish failed.", `Error: ${msg}\nRetry with --skip-build to avoid rebuilding.`);
+        fail("Publish failed.", `Error: ${msg.slice(0, 300)}`);
         throw e;
       }
     }
@@ -296,6 +302,45 @@ function collectSeedPlan(opts: InitOpts): Array<{ name: string; fromEnv: string 
       return { name, fromEnv };
     })
     .filter((x): x is { name: string; fromEnv: string } => x !== null);
+}
+
+/** Fresh-tenant scaffolding: claim, create secrets + authorised-hosts maps. Idempotent. */
+async function ensureTenantScaffolding(env: ReturnType<typeof loadBlindfoldEnv>): Promise<void> {
+  // Use raw SDK access since openT3Client doesn't expose maps/tenant.
+  const sdk = (await import("@terminal3/t3n-sdk")) as any;
+  sdk.setEnvironment(env.t3Env);
+  const baseUrl = sdk.NODE_URLS[env.t3Env];
+  const addr = sdk.eth_get_address(env.t3nApiKey);
+  const t3n = new sdk.T3nClient({ baseUrl, wasmComponent: await sdk.loadWasmComponent(), handlers: { EthSign: sdk.metamask_sign(addr, undefined, env.t3nApiKey) } });
+  await t3n.handshake();
+  await t3n.authenticate(sdk.createEthAuthInput(addr));
+  const tenant = new sdk.TenantClient({ environment: env.t3Env, baseUrl, tenantDid: env.did, t3n });
+
+  for (const tail of ["secrets", "authorised-hosts"]) {
+    try {
+      await tenant.maps.create({ tail, visibility: "private", writers: "all" });
+      info(`Created tenant map "${tail}"`);
+    } catch {
+      // Most often "map already exists" — fine.
+    }
+  }
+}
+
+async function grantContractReads(env: ReturnType<typeof loadBlindfoldEnv>, contractId: number): Promise<void> {
+  const sdk = (await import("@terminal3/t3n-sdk")) as any;
+  sdk.setEnvironment(env.t3Env);
+  const baseUrl = sdk.NODE_URLS[env.t3Env];
+  const addr = sdk.eth_get_address(env.t3nApiKey);
+  const t3n = new sdk.T3nClient({ baseUrl, wasmComponent: await sdk.loadWasmComponent(), handlers: { EthSign: sdk.metamask_sign(addr, undefined, env.t3nApiKey) } });
+  await t3n.handshake();
+  await t3n.authenticate(sdk.createEthAuthInput(addr));
+  const tenant = new sdk.TenantClient({ environment: env.t3Env, baseUrl, tenantDid: env.did, t3n });
+  await tenant.maps.update("secrets", { readers: { only: [contractId] } });
+  try {
+    await tenant.maps.update("authorised-hosts", { readers: { only: [contractId] } });
+  } catch {
+    /* optional */
+  }
 }
 
 async function isSdkInstalled(): Promise<boolean> {
