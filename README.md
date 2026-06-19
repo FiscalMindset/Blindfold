@@ -278,15 +278,33 @@ Each runnable example is ~20 lines. The pattern is always the same: set the base
 
 ## Quickstart
 
+> **The zero-knowledge path.** You don't need to know Rust or any Terminal 3 internals. One command does the whole setup.
+
+```bash
+npm install
+npm run blindfold -- init
+# → preflight  ·  builds the Rust contract  ·  handshakes with T3  ·  publishes the contract  ·  seals your first secret
+```
+
+Each step prints what it did and what to try if it fails. The wizard never asks for a secret on screen — values come from your `.env` and go straight to the enclave.
+
+To seed your OpenAI key as part of the same flow:
+
+```bash
+# Put OPENAI_API_KEY=sk-... in .env temporarily, then:
+npm run blindfold -- init --seed openai_api_key:OPENAI_API_KEY
+# After it finishes: delete OPENAI_API_KEY from .env. The plaintext never goes anywhere else.
+```
+
+You can also use the lower-level commands directly:
+
 <details>
-<summary><b>1. One-time setup</b></summary>
+<summary><b>Step-by-step (advanced)</b></summary>
 
 ```bash
 ./scripts/one-time-setup.sh
 # →  installs node deps, builds the Rust contract (needs rustup), copies .env.example to .env
 ```
-
-</details>
 
 <details>
 <summary><b>2. Provide your T3 credentials</b></summary>
@@ -333,6 +351,29 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 ```
 
 </details>
+
+</details>
+
+---
+
+## Real T3 mode — what works today
+
+| Capability | Status | Note |
+|---|---|---|
+| Handshake + authenticate against testnet | ✅ verified | `npm run blindfold -- verify` |
+| Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ wired | one-time per secret |
+| Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
+| Publish the contract via `tenant.contracts.register` | ⏳ ready, untested at HEAD | runtime depends on canonical host WIT files matching our stubs |
+| Per-request proxy → enclave forwarding via `tenant.contracts.execute` | ⏳ ready, untested at HEAD | same dependency as publish |
+
+**The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
+
+```bash
+npm run blindfold -- verify
+# 🛡️  Blindfold — verify
+#   · mode: REAL  ·  T3 env: testnet
+#   ✓ REAL T3 round-trip succeeded.
+```
 
 ---
 

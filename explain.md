@@ -57,16 +57,26 @@ The side-by-side contrast is the whole pitch.
 
 From Step 2. Each has a planned fallback; nothing blocks development, but the user should verify before a real production deploy.
 
-1. **`TenantClient` `baseUrl` for testnet** — try `getNodeUrl()` first, fall back to a config flag.
-2. **`script_version` typing** — `register` takes semver, `executeAndDecode` takes integer. Resolver TBD (`getScriptVersion()` or `contracts.list`).
-3. **`T3N_API_KEY` role** — the user's `.env` has one secp256k1 hex key. MVP uses it as both tenant (registration) and agent (invocation). Splitting into a separate agent key is a hardening step.
-4. **Egress allowlist setup** — `host/http.egress_denied` if the target host isn't on the tenant's grant. The exact control action to add `api.openai.com` to allowed-hosts isn't documented in the pages I fetched. Plan: try a `grant-set` action; surface a clear error otherwise.
-5. **`loadWasmComponent()` source** — internal SDK blob; trust the default unless it errors.
-6. **ACL setup before `map-entry-set`** — docs say control-plane writes bypass writer ACLs; assume true for tenant. If `access denied` appears at runtime, add an ACL grant before seeding.
+1. ✅ **`TenantClient` `baseUrl` for testnet** — RESOLVED. SDK v3 exposes `NODE_URLS.testnet` = `https://cn-api.sg.testnet.t3n.terminal3.io`. Wired in `t3-client.ts`.
+2. ✅ **`script_version` typing** — RESOLVED. SDK v3's `ContractExecuteInput.version` is `string` (semver); no integer mapping. Wired.
+3. ⚠ **`T3N_API_KEY` role** — still using the single secp256k1 key as both tenant + agent (validates handshake + auth against testnet). Splitting into a separate agent key is hardening for later.
+4. ⏳ **Egress allowlist setup** — still untested; will surface as `host/http.egress_denied` if missing. Plan unchanged.
+5. ✅ **`loadWasmComponent()` source** — RESOLVED. Default load (no args) works against testnet; verified by the live `verify` round-trip.
+6. ⏳ **ACL setup before `map-entry-set`** — still untested at HEAD; will surface as `access denied` if needed.
+7. ⏳ **Host WIT package canonical source** — NEW. T3 doesn't publish (or doesn't document publishing) the host WIT files needed to compile a tenant contract. We authored best-effort stubs at `contract/wit/deps/`. Local build works; publish + execute at HEAD untested. When T3 publishes the canonical WITs, swap them in. See `contract/wit/deps/README.md`.
 
 ---
 
 ## Running log
+
+### 2026-06-19 — REAL T3 mode wired + `blindfold init` wizard
+- Inspected the actual `@terminal3/t3n-sdk` v3.9 surface (NODE_URLS, T3nClient, TenantClient, contracts.register/execute, executeControl). Rewrote `packages/blindfold/src/t3-client.ts` to match — the previous code was based on docs that pre-dated v3.
+- **`npm run blindfold -- verify`** now does a real handshake + authenticate against T3 testnet using `T3N_API_KEY` + `DID`. **VERIFIED LIVE: round-trip succeeded** on the user's credentials.
+- **`npm run blindfold -- init`** — zero-knowledge bootstrap wizard. Steps: (1) preflight (SDK + rust + wasm32-wasip2), (2) cargo build the Rust contract, (3) authenticate to T3, (4) publish the contract, (5) seal first secret. Each step prints `✓` / `!` / `✖` with a clear next-action hint on failure. Tested with `--skip-publish` (no destructive side-effects on the user's tenant) — full pipeline through Step 3 succeeded, contract built (158KB WASM artifact).
+- **Contract build now succeeds** locally. Authored best-effort host WIT stubs at `contract/wit/deps/{host-tenant,host-interfaces}/world.wit` (T3 doesn't publish them in any documented location). Documented honestly in `contract/wit/deps/README.md`: stubs may need to be replaced with canonical signatures from T3 for publish to succeed at runtime.
+- **Publish + per-request forward** are wired in TS but **untested end-to-end at HEAD** — they depend on the WIT stubs matching T3's actual host signatures. Adding this as a NEEDS VERIFICATION item (the only one between us and full REAL-mode roundtrip).
+- All 9 mock-mode tests still pass (verified post-rewrite).
+- README updated: new "Real T3 mode — what works today" matrix + "zero-knowledge path" featuring `init` as the primary onramp.
 
 ### 2026-06-19 — Usage dashboard + test-report runner
 - `packages/blindfold/src/usage-log.ts`: append-only JSONL logger that writes **metadata only** (provider, path, status, latency, agent_supplied_auth, sentinel_in_outbound). Default path `.blindfold/usage.jsonl`, gitignored. The proxy hooks into this after every forwarded request.
