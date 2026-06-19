@@ -38,8 +38,26 @@ export function loadBlindfoldEnv(): BlindfoldEnv {
   const port = Number.parseInt(process.env.BLINDFOLD_PORT ?? "8787", 10);
   const t3EnvRaw = (process.env.BLINDFOLD_T3_ENV ?? "testnet").toLowerCase();
   const t3Env = t3EnvRaw === "production" ? "production" : "testnet";
-  const mock = process.env.BLINDFOLD_MOCK === "1" || !t3nApiKey || !did;
+  // MOCK is opt-in only — used by the standalone demo and CI tests. The
+  // production path is REAL. If T3 creds are missing in REAL mode, callers
+  // must surface a clear error (not silently fall back to mock).
+  const mock = process.env.BLINDFOLD_MOCK === "1";
   return { t3nApiKey, did, port, t3Env, mock };
+}
+
+/** Throw a friendly error if REAL mode is requested but creds are missing. */
+export function assertRealReady(env: BlindfoldEnv): void {
+  if (env.mock) return;
+  const missing: string[] = [];
+  if (!env.t3nApiKey) missing.push("T3N_API_KEY");
+  if (!env.did) missing.push("DID");
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required env: ${missing.join(", ")}. ` +
+        `Claim them at https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens, ` +
+        `then put them in .env. Or set BLINDFOLD_MOCK=1 to use mock mode for the demo only.`,
+    );
+  }
 }
 
 /** Pull a plaintext value out of env. Returns the value AND the env name

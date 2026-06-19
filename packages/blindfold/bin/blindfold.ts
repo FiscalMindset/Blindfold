@@ -166,11 +166,18 @@ async function main(): Promise<void> {
     case "doctor": {
       const env = loadBlindfoldEnv();
       console.log("Blindfold doctor:");
-      console.log(`  mode:               ${env.mock ? "MOCK (T3 not reachable / not configured)" : "REAL (T3 testnet/prod)"}`);
-      console.log(`  T3N_API_KEY set:    ${env.t3nApiKey ? "yes" : "no"}`);
-      console.log(`  DID set:            ${env.did ? "yes" : "no"}`);
+      console.log(`  mode:               ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL (T3)"}`);
+      console.log(`  T3N_API_KEY set:    ${env.t3nApiKey ? "yes" : "NO ✖"}`);
+      console.log(`  DID set:            ${env.did ? "yes" : "NO ✖"}`);
       console.log(`  T3 environment:     ${env.t3Env}`);
       console.log(`  default proxy port: ${env.port}`);
+      if (!env.mock && (!env.t3nApiKey || !env.did)) {
+        console.log("");
+        console.log(`  ⚠  REAL mode is selected but credentials are missing.`);
+        console.log(`     Claim them: https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
+        console.log(`     Or run \`npm run setup\` and the wizard will walk you through it.`);
+        process.exitCode = 1;
+      }
       return;
     }
 

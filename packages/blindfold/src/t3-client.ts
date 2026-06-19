@@ -13,6 +13,7 @@
  */
 import type { BlindfoldEnv, ForwardRequest, ForwardResponse } from "./types.ts";
 import { CONTRACT_TAIL, CONTRACT_VERSION } from "./constants.ts";
+import { assertRealReady } from "./env.ts";
 import { safeLog } from "./log.ts";
 
 /** Loaded SDK module shape (subset of the real @terminal3/t3n-sdk exports). */
@@ -67,6 +68,7 @@ export interface T3ClientHandle {
 
 export async function openT3Client(env: BlindfoldEnv): Promise<T3ClientHandle> {
   if (env.mock) return openMockClient();
+  assertRealReady(env);
   return openRealClient(env);
 }
 

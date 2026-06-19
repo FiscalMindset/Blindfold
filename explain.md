@@ -69,6 +69,15 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-20 — drop silent mock; make REAL the only default; wizard auto-scaffolds
+- **Mock is now opt-in.** Previously `BLINDFOLD_MOCK=1 || !T3N_API_KEY || !DID` would silently fall to mock — misleading. Now only `BLINDFOLD_MOCK=1` triggers it. Missing creds in REAL mode produce a loud, actionable error pointing at the T3 claim page.
+- New `assertRealReady(env)` helper. `openT3Client` calls it before any T3 round-trip.
+- `doctor` exits non-zero if creds are missing.
+- **`init` wizard now auto-scaffolds the tenant on every run:** calls `tenant.maps.create("secrets")` and `tenant.maps.create("authorised-hosts")` (both `visibility:"private", writers:"all"`); idempotent (silently skips if maps exist).
+- **`init` wizard now auto-grants ACLs after publish:** `tenant.maps.update("secrets", { readers: { only: [<new_contract_id>] } })` plus the same for authorised-hosts. No more manual step.
+- **Probed for an egress mechanism.** `tenant.maps.create({tail:"authorised-hosts"})` accepted; `map-entry-set` with `api.x.ai → 1` accepted. But contract's `http::call` still returns 500 after this — so either T3 doesn't consult this map for egress, or there's an additional step we haven't discovered. Confirmed: no `map-entry-get` exists on the control plane (secrets are strictly enclave-only by design — verified by probing 9 candidate action names).
+- Verified: all 9 tests still pass after the rewrite; new `doctor` cleanly reports REAL mode with the new tenant.
+
 ### 2026-06-20 — register supports no-disk secret input (stdin prompt + pipe)
 - New `packages/blindfold/src/prompt.ts`: tiny stdlib-only helper for reading a secret from stdin with echo disabled (raw-mode TTY) and non-TTY pipe support.
 - `register.ts` now resolves the plaintext value from three sources, in priority: (1) explicit `value` arg (programmatic), (2) `--from-env` (scripting), (3) interactive prompt or piped stdin (preferred — never touches disk or shell history).

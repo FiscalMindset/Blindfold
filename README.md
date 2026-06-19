@@ -414,11 +414,12 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 | Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` |
 | Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
 | Publish the contract via `tenant.contracts.register` | ✅ **verified live** | got `contract_id` back from T3 testnet |
-| Create the tenant's `secrets` map (one-time per new tenant) | ✅ **verified live** | `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })` |
-| Grant the contract read access to `secrets` (`tenant.maps.update`) | ✅ **verified live** | `{ readers: { only: [<contract_id>] } }` — wired into `real-e2e` as step S3b |
-| **In-enclave secret read + sentinel substitution (the Blindfold security property)** | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the *lengths* as proof (never the value). Math verified: 19-byte secret → 26-char `Authorization` after substitution. |
-| Real provider keys sealed into the enclave (`grok_api_key` confirmed) | ✅ **verified live** | Contract reads back the user's actual xAI/Grok key from inside TDX: `secret_len=84`. Value never appears outside the enclave. |
-| In-enclave `http::call` for outbound forwarding | 🚧 opaque HTTP 500 from T3 | One specific gap — either an http-WIT-stub signature mismatch or an empty egress allowlist; T3 returns the same opaque 500 for both. Closes once T3 publishes canonical host WITs. |
+| Create the tenant's `secrets` map (one-time per new tenant) | ✅ **verified live** | `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })` — `blindfold init` does this automatically |
+| Create + populate the tenant's `authorised-hosts` map | ✅ **verified live** | T3 accepts the map and entries; `blindfold init` creates it. Whether T3's runtime actually consults this map for egress is unconfirmed (see below). |
+| Grant the contract read access to maps (`tenant.maps.update`) | ✅ **verified live + auto-wired into `init`** | `{ readers: { only: [<contract_id>] } }` — applied to both `secrets` and `authorised-hosts` after publish |
+| **In-enclave secret read + sentinel substitution (the Blindfold security property)** | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the *lengths* as proof (never the value). 19-byte secret → 26-char `Authorization`, math checks. |
+| Real provider keys sealed (`grok_api_key`) | ✅ **verified live** | Contract reads back the user's actual xAI/Grok key from TDX: `secret_len=84`. Value never appears outside the enclave. |
+| In-enclave `http::call` for outbound forwarding | 🚧 opaque HTTP 500 from T3 | The one open gap. Probed: 12+ egress-control action names, multiple WIT signature shapes, all return the same opaque 500. T3's contract `logs()` is empty for failed runs. Closes once T3 publishes the canonical host WIT files — no code change needed on our side. |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 
