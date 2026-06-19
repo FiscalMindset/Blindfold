@@ -25,6 +25,40 @@ Today, your AI agent holds its OpenAI / Stripe / Anthropic API key in memory. A 
 
 ---
 
+## Plain-English: what's actually happening here
+
+If you're new, four concepts unlock the whole thing. Each is one sentence.
+
+| Concept | One-sentence explanation |
+|---|---|
+| 🔒 **Enclave** | A region of RAM inside an Intel TDX chip that nobody — not the cloud provider, not the OS, not even root on the host — can read. Code that runs *inside* the enclave can see plain values; everyone outside sees only encrypted bytes. |
+| 📄 **Canonical copy** | The one *authoritative* version of a secret — the copy that actually authenticates real API calls. Every other copy of the same value (in `.env`, in a backup, in your shell history) is just leak surface. Blindfold's job: make the enclave's copy the canonical one and let you delete the rest. |
+| 🎭 **Sentinel** | The literal string `__BLINDFOLD__`. Your agent sends `Authorization: Bearer __BLINDFOLD__` thinking it's a key — but it's just a placeholder. The real value is never on the agent's side. |
+| 🔁 **Substitution-in-enclave** | At the last possible moment, *inside* TDX RAM, the contract swaps `__BLINDFOLD__` for the real secret and sends the request to the API. The substituted version never crosses back out — only the API's response does. |
+
+Put them together:
+
+```mermaid
+flowchart LR
+    classDef leak fill:#fee,stroke:#c33,color:#900
+    classDef ok fill:#efe,stroke:#393,color:#060
+    classDef enc fill:#eef,stroke:#33c,color:#003
+
+    Dev["🧑‍💻 You<br/>(.env, once)"]:::ok -- "register: key value goes<br/>straight to enclave" --> Sec[("🔒 enclave<br/>canonical copy")]:::enc
+    Dev2["🧑‍💻 You<br/>(after register)"] -. "rm .env entry" .-> X["📄 .env<br/>(no key any more)"]:::ok
+    Agent["🤖 Agent"] -- "Authorization: Bearer __BLINDFOLD__<br/>(sentinel, not a secret)" --> Proxy["Blindfold<br/>proxy"]:::ok
+    Proxy --> Sec
+    Sec -- "swap sentinel → real value<br/>INSIDE TDX, last moment" --> API["✅ api.openai.com<br/>etc."]
+    Inject["💀 prompt-injection<br/>(in some webpage)"]:::leak -. "tries to exfiltrate<br/>$OPENAI_API_KEY" .-> Agent
+    Agent -. "leaks only __BLINDFOLD__" .-> Inject
+```
+
+If you remember **one thing**: the only place on Earth your real API key exists, after Blindfold is set up, is inside a sealed Intel TDX enclave. Every other copy has been deleted. There is nothing for an attacker to steal because there is nothing on your machine to steal.
+
+> A growing list of plain-English Q&A is in [`vicky.md`](vicky.md). If you have a question, that's the place to add it.
+
+---
+
 ## The one-line adoption
 
 <table>
@@ -502,6 +536,7 @@ This is a **hackathon-stage demo** focused on the structural security claim. The
 | [`docs/04-usage.md`](docs/04-usage.md) | One-line adoption recipes for OpenAI / LangChain / AutoGen / Anthropic / LlamaIndex |
 | [`docs/05-compatibility.md`](docs/05-compatibility.md) | Which agent CLIs Blindfold protects (Claude Code, OpenCode, Aider, Cursor, …) + the two-property test |
 | [`docs/AGENTS.md`](docs/AGENTS.md) | Onboarding for any future coding agent working on this repo |
+| [`vicky.md`](vicky.md) | Plain-English Q&A for new users — add your own questions there |
 
 ---
 
