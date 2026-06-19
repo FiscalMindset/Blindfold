@@ -69,6 +69,20 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-20 — Fix S4 — deep diagnostic against live T3
+- Goal: turn the opaque "HTTP 500 internal_error" from S4 into a fix. Did **incremental WASM bisection** against the live testnet (10+ contract versions registered, 234 → 245). Each version isolated a single capability to identify what T3 actually rejects.
+- **Proven live (inside the TDX enclave):**
+  1. `tenant_context::tenant_did()` returns the calling tenant's DID. ✅
+  2. `kv_store::get("z:<tid>:secrets", key)` reads a sealed value with the right signature. ✅
+  3. Reading a real seeded 19-byte secret returns `Ok(Some(...))`. ✅
+  4. The contract never echoes the value into its return JSON (we return `"kv_result": "found, 19 bytes"`, not the bytes). ✅
+- **ACL gap found + fixed:** the first `kv_store::get` failed with a typed `access denied: TenantContract(.../239) cannot read map "z:...:secrets"`. Probed `tenant.maps.update("secrets", patch)` with several shapes; **`{ readers: { only: [<contract_id>] } }` is accepted**. Wired into real-e2e as step S3b so every freshly-registered contract gets the read grant automatically.
+- **Outstanding gap (http::call):** every variation of `http::call` from the contract returns an opaque `HTTP 500: internal_error` with no typed body. Tried: docs-verbatim signature (`headers: option<list<tuple<string, string>>>`, `payload: option<list<u8>>`), bytes-headers shape, headers omitted, payload omitted, simple no-secret no-substitution call, two-host probe (example.com + httpbin.org). All return identical 500s; T3 contract `logs()` returned no entries for any failed run.
+  - Probed `executeControl` for plausible egress-grant action names (`grant-set`, `allowed-hosts-set`, `egress-allow`, `host-grant-add`, `authorised-hosts-set`, `policy-set`, etc.) — all returned 500. T3 doesn't differentiate "unknown action" from "execution failed", which makes blind probing impossible.
+  - Net conclusion: **either** our http WIT stub signature doesn't match T3's real interface, **or** the tenant lacks an egress-allowlist entry for httpbin.org and T3 wraps that as a generic 500 instead of the typed `host/http.egress_denied`. Both close once T3 publishes canonical host WITs.
+- **Contract now ships with a `dry_run` mode** so end-users can verify the secret-substitution path works in-enclave without hitting the http gap. Run `dry_run: true` and the contract reads the secret, substitutes the sentinel, returns the substituted Authorization header's *length* (not value) and `200 OK`. That's enough to prove the security property on T3.
+- **Testnet credit exhausted** during this debug session (`available=0` from T3 after publishing 12 contract versions). Further publish + execute calls require fresh credits from the T3 claim page.
+
 ### 2026-06-20 — Compatibility scanner + live REAL test
 - **`blindfold compat`**: scans the local machine for known AI agent CLIs and SDKs and prints the exact env-var swap that wires each one through Blindfold. Detected on this box: Claude Code (depends on auth mode), OpenCode, Codex CLI, Cline-via-VS-Code, Ollama (doesn't apply). Honest about each case — OAuth-only tools are reported as "doesn't apply (no user-supplied key)".
 - **`docs/05-compatibility.md`**: long-form matrix with the two-property test (does the tool use a user-supplied key? does it honour a base-URL override?). Specific writeup of the Claude Code OAuth vs. ANTHROPIC_API_KEY situation. README living-docs index links to it.

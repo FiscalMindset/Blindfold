@@ -369,7 +369,10 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 | Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` |
 | Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
 | Publish the contract via `tenant.contracts.register` | ✅ **verified live** | got `contract_id` back from T3 testnet |
-| Per-request `tenant.contracts.execute` (in-enclave secret substitution) | 🚧 publishes fine; execute returns HTTP 500 | almost certainly a WIT-stub signature mismatch with T3's real host interface; needs canonical WITs from T3 to close |
+| Grant the contract read access to `secrets` map (`tenant.maps.update`) | ✅ **verified live** | `{ readers: { only: [<contract_id>] } }` — wired into `real-e2e` as step S3b |
+| In-enclave secret read via `kv_store::get` inside the contract | ✅ **verified live** | T3 contract returned `kv_result: "found, 19 bytes"` for a real seeded secret — never echoing the value |
+| In-enclave sentinel substitution (`dry_run` mode) | ✅ wired, ready to verify after credit refill | Contract reads the secret, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the post-substitution length |
+| In-enclave `http::call` to upstream (full forwarding) | 🚧 returns opaque HTTP 500 from T3 | Either an http-interface WIT-stub signature mismatch OR an empty egress allowlist; T3 returns the same opaque 500 for both. Closes once T3 publishes canonical host WITs. |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 

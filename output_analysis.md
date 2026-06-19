@@ -68,6 +68,120 @@ The script lives at `scripts/run-tests.ts` and exits non-zero if any check fails
 ## Test runs
 
 <!-- TEST_RUNS_BELOW -->
+### Real-T3 run 2026-06-19 19:11:26 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781896283" len=19 (value never logged) |
+| S3 | contracts.register | 🚨 | HTTP 403: Forbidden ({"code":"forbidden","detail":"InsufficientCredit (account=256ddb4f2fa02414f473ff75bc7572af01117654, required=10000, available=0)","request_id":"a5127f2f-2bf0-41ae-8932-f5ab617abdea"}) |
+| S4 | contracts.execute | ⚠️ | contract not published — can't exercise execute path |
+
+### Real-T3 run 2026-06-19 19:10:58 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781896256" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=245; wasm=97,588B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=245 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [a25783af-ff5a-4f0d-9169-caa33d678276] ({"code":"internal_error","request_id":"a25783af-ff5a-4f0d-9169-caa33d678276"}) |
+
+### Real-T3 run 2026-06-19 19:08:15 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781896090" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=244; wasm=97,588B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=244 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [2b8fe83c-760f-4100-a211-7255da75a20c] ({"code":"internal_error","request_id":"2b8fe83c-760f-4100-a211-7255da75a20c"}) |
+
+### Real-T3 run 2026-06-19 19:07:14 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781896031" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=243; wasm=90,067B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=243 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [809e26d7-94ac-42bd-8df8-423ffa747be6] ({"code":"internal_error","request_id":"809e26d7-94ac-42bd-8df8-423ffa747be6"}) |
+
+### Real-T3 run 2026-06-19 19:06:07 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781895963" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=242; wasm=1,56,946B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=242 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [a9019131-966b-4a57-85b7-fe76e0f683a2] ({"code":"internal_error","request_id":"a9019131-966b-4a57-85b7-fe76e0f683a2"}) |
+
+### Real-T3 run 2026-06-19 18:56:56 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781895414" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=241; wasm=88,219B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=241 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined |
+
+### Real-T3 run 2026-06-19 18:55:49 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781895340" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=240; wasm=1,55,883B |
+| S3b | maps.update(secrets, readers: only) | ✅ | granted read for contract_id=240 |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [1d62de72-dbb6-49a4-a92c-bd253d04b05d] ({"code":"internal_error","request_id":"1d62de72-dbb6-49a4-a92c-bd253d04b05d"}) |
+
+### Real-T3 run 2026-06-19 18:50:01 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894999" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | already registered at this version (idempotent): HTTP 400: Invalid params ({"code":"bad_request","detail":"contract version invalid: version 0.1.4 is |
+| S4 | contracts.execute (httpbin echo) | 🚨 | The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined |
+
+### Real-T3 run 2026-06-19 18:47:41 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894860" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=239; wasm=1,51,686B |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 400: Invalid params ({"code":"bad_request","detail":"kv_store.get error: \"kv_store.get on 'z:256ddb4f2fa02414f473ff75bc7572af01117654:secrets' read denied: access denied: TenantContract(did:t3n:256ddb4f2fa02414f473ff75bc7572af01117654 |
+
+### Real-T3 run 2026-06-19 18:46:58 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894816" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=238; wasm=93,473B |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 400: Invalid params ({"code":"bad_request","detail":"kv read failed: \"kv_store.get on 'z:256ddb4f2fa02414f473ff75bc7572af01117654:secrets' read denied: access denied: TenantContract(did:t3n:256ddb4f2fa02414f473ff75bc7572af01117654/238 |
+
+### Real-T3 run 2026-06-19 18:45:11 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894709" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=237; wasm=88,211B |
+| S4 | contracts.execute (httpbin echo) | 🚨 | The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined |
+
+### Real-T3 run 2026-06-19 18:44:32 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781894670" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | contract_id=236; wasm=1,56,028B |
+| S4 | contracts.execute (httpbin echo) | 🚨 | HTTP 500: Internal error [e8590d63-9d60-4c26-8498-2f639de18a19] ({"code":"internal_error","request_id":"e8590d63-9d60-4c26-8498-2f639de18a19"}) |
+
 ### Real-T3 run 2026-06-19 18:34:12 UTC
 
 | # | Step | Status | Detail |

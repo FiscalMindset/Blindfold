@@ -1,16 +1,8 @@
-// Blindfold proxy contract: forwards an HTTP request the agent describes,
-// substituting an enclave-held secret into the headers before egress.
-//
-// Capabilities — narrowest set we can declare:
-//   - tenant-context : to derive z:<tid>:secrets map name
-//   - kv-store       : to read the developer's sealed API key
-//   - http           : to make the outbound call from inside the enclave
-//   - logging        : to emit structured logs (no header values logged)
+// Blindfold proxy contract — full surface for the end-to-end forward.
 package z:blindfold@0.1.0;
 
 world blindfold-proxy {
   import host:tenant/tenant-context@1.0.0;
-  import host:interfaces/logging@2.1.0;
   import host:interfaces/kv-store@2.1.0;
   import host:interfaces/http@2.1.0;
 
@@ -24,9 +16,5 @@ interface contracts {
     context:      option<list<u8>>,
   }
 
-  // Forward a single HTTP call. Input is JSON: { method, url, headers,
-  // body?, secret-key }. The contract substitutes the secret named by
-  // `secret-key` into any header value containing the literal sentinel
-  // "__BLINDFOLD__", then makes the call via host:interfaces/http.
   forward: func(req: generic-input) -> result<list<u8>, string>;
 }
