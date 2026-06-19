@@ -15,7 +15,9 @@
     "demo:a": "tsx demo/agent-a-leaks/index.ts",
     "demo:b": "tsx demo/agent-b-blindfolded/index.ts",
     "dashboard": "tsx packages/blindfold/bin/blindfold.ts dashboard",
-    "test:report": "tsx scripts/run-tests.ts"
+    "test:report": "tsx scripts/run-tests.ts",
+    "test:real": "tsx scripts/real-e2e-test.ts",
+    "compat": "tsx packages/blindfold/bin/blindfold.ts compat"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

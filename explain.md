@@ -69,6 +69,16 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-20 — Compatibility scanner + live REAL test
+- **`blindfold compat`**: scans the local machine for known AI agent CLIs and SDKs and prints the exact env-var swap that wires each one through Blindfold. Detected on this box: Claude Code (depends on auth mode), OpenCode, Codex CLI, Cline-via-VS-Code, Ollama (doesn't apply). Honest about each case — OAuth-only tools are reported as "doesn't apply (no user-supplied key)".
+- **`docs/05-compatibility.md`**: long-form matrix with the two-property test (does the tool use a user-supplied key? does it honour a base-URL override?). Specific writeup of the Claude Code OAuth vs. ANTHROPIC_API_KEY situation. README living-docs index links to it.
+- **`npm run test:real`** + `scripts/real-e2e-test.ts`: live REAL-mode end-to-end against T3 testnet. Results (run 2026-06-19):
+    - S1 handshake + authenticate → ✅
+    - S2 executeControl("map-entry-set") seal test secret → ✅ (secret `blindfold_test_<ts>` now in tenant's z:tid:secrets)
+    - S3 contracts.register publish 158KB WASM → ✅ **contract_id=234** — contract published to user's tenant
+    - S4 contracts.execute against httpbin echo → 🚨 HTTP 500 internal_error (no typed error code). Almost certainly a WIT-stub signature mismatch — the contract is accepted at publish but errors at runtime when it tries to call kv-store::get/http::call. Closing this requires canonical host WIT files from T3.
+- README "Real T3 mode" matrix updated to reflect the live results.
+
 ### 2026-06-19 — Two-command onramp
 - `npm run setup` now runs `blindfold init` as a single npm script — entire fresh-machine flow is `npm install && npm run setup`.
 - `init` now **interactively bootstraps `.env`** when T3 credentials are missing: prints the T3 claim URL, accepts pasted T3N_API_KEY + DID with format validation (5 attempts), writes them via `upsertEnvLines` so existing lines are overwritten instead of duplicated. Non-interactive (`--yes`) mode fails with the same clear pointer instead of prompting.
