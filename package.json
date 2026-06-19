@@ -17,6 +17,7 @@
     "dashboard": "tsx packages/blindfold/bin/blindfold.ts dashboard",
     "test:report": "tsx scripts/run-tests.ts",
     "test:real": "tsx scripts/real-e2e-test.ts",
+    "demo:smtp": "tsx scripts/demo-smtp.ts",
     "compat": "tsx packages/blindfold/bin/blindfold.ts compat"
   },
   "devDependencies": {
@@ -25,6 +26,8 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@terminal3/t3n-sdk": "^3.9.0"
+    "@terminal3/t3n-sdk": "^3.9.0",
+    "@types/nodemailer": "^8.0.1",
+    "nodemailer": "^9.0.1"
   }
 }
