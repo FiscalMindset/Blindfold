@@ -68,6 +68,14 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-19 — Usage dashboard + test-report runner
+- `packages/blindfold/src/usage-log.ts`: append-only JSONL logger that writes **metadata only** (provider, path, status, latency, agent_supplied_auth, sentinel_in_outbound). Default path `.blindfold/usage.jsonl`, gitignored. The proxy hooks into this after every forwarded request.
+- `packages/blindfold/src/dashboard.ts`: self-contained dashboard server (default port 8799). Serves a dark-themed HTML page with live counters + recent-activity table, auto-refreshing every 2 s. JSON API at `/api/events`, clear at `POST/DELETE /api/clear`. The HTML is inline — no build step.
+- CLI now has `blindfold dashboard`, `blindfold stats`, `blindfold stats:clear`.
+- `scripts/run-tests.ts` + `npm run test:report`: runs the full battery (9 checks). Appends a dated block to `output_analysis.md`; never overwrites. Per-test try/catch + `waitForPort` so one flaky proxy bind doesn't crash the whole run.
+- `output_analysis.md`: living test-report file. Top half explains what each test analyses ("without it" vs "with it" vs "what happens"); bottom half is the auto-appended run history. Verified by running `npm run test:report` twice — two run blocks, newest at top.
+- Verified live: dashboard renders 5 sample requests (4 openai + 1 anthropic) with sentinel-substituted = 5/5. `stats` CLI agrees.
+
 ### 2026-06-19 — Usage recipes + runnable examples
 - Wrote `docs/04-usage.md` with one-line-adoption snippets for: OpenAI SDK (Node + Python), LangChain (Node + Python), AutoGen, Anthropic SDK, LlamaIndex, plus a "my framework hides the HTTP client" escape-hatch using `wrap()` and a "verifying you're actually using Blindfold" debugging section, plus rotation, plus an honest "what Blindfold does *not* protect" note.
 - Created `examples/` folder with four runnable apps: `openai-node-quickstart`, `openai-python-quickstart`, `langchain-summarizer`, `anthropic-quickstart`. Each is ~20 lines.

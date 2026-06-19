@@ -336,6 +336,39 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 
 ---
 
+## Dashboard & telemetry
+
+Every forwarded request appends a metadata line to `.blindfold/usage.jsonl`. The line contains the provider, path, method, status, latency, whether the agent supplied any auth header, and whether the Blindfold sentinel was actually placed in the outbound headers. **It never contains request bodies, response bodies, or header values** — by construction, those are not passed to the logger.
+
+```bash
+npm run blindfold -- proxy            # in one terminal
+npm run dashboard                     # in another → opens http://127.0.0.1:8799
+npm run blindfold -- stats            # quick CLI summary
+npm run blindfold -- stats:clear      # wipe the log
+```
+
+The dashboard shows live counters (by provider, success rate, average latency, sentinel-substitution count) and the most recent 50 events, auto-refreshing every 2 seconds.
+
+```mermaid
+flowchart LR
+    classDef bf      fill:#efe,stroke:#3a3,color:#060
+    classDef file    fill:#eef,stroke:#33c,color:#003
+    classDef ui      fill:#fef,stroke:#a3a,color:#606
+    Agent[🤖 Agent] --> Proxy[Blindfold Proxy]:::bf
+    Proxy -- "metadata only<br/>(no bodies / headers)" --> Log[(.blindfold/usage.jsonl)]:::file
+    Log --> Dash[Dashboard server :8799]:::ui
+    Log --> Stats[blindfold stats CLI]:::ui
+    Dash --> Browser[Browser]
+```
+
+## Continuous test-report
+
+```bash
+npm run test:report
+```
+
+Runs the full battery (9 checks, including the side-by-side leak demo and the "register never logs the secret" auditor check) and **appends** a timestamped block to [`output_analysis.md`](output_analysis.md). Nothing in that file ever gets overwritten — every run becomes a row in the history.
+
 ## Where the key could leak — and why it can't
 
 A security-auditor walkthrough. Every plausible leak vector is listed; if any answer were "yes", it would be a bug to fix, not ship.

@@ -12,7 +12,9 @@
     "blindfold": "tsx packages/blindfold/bin/blindfold.ts",
     "demo": "tsx demo/run-demo.ts",
     "demo:a": "tsx demo/agent-a-leaks/index.ts",
-    "demo:b": "tsx demo/agent-b-blindfolded/index.ts"
+    "demo:b": "tsx demo/agent-b-blindfolded/index.ts",
+    "dashboard": "tsx packages/blindfold/bin/blindfold.ts dashboard",
+    "test:report": "tsx scripts/run-tests.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
