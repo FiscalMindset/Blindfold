@@ -1,66 +1,65 @@
-// Full forward — kv read + http call. Egress allowlist is now populated
-// via z:<tid>:authorised-hosts.
+// Release-broker contract — kv-store only, no http.
+//
+// `release_to_tenant` returns the plaintext to the authenticated tenant
+// over T3's encrypted session. The local broker (Aurora EnclaveBroker
+// or our smtp script) uses it briefly for the real outbound call and
+// drops it.
+//
+// `forward` is kept as a substitution-proof endpoint (returns lengths,
+// not values) — useful when the caller just wants to confirm the
+// secret is reachable in-enclave without releasing it.
+
 use serde::{Deserialize, Serialize};
 
-use crate::host::interfaces::{http, kv_store};
+use crate::host::interfaces::kv_store;
 use crate::host::tenant::tenant_context;
 
 pub const SENTINEL: &str = "__BLINDFOLD__";
 
 #[derive(Deserialize)]
 struct ForwardInput {
-    method: String,
-    url: String,
     #[serde(default)]
     headers: Vec<(String, String)>,
-    #[serde(default)]
-    body: Option<String>,
     secret_key: String,
 }
 
 #[derive(Serialize)]
 struct ForwardOutput {
-    status: u16,
-    headers: Vec<(String, String)>,
-    body: String,
+    ok: bool,
+    secret_len: usize,
+    authorization_header_len_after_substitution: usize,
+    dry_run: bool,
 }
 
 pub fn forward(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
-    let input: ForwardInput = serde_json::from_slice(input_bytes)
-        .map_err(|e| format!("bad input json: {e}"))?;
+    let input: ForwardInput = serde_json::from_slice(input_bytes).map_err(|e| format!("input: {e}"))?;
+    let secret = read_secret(&input.secret_key)?;
+    let substituted: Vec<(String, String)> = input.headers.into_iter()
+        .map(|(k, v)| (k, v.replace(SENTINEL, &secret))).collect();
+    let auth_len = substituted.iter().find(|(k, _)| k.eq_ignore_ascii_case("authorization")).map(|(_, v)| v.len()).unwrap_or(0);
+    serde_json::to_vec(&ForwardOutput {
+        ok: true,
+        secret_len: secret.len(),
+        authorization_header_len_after_substitution: auth_len,
+        dry_run: true,
+    }).map_err(|e| format!("encode: {e}"))
+}
 
-    let api_key = read_secret(&input.secret_key)?;
+#[derive(Deserialize)]
+struct ReleaseInput { secret_key: String }
 
-    let substituted: Vec<(String, String)> = input
-        .headers
-        .into_iter()
-        .map(|(k, v)| (k, v.replace(SENTINEL, &api_key)))
-        .collect();
+#[derive(Serialize)]
+struct ReleaseOutput {
+    ok: bool,
+    value: String,
+    length: usize,
+}
 
-    let resp = http::call(&http::Request {
-        method: parse_verb(&input.method)?,
-        url: input.url,
-        headers: Some(substituted),
-        payload: input.body.map(|b| b.into_bytes()),
-    })
-    .map_err(|e| format!("http::call: {e}"))?;
-
-    let sanitized_headers: Vec<(String, String)> = resp
-        .headers
-        .into_iter()
-        .filter(|(k, _)| !is_sensitive_header(k))
-        .collect();
-
-    let body_str = String::from_utf8(resp.payload).unwrap_or_else(|e| {
-        format!("<{} non-utf8 bytes>", e.into_bytes().len())
-    });
-
-    let out = ForwardOutput {
-        status: resp.code,
-        headers: sanitized_headers,
-        body: body_str,
-    };
-    serde_json::to_vec(&out).map_err(|e| format!("output encode: {e}"))
+pub fn release_to_tenant(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
+    let req: ReleaseInput = serde_json::from_slice(input_bytes).map_err(|e| format!("input: {e}"))?;
+    let value = read_secret(&req.secret_key)?;
+    let length = value.len();
+    serde_json::to_vec(&ReleaseOutput { ok: true, value, length }).map_err(|e| format!("encode: {e}"))
 }
 
 fn read_secret(name: &str) -> Result<String, String> {
@@ -69,18 +68,5 @@ fn read_secret(name: &str) -> Result<String, String> {
     let bytes = kv_store::get(&map_name, name.as_bytes())
         .map_err(|e| format!("kv read: {e}"))?
         .ok_or_else(|| format!("secret {name} not found"))?;
-    String::from_utf8(bytes).map_err(|e| format!("secret not utf-8: {e}"))
-}
-
-fn parse_verb(m: &str) -> Result<http::Verb, String> {
-    Ok(match m.to_ascii_uppercase().as_str() {
-        "GET" => http::Verb::Get, "POST" => http::Verb::Post, "PUT" => http::Verb::Put,
-        "DELETE" => http::Verb::Delete, "PATCH" => http::Verb::Patch, "HEAD" => http::Verb::Head,
-        other => return Err(format!("unsupported method: {other}")),
-    })
-}
-
-fn is_sensitive_header(name: &str) -> bool {
-    matches!(name.to_ascii_lowercase().as_str(),
-        "authorization" | "proxy-authorization" | "set-cookie" | "cookie" | "x-api-key")
+    String::from_utf8(bytes).map_err(|e| format!("non-utf8: {e}"))
 }

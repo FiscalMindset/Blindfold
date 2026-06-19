@@ -1,9 +1,11 @@
+// Release-only contract — kv-store + tenant-context. No http import,
+// since that causes instantiation failures on this tenant. Outbound
+// HTTP happens in the broker process (Aurora / our smtp script).
 package z:blindfold@0.1.0;
 
 world blindfold-proxy {
   import host:tenant/tenant-context@1.0.0;
   import host:interfaces/kv-store@2.1.0;
-  import host:interfaces/http@2.1.0;
   export contracts;
 }
 
@@ -14,4 +16,5 @@ interface contracts {
     context:      option<list<u8>>,
   }
   forward: func(req: generic-input) -> result<list<u8>, string>;
+  release-to-tenant: func(req: generic-input) -> result<list<u8>, string>;
 }
