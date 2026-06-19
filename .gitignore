@@ -25,6 +25,9 @@ Cargo.lock
 # Claude Code local settings
 .claude/
 
+# Blindfold runtime telemetry (per-machine; not for the repo)
+.blindfold/
+
 # test / coverage
 coverage/
 .nyc_output/

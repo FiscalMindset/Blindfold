@@ -16,6 +16,8 @@ import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv } from "../src/env.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
+import { startDashboard } from "../src/dashboard.ts";
+import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -87,6 +89,51 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "dashboard": {
+      const port = argv.flags.port ? Number(argv.flags.port) : undefined;
+      const handle = await startDashboard({ port });
+      console.log(`✓ Blindfold dashboard at ${handle.url}`);
+      console.log(`  Reading: ${defaultLogPath()}`);
+      console.log(`  (open in your browser; auto-refreshes every 2s)`);
+      process.on("SIGINT", async () => { await handle.close(); process.exit(0); });
+      return;
+    }
+
+    case "stats": {
+      const events = readUsage();
+      if (events.length === 0) {
+        console.log("No usage recorded yet. Reads from " + defaultLogPath());
+        return;
+      }
+      const byProvider: Record<string, number> = {};
+      let ok = 0, bad = 0, totalLat = 0, sentinel = 0;
+      for (const e of events) {
+        byProvider[e.provider] = (byProvider[e.provider] ?? 0) + 1;
+        if (e.status >= 200 && e.status < 300) ok++;
+        else if (e.status >= 400) bad++;
+        totalLat += e.latency_ms;
+        if (e.sentinel_in_outbound) sentinel++;
+      }
+      const total = events.length;
+      console.log("Blindfold usage stats (source: " + defaultLogPath() + ")");
+      console.log(`  Total requests:     ${total}`);
+      console.log(`  2xx / 4xx+:         ${ok} / ${bad}`);
+      console.log(`  Sentinel substituted: ${sentinel}/${total}  (should equal total)`);
+      console.log(`  Avg latency:        ${total ? Math.round(totalLat / total) : 0} ms`);
+      console.log(`  By provider:        ${Object.entries(byProvider).map(([k, v]) => `${k}×${v}`).join("  ")}`);
+      console.log(`  Recent (last 5):`);
+      for (const e of events.slice(-5)) {
+        console.log(`    ${e.t}  ${e.method.padEnd(6)} ${e.path}  → ${e.status} (${e.latency_ms}ms, ${e.provider}, ${e.mode})`);
+      }
+      return;
+    }
+
+    case "stats:clear": {
+      clearUsage();
+      console.log("✓ Cleared " + defaultLogPath());
+      return;
+    }
+
     case "doctor": {
       const env = loadBlindfoldEnv();
       console.log("Blindfold doctor:");
@@ -110,6 +157,9 @@ Commands:
   register --name <KV_KEY> --from-env <ENV_VAR>    Seal a secret into the enclave (one-time).
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
+  dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
+  stats                                             CLI summary of proxy usage.
+  stats:clear                                       Wipe the usage log.
   doctor                                            Show current mode + config.
 
 Quick start:

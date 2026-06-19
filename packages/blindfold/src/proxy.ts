@@ -30,6 +30,7 @@ import { loadBlindfoldEnv } from "./env.ts";
 import { safeLog } from "./log.ts";
 import { openT3Client, type T3ClientHandle } from "./t3-client.ts";
 import type { ForwardRequest } from "./types.ts";
+import { logUsage, providerForUpstream } from "./usage-log.ts";
 
 export interface ProxyOpts {
   port?: number;
@@ -98,6 +99,7 @@ async function handle(
   // Build the headers we'll send to the contract. Any Authorization the
   // agent sent is replaced with the sentinel — the agent's bearer value
   // is never forwarded.
+  const agentSuppliedAuth = Object.keys(req.headers).some((k) => k.toLowerCase() === "authorization");
   const headers = forwardableHeaders(req.headers);
   ensureHeader(headers, "authorization", `Bearer ${SENTINEL}`);
 
@@ -115,7 +117,23 @@ async function handle(
     upstream: upstream.replace(/\?.*$/, ""),
   });
 
+  const startedAt = Date.now();
   const result = await t3.invokeForward(forwardReq);
+  const latency = Date.now() - startedAt;
+
+  // Record non-sensitive telemetry. Never the body, never the header values.
+  logUsage({
+    t: new Date().toISOString(),
+    mode: loadBlindfoldEnv().mock ? "mock" : "real",
+    provider: providerForUpstream(upstream),
+    method: forwardReq.method,
+    path: req.url ?? "/",
+    upstream: upstream.replace(/\?.*$/, ""),
+    status: result.status,
+    latency_ms: latency,
+    agent_supplied_auth: agentSuppliedAuth,
+    sentinel_in_outbound: forwardReq.headers.some(([k, v]) => k.toLowerCase() === "authorization" && v.includes(SENTINEL)),
+  });
 
   res.writeHead(result.status, headersFromTuple(result.headers));
   const bodyBytes = typeof result.body === "string" ? Buffer.from(result.body, "utf8") : Buffer.from(result.body);

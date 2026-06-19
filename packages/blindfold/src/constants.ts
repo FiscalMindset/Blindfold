@@ -19,3 +19,6 @@ export const CONTRACT_VERSION = "0.1.0";
 
 /** Marker the proxy uses to surface "registered but mock" status in /health. */
 export const HEALTH_BANNER = "blindfold/0.1.0";
+
+/** Default port for the dashboard server (separate from the proxy port). */
+export const DEFAULT_DASHBOARD_PORT = 8799;
