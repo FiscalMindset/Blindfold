@@ -6,7 +6,7 @@
 
 ## What this project is
 
-**Blindfold** is a thin wrapper around Terminal 3 (T3, a confidential-compute network on Intel TDX) that protects an AI agent's API keys from prompt-injection exfiltration. The full design is in `docs/01-problem-analysis.md` (the problem), `docs/02-terminal3-analysis.md` (the T3 surface we use), and `docs/03-architecture.md` (how the wrapper is built).
+**Blindfold** is a thin wrapper around Terminal 3 (T3, a confidential-compute network on Intel TDX) that protects an AI agent's API keys from prompt-injection exfiltration. The full design is in `docs/01-problem-analysis.md` (the problem), `docs/02-terminal3-analysis.md` (the T3 surface we use), `docs/03-architecture.md` (how the wrapper is built), `docs/04-usage.md` (adoption recipes per stack), and `docs/05-compatibility.md` (which agent CLIs Blindfold works with).
 
 Before doing anything, read `explain.md` — it is the single source of truth for project status, open questions, and the running log. Update it at the end of every change you make.
 
@@ -17,31 +17,82 @@ Before doing anything, read `explain.md` — it is the single source of truth fo
 If you violate either of these, you have broken Blindfold. Test for them before merging.
 
 1. **EASY.** A developer adopts Blindfold by changing **at most one line** (env var or `wrap()` call). Any new feature that requires more is not in scope; rework it.
-2. **ZERO ADDED RISK.** The plaintext API key passes through *exactly one* function in this repo: `packages/blindfold/src/register.ts` → the single `executeControl("map-entry-set", …)` call. **Nowhere else.** Not in proxy logs, not in error messages, not in metrics, not in caches, not in tests' fixtures, not in CLI stdout.
+2. **ZERO ADDED RISK in the agent.** The plaintext API key never enters the agent's process or context. The only processes that may briefly touch the plaintext are:
+   - **Registration** — `packages/blindfold/src/register.ts` (one `executeControl("map-entry-set", …)` call; value dropped immediately).
+   - **Release broker** (today, until T3 ships canonical `http::call` WITs) — `scripts/smtp-with-blindfold.ts` and Aurora's `EnclaveBroker`: receive the plaintext from the T3 contract over the tenant-authenticated session, use it for one outbound call, drop it. Audit table in `docs/03-architecture.md` §6 lists every such path.
 
-Practical rules that come from invariant #2:
-
-- Never `console.log` a value whose origin is `process.env.*_API_KEY` or any HTTP header named `authorization`.
-- Never persist anything from `register.ts` to disk. The function reads → calls T3 → returns. No state.
-- Never share state between `register.ts` and `proxy.ts`. They run in different processes; they share no module-level variables. (CI should grep for cross-imports.)
-- Any new code path that *could* see a plaintext secret must be added to the audit table in `docs/03-architecture.md` §6 with a one-line justification.
+Practical rules:
+- Never `console.log` a value whose origin is `process.env.*_API_KEY`, an `authorization` header, or the return of `contracts.execute("release_to_tenant", …)`.
+- Never persist plaintext to disk. Logs use `packages/blindfold/src/log.ts::safeLog` which scrubs sensitive header names.
+- The proxy (`proxy.ts`) ALWAYS replaces any `Authorization` header the agent sent with `Bearer __BLINDFOLD__` before calling T3. Don't introduce any path that bypasses this.
+- Any new code path that *could* see plaintext must be added to the audit table in `docs/03-architecture.md` §6 with a one-line justification.
 
 ---
 
 ## Folder map (skim, then go read the files)
 
 ```
-contract/        Rust crate. The T3 WASM contract. Reads secret from KV, makes outbound call.
-packages/blindfold/   TS package. The dev-facing SDK + CLI + proxy.
-  src/register.ts     ⚠️ The ONLY plaintext-touching path. Audit-critical.
-  src/proxy.ts        OpenAI-shaped HTTP proxy. Never touches the key.
-  src/wrap.ts         In-process fetch wrap. Never touches the key.
-  src/t3-client.ts    Auth + invoke helpers for @terminal3/t3n-sdk.
-  bin/blindfold.ts    CLI entrypoint.
-demo/            Two agents (A leaks, B doesn't) + a runner that prints the contrast.
-docs/            Step-by-step design docs. 01, 02, 03 are the design; this is the agent guide.
-scripts/         build-contract.sh + one-time-setup.sh.
+contract/                                Rust crate — the T3 WASM contract.
+  Cargo.toml
+  wit/
+    world.wit                            forward + release-to-tenant exports; kv-store + tenant-context imports.
+    deps/host-{tenant,interfaces}/       Best-effort host WIT stubs (replace if T3 ships canonical).
+  src/{lib.rs, forward.rs}               forward() returns substitution-proof; release_to_tenant() returns plaintext.
+
+packages/blindfold/                      TS package — dev-facing SDK + CLI + proxy + dashboard.
+  src/
+    register.ts                          ⚠️ ONE of two plaintext-touching paths (audit-critical). Three input modes: stdin prompt / pipe / --from-env.
+    prompt.ts                            stdlib-only hidden-input reader for `register` without --from-env.
+    proxy.ts                             OpenAI/Anthropic/xAI/Groq-shaped HTTP proxy. Never sees plaintext.
+    wrap.ts                              In-process fetch wrap.
+    t3-client.ts                         @terminal3/t3n-sdk wrapper. REAL only (mock is opt-in via BLINDFOLD_MOCK=1).
+    init.ts                              `blindfold init` wizard logic (.env walkthrough, build, auth, scaffold, publish, ACL, seed).
+    compat.ts                            `blindfold compat` scans local box for agent CLIs.
+    dashboard.ts                         Live HTML dashboard server (default port 8799).
+    usage-log.ts                         Append-only JSONL telemetry; metadata only.
+    env.ts                               Loads .env; assertRealReady() throws if creds missing.
+    log.ts, types.ts, constants.ts, index.ts
+  bin/blindfold.ts                       CLI entrypoint. Commands listed below.
+
+demo/                                    Two agents (A leaks, B doesn't) + a runner. Mock-LLM driven so it runs anywhere.
+
+examples/                                Runnable per-stack quickstarts (openai-node, openai-python, langchain, anthropic).
+
+scripts/
+  build-contract.sh, one-time-setup.sh   Shell helpers.
+  run-tests.ts                           `npm run test:report` — full 9-check battery; appends to output_analysis.md.
+  real-e2e-test.ts                       `npm run test:real` — live REAL T3 pipeline.
+  smtp-with-blindfold.ts                 The end-to-end "sealed AND used" demo. Real email sent via T3-released password.
+  demo-smtp.ts                           SMTP send from env (the "without Blindfold" baseline).
+  init-tenant.ts                         One-time per-tenant scaffolding (now baked into the wizard).
+  diagnose-execute.ts                    Pulls contract logs + raw error after execute calls.
+  probe-*.ts, grant-*.ts                 Diagnostic helpers — kept in-tree as the journal of what we tried.
+
+docs/                                    01..05 = design docs. AGENTS.md = this file.
+INTEGRATION-AURORA.md                    Coding-agent prompt for integrating Blindfold into the Aurora research engine.
+vicky.md                                 Plain-English Q&A for new users. Newest at top.
+explain.md                               Living status file. Update at the end of every change.
+output_analysis.md                       Auto-appended test history.
+tests/smtp-demo.md                       Permanent record of the without/with SMTP test runs.
 ```
+
+---
+
+## The CLI commands
+
+```
+blindfold init     [--seed KV:ENV]... [--start]   Zero-knowledge bootstrap. The preferred onramp.
+blindfold verify                                   Handshake + auth round-trip against T3 testnet.
+blindfold compat   [--json]                        Scan local box for agent CLIs.
+blindfold register --name <K> [--from-env <ENV>]  Seal a secret. Prompts (no echo) if --from-env omitted; piped stdin also works.
+blindfold proxy    [--port 8787] [--secret …]     Local OpenAI-shaped proxy.
+blindfold publish  [--wasm <path>]                Manually publish the WASM (init does this automatically).
+blindfold dashboard [--port 8799]                  Live HTML usage dashboard.
+blindfold stats    | stats:clear                  CLI usage summary / wipe.
+blindfold doctor                                   Show mode + config. Exit 1 if REAL is missing creds.
+```
+
+Mocked behaviour is opt-in only: `BLINDFOLD_MOCK=1`. Otherwise, REAL mode is the only mode.
 
 ---
 
@@ -49,38 +100,41 @@ scripts/         build-contract.sh + one-time-setup.sh.
 
 ### Adding a new provider (e.g. Anthropic, Stripe)
 
-You do **not** need to change `contract/` for a new provider. The contract is generic. You only need to:
-
-1. Add a route in `packages/blindfold/src/proxy.ts` for the new provider's URL shape (e.g. `/v1/messages`).
-2. Document the env-var swap in the README (`ANTHROPIC_BASE_URL=…`).
-3. Add a demo under `demo/` if you want to show off the new provider; not required.
+The contract is generic. Only:
+1. Add a route in `packages/blindfold/src/proxy.ts::upstreamForPath` for the new provider's URL shape.
+2. Add a provider tag in `packages/blindfold/src/usage-log.ts::providerForUpstream` for dashboard recognition.
+3. Document the env-var swap in `docs/04-usage.md`.
 
 ### Adding a new T3 capability the contract needs
 
-Only add the capability to `contract/wit/world.wit` if the contract code actually uses it. Capabilities are not free — they widen the contract's blast radius if it's ever compromised. Justify the addition in a comment.
+Only add the import to `contract/wit/world.wit` if the contract code actually uses it. Each import widens the contract's blast radius. Justify in a comment. **Known footgun (2026-06):** the `host:interfaces/http@2.1.0` import alone (without calling it) causes T3 to reject the contract at instantiation on some tenants. Until that's resolved, the working contract shape is kv-store + tenant-context only.
 
 ### Adding logging / metrics
 
-Allowed, but:
-- Never log header *values*.
-- Always pass logs through `packages/blindfold/src/log.ts::safe()` if it touches any header or body.
-- Log the *shape* of a request, not the contents (e.g. `POST /v1/chat/completions, 1421 bytes body` — not the body itself).
+- Never log header *values* — pass through `safeLog`.
+- Log shape, not content (`POST /v1/chat/completions 1421b` not the body).
+- `usage-log.ts` is the canonical telemetry path — metadata only by construction.
 
 ### Adding tests
 
-Tests should never embed a real T3N_API_KEY. Use the mock T3 client at `packages/blindfold/src/t3-client.mock.ts` (added in a later iteration if needed). The full demo can run against the real testnet but is gated behind `BLINDFOLD_E2E=1`.
+- `npm run test:report` runs the 9-check battery (T1–T9 in `output_analysis.md`'s explainer). Uses `BLINDFOLD_MOCK=1` for proxy tests.
+- `npm run test:real` runs a full live REAL-mode round-trip against T3 testnet. Costs one contract slot per publish.
+- Never embed a real `T3N_API_KEY` in test fixtures.
 
 ---
 
-## How to find the right thing to change
+## Quick "where do I edit" map
 
 | If you want to … | Edit … |
 |---|---|
 | Change what the contract does when called | `contract/src/forward.rs` |
 | Change which T3 capabilities the contract has | `contract/wit/world.wit` |
-| Change the developer-facing CLI commands | `packages/blindfold/bin/blindfold.ts` |
+| Change the developer-facing CLI | `packages/blindfold/bin/blindfold.ts` + the `src/<command>.ts` it dispatches to |
 | Change how the proxy parses incoming requests | `packages/blindfold/src/proxy.ts` |
-| Change how secrets get into T3 | `packages/blindfold/src/register.ts` (and *only* this file) |
+| Change how secrets are sealed | `packages/blindfold/src/register.ts` (and *only* this file) |
+| Change how secrets are released to a local broker | `contract/src/forward.rs::release_to_tenant` |
+| Change the wizard flow | `packages/blindfold/src/init.ts` |
+| Change the dashboard UI | the inline HTML in `packages/blindfold/src/dashboard.ts` |
 | Change the demo prompts / attack payload | `demo/shared/injection-page.ts` |
 | Add a new demo scenario | `demo/<scenario-name>/` |
 
@@ -94,10 +148,11 @@ After every commit or material change: update the status table row + append a da
 
 ## Style + conventions
 
-- **TypeScript:** strict mode on. No `any` unless justified in a comment. Prefer narrow types from `src/types.ts`.
-- **Rust:** match the T3 walkthrough exactly. `wit_bindgen` macros, `serde` derive, `cargo build --target wasm32-wasip2 --release`.
-- **No new top-level files** without updating the folder map above + the architecture doc.
-- **No comments explaining *what* code does** — explain *why*, but only when non-obvious. Naming should make `what` self-evident.
+- **TypeScript:** strict mode on. Avoid `any` (some SDK-shape escapes are tagged with `// eslint-disable-next-line` — keep them narrow).
+- **Rust contract:** match the T3 walkthrough exactly. `wit_bindgen` macros, `serde` derive, `cargo build --target wasm32-wasip2 --release`. Bump `CONTRACT_VERSION` in `packages/blindfold/src/constants.ts` AND `contract/Cargo.toml` on every contract change.
+- **No new top-level files** without updating the folder map above + `docs/03-architecture.md`.
+- **Comments:** explain *why*, not *what*. Naming should make *what* self-evident.
+- **Commit messages:** semantic prefix (`feat:`, `fix:`, `docs:`); body explains the *why* and lists *what* in bullets.
 
 ---
 
