@@ -18,6 +18,7 @@ import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
 import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
+import { runInit, runVerify } from "../src/init.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -89,6 +90,23 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "init": {
+      const seedFlag = argv.flags.seed;
+      const seedArr = Array.isArray(seedFlag) ? (seedFlag as string[]) : seedFlag ? [String(seedFlag)] : [];
+      await runInit({
+        skipBuild: !!argv.flags["skip-build"],
+        skipPublish: !!argv.flags["skip-publish"],
+        seed: seedArr,
+        yes: !!argv.flags.yes,
+      });
+      return;
+    }
+
+    case "verify": {
+      await runVerify();
+      return;
+    }
+
     case "dashboard": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const handle = await startDashboard({ port });
@@ -154,6 +172,8 @@ function printHelp(): void {
   console.log(`Blindfold — protect your AI agent's API keys with Terminal 3 enclaves.
 
 Commands:
+  init     [--seed KV:ENV]...                       One-command zero-knowledge setup.
+  verify                                            Handshake + auth against T3 (smoke test).
   register --name <KV_KEY> --from-env <ENV_VAR>    Seal a secret into the enclave (one-time).
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
@@ -161,6 +181,8 @@ Commands:
   stats                                             CLI summary of proxy usage.
   stats:clear                                       Wipe the usage log.
   doctor                                            Show current mode + config.
+
+The friendliest path is just:  blindfold init
 
 Quick start:
   1) ./scripts/build-contract.sh             # build the Rust contract (REAL mode only)

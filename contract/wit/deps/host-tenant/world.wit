@@ -1,0 +1,10 @@
+// host:tenant — best-effort stub for the T3 tenant-context interface.
+//
+// Reconstructed from the public T3 docs. If T3 ships the canonical
+// host-package WIT files officially, replace this file with theirs.
+package host:tenant@1.0.0;
+
+interface tenant-context {
+  /// Returns the calling tenant's DID as raw bytes (hex-encoded by caller).
+  tenant-did: func() -> list<u8>;
+}

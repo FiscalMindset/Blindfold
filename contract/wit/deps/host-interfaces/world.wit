@@ -1,0 +1,37 @@
+// host:interfaces — best-effort stubs for kv-store, http, logging.
+//
+// Reconstructed from the public T3 docs. If T3 ships the canonical
+// host-package WIT files officially, replace this file with theirs.
+package host:interfaces@2.1.0;
+
+interface logging {
+  info:  func(message: string) -> result<_, string>;
+  debug: func(message: string) -> result<_, string>;
+  error: func(message: string) -> result<_, string>;
+}
+
+interface kv-store {
+  /// Get the value at (map_name, key). Returns none if absent.
+  get: func(map-name: string, key: list<u8>) -> result<option<list<u8>>, string>;
+  /// Put a value at (map_name, key).
+  put: func(map-name: string, key: list<u8>, value: list<u8>) -> result<_, string>;
+}
+
+interface http {
+  enum verb { get, post, put, delete, patch, head }
+
+  record request {
+    method:  verb,
+    url:     string,
+    headers: option<list<tuple<string, string>>>,
+    payload: option<list<u8>>,
+  }
+
+  record response {
+    code:    u16,
+    headers: list<tuple<string, string>>,
+    payload: list<u8>,
+  }
+
+  call: func(req: request) -> result<response, string>;
+}
