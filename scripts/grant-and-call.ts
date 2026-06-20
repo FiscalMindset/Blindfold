@@ -104,11 +104,26 @@ async function main(): Promise<void> {
         headers: [["Authorization", "Bearer __BLINDFOLD__"], ["Content-Type", "application/json"]],
         secret_key: "grok_api_key",
       },
-    }) as { status: number; headers: Array<[string, string]>; body: string };
-    console.log(`  ✓ STATUS ${r.status}`);
-    console.log(`    body (first 500 bytes):\n    ${String(r.body).slice(0, 500).replace(/\n/g, "\n    ")}`);
-    if (r.status >= 200 && r.status < 300) {
-      console.log(`\n  🎉 FULL ENCLAVE PIPELINE WORKS — sealed key never left the enclave.`);
+    }) as Record<string, unknown>;
+    // Detect which contract shape we got:
+    //  - {status, headers, body}  → contract has http import and made a real outbound call
+    //  - {ok, secret_len, dry_run} → current v0.5.1 (kv-only) substitution-proof contract
+    if (typeof r.status === "number" && typeof r.body !== "undefined") {
+      console.log(`  ✓ STATUS ${r.status}`);
+      const body = typeof r.body === "string" ? r.body : JSON.stringify(r.body);
+      console.log(`    body (first 500 bytes):\n    ${body.slice(0, 500).replace(/\n/g, "\n    ")}`);
+      if ((r.status as number) >= 200 && (r.status as number) < 300) {
+        console.log(`\n  🎉 FULL ENCLAVE PIPELINE WORKS — sealed key never left the enclave.`);
+      }
+    } else if (r.dry_run === true) {
+      console.log(`  ℹ Contract is the kv-only version (no http import): ran the substitution-proof path.`);
+      console.log(`    response: ${JSON.stringify(r)}`);
+      console.log(`    secret_len=${r.secret_len} · auth_len=${r.authorization_header_len_after_substitution}`);
+      console.log(`    (To exercise the in-enclave http::call, replace contract/wit/deps/host-interfaces/`);
+      console.log(`     world.wit with T3's canonical signatures, re-add 'import host:interfaces/http`);
+      console.log(`     @2.1.0;' to contract/wit/world.wit, bump CONTRACT_VERSION, rerun this script.)`);
+    } else {
+      console.log(`  ⚠ Unknown response shape: ${JSON.stringify(r).slice(0, 300)}`);
     }
   } catch (e) {
     console.log("  ✖", (e as Error).message.slice(0, 300));
