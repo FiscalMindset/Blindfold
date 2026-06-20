@@ -22,8 +22,10 @@ Cargo.lock
 .idea/
 .vscode/
 
-# Claude Code local settings
-.claude/
+# Claude Code local settings (gitignore everything EXCEPT shared skills)
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 # Blindfold runtime telemetry (per-machine; not for the repo)
 .blindfold/
