@@ -19,6 +19,7 @@
 import { loadBlindfoldEnv, pluckSecret } from "./env.ts";
 import { safeLog } from "./log.ts";
 import { readSecretLine } from "./prompt.ts";
+import { recordSealed } from "./sealed-ledger.ts";
 import { openT3Client } from "./t3-client.ts";
 import type { RegisterOpts } from "./types.ts";
 
@@ -46,13 +47,19 @@ export async function registerSecret(opts: RegisterOpts): Promise<void> {
     }
 
     await t3.seedSecret(opts.name, value);
-    safeLog("info", {
-      msg: "registered",
+    const length = value.length;
+    const mode = env.mock ? "mock" : "real";
+    // Append to the sealed-keys ledger — metadata only, never the value.
+    recordSealed({
+      t: new Date().toISOString(),
       name: opts.name,
       source,
-      length: value.length,
-      mode: env.mock ? "mock" : "real",
+      length,
+      mode,
+      tenant_did: env.did,
+      map_name: env.did ? `z:${env.did.replace(/^did:t3n:/, "")}:secrets` : "(mock)",
     });
+    safeLog("info", { msg: "registered", name: opts.name, source, length, mode });
   } finally {
     await t3.close();
   }
