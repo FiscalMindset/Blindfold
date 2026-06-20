@@ -253,6 +253,137 @@ The first-and-last few chars + byte count let you confirm the right key is there
 
 ---
 
+## 9.5. What's actually happening at each step (cognee API key, real run)
+
+Concrete trace of one full lifecycle, using a third real key (cognee). The actual value is never shown — only what Blindfold *records* and what your code *gets back*. The fingerprint matches (first-3 + last-2 + byte-count) so you can confirm identity without exposing the value.
+
+### Step A — seal (one command, no `.env` touch)
+
+```bash
+printf '<your cognee key here>' | npm run blindfold -- register --name cognee_api_key
+```
+
+What happens inside that command, in order:
+
+1. **stdin** — the 64-byte value is read from the pipe (no echo, no shell history).
+2. **t3-client.ts** opens an encrypted session to T3 testnet (handshake + Ethereum-style authenticate using your `T3N_API_KEY`).
+3. **register.ts** calls `tenant.executeControl("map-entry-set", { map_name: "z:<tid>:secrets", key: "cognee_api_key", value: <the 64 bytes> })`.
+4. The plaintext lives only inside this Node process for the duration of that one RPC. Once it returns, the local binding is dropped.
+5. **sealed-ledger.ts** appends one JSON line to `.blindfold/sealed.jsonl` — metadata only, never the value:
+
+   ```json
+   {"t":"2026-06-20T12:48:54.888Z","name":"cognee_api_key","source":"stdin","length":64,"mode":"real","tenant_did":"did:t3n:d20…071a9f","map_name":"z:d20…071a9f:secrets"}
+   ```
+
+What you see in your terminal:
+
+```
+✓ Registered "cognee_api_key" — value lives only in the enclave.
+```
+
+### Step B — confirm via the ledger (no T3 round-trip; reads the local jsonl)
+
+```bash
+npm run blindfold -- sealed
+```
+
+```
+WHEN                  NAME              BYTES  MODE  WHERE
+────                  ────              ─────  ────  ─────
+2026-06-20 12:31:46   deepgram_api_key     40  real  z:d20…071a9f:secrets/deepgram_api_key
+2026-06-20 12:48:54   cognee_api_key       64  real  z:d20…071a9f:secrets/cognee_api_key
+```
+
+This is "is the key sealed?" *yes/no*. No value. The ledger is purely local metadata; cheap to read.
+
+### Step C — confirm via T3 contract (real round-trip, returns fingerprint)
+
+```bash
+npx tsx scripts/test-v5-release.ts cognee_api_key
+```
+
+```
+testing v0.5.1 release-to-tenant for "cognee_api_key" (no egress needed)
+  ✓ released: efa…bc  (64 bytes)  ·  reported length=64  ·  match=true
+  (full plaintext NOT printed; if you need to inspect, do it in a non-shared terminal)
+```
+
+What happened: the script asked the **contract running inside the TDX enclave** to read `z:<tid>:secrets/cognee_api_key`. The contract returned the bytes to your authenticated tenant session. The script took the first 3 + last 2 chars + byte-count and printed *only that*. The full value was in this script's process for milliseconds, then garbage-collected.
+
+The fingerprint (`efa…bc, 64 bytes`) is enough to confirm "yes, the right key is in there" — you can compare with the key you intended to seal — without exposing it. This is what you do when something's wrong and you want to verify the seal *worked* without re-sealing.
+
+### Step D — use it in real code (the production pattern)
+
+When your real application needs to call cognee, here's the smallest possible shape — same code that today sends real emails via SMTP and authenticates real xAI calls:
+
+```ts
+import { loadBlindfoldEnv, CONTRACT_VERSION } from "blindfold";
+
+async function cogneeCall(prompt: string): Promise<unknown> {
+  // (Tenant client setup omitted — make it once at server boot, reuse it.)
+  const { value: cogneeKey } = await tenant.contracts.execute("blindfold-proxy", {
+    version: CONTRACT_VERSION,
+    functionName: "release-to-tenant",
+    input: { secret_key: "cognee_api_key" },
+  }) as { value: string };
+
+  try {
+    const res = await fetch("https://api.cognee.ai/v1/...", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cogneeKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+    return await res.json();
+  } finally {
+    /* cogneeKey out of scope — nothing persisted, nothing logged */
+  }
+}
+```
+
+What happens per call:
+
+1. Your function asks T3 for the sealed value (one round-trip).
+2. T3's contract reads `z:<tid>:secrets/cognee_api_key` *inside the TDX enclave* and returns it over the encrypted session.
+3. Your process holds the value for the duration of one outbound `fetch()` — typically ~100ms for a real API call.
+4. After the `try { … }` block, the binding is dropped. Garbage collector reclaims the bytes shortly after.
+
+The provider (cognee) receives the real value in the `Authorization` header — exactly as it would without Blindfold. Cognee can't tell the difference. **You** can: `process.env.cognee_api_key` is empty; `cat .env | grep -i cognee` returns nothing.
+
+### Where the value lives at each step (the picture)
+
+```
+                              ┌───────────────────────────────────────────────┐
+                              │  T3 TDX enclave (always — canonical copy)     │
+                              │  z:d20…071a9f:secrets/cognee_api_key (64B)    │
+                              └───────────────────────────────────────────────┘
+                                  ▲                              │
+                                  │ seal (Step A)                │ release (Step D)
+                                  │ — one RPC, value             │ — one RPC, value briefly
+                                  │ briefly here                 │ in YOUR process
+                                  │                              ▼
+                              ┌─────────────────┐         ┌──────────────────────┐
+                              │  register cmd   │         │  your fetch() call   │
+                              │  (one process,  │         │  (one process,       │
+                              │   one moment)   │         │   one outbound call) │
+                              └─────────────────┘         └──────────────────────┘
+                                  ▲                              │
+                                  │ stdin pipe / env / paste     │
+                                  │                              ▼
+                              ┌─────────────────┐         ┌──────────────────┐
+                              │  YOUR TERMINAL  │         │  api.cognee.ai   │
+                              │  (transient)    │         │  (the provider)  │
+                              └─────────────────┘         └──────────────────┘
+
+  ❌ NEVER here:  agent process · prompt context · .env on disk · git history · backups · logs
+```
+
+The agent process (your LLM-driven part — the prompt-injection target) is *off the diagram entirely*. There is no arrow into it. That's the whole point.
+
+---
+
 ## 10. The day-2 view — what's live, what's been used
 
 Two more reads to know about:
