@@ -151,6 +151,7 @@ const HTML = `<!DOCTYPE html>
     --accent: #6e44ff; --accent2: #58a6ff;
   }
   * { box-sizing: border-box; }
+  html, body { max-width: 100vw; overflow-x: hidden; }
   body {
     margin: 0; padding: 24px 32px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
@@ -158,8 +159,8 @@ const HTML = `<!DOCTYPE html>
   }
   h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
   h1 .logo { color: var(--accent); }
-  .sub { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
-  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 24px; overflow-wrap: anywhere; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .grid {
     display: grid; gap: 12px;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -167,11 +168,11 @@ const HTML = `<!DOCTYPE html>
   }
   .card {
     background: var(--card); border: 1px solid var(--line); border-radius: 8px;
-    padding: 14px 16px;
+    padding: 14px 16px; min-width: 0;
   }
   .card .label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .5px; }
-  .card .value { font-size: 24px; font-weight: 600; margin-top: 4px; word-break: break-all; }
-  .card .sub2 { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .card .value { font-size: 24px; font-weight: 600; margin-top: 4px; overflow-wrap: anywhere; word-break: break-word; }
+  .card .sub2 { font-size: 12px; color: var(--dim); margin-top: 4px; overflow-wrap: anywhere; }
   .section-title {
     font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .5px;
     margin: 28px 0 8px; display: flex; align-items: center; gap: 8px;
@@ -179,14 +180,18 @@ const HTML = `<!DOCTYPE html>
   .section-title::before {
     content: ""; flex: 1; height: 1px; background: var(--line); margin-right: 4px; max-width: 0;
   }
-  table {
-    width: 100%; border-collapse: collapse;
-    background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  /* All tables live inside .scroll for horizontal swipe on narrow screens. */
+  .scroll {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
   }
-  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
-  th { color: var(--dim); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: .5px; }
+  table {
+    width: 100%; border-collapse: collapse; min-width: 480px;
+  }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  th { color: var(--dim); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: .5px; white-space: nowrap; }
   tr:last-child td { border-bottom: none; }
-  code { background: rgba(255,255,255,.05); padding: 2px 5px; border-radius: 3px; font-size: 12px; word-break: break-all; }
+  code { background: rgba(255,255,255,.05); padding: 2px 5px; border-radius: 3px; font-size: 12px; overflow-wrap: anywhere; word-break: break-word; }
   .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
   .pill-ok   { background: rgba(63,185,80,.15);  color: var(--ok); }
   .pill-bad  { background: rgba(248,81,73,.15);  color: var(--bad); }
@@ -218,11 +223,32 @@ const HTML = `<!DOCTYPE html>
   /* sparkline */
   .spark { display: flex; align-items: flex-end; gap: 1px; height: 56px;
     background: var(--card); border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px; }
-  .spark > .b { background: var(--accent); flex: 1; min-width: 2px; transition: height .2s; opacity: .85; }
+    padding: 8px; overflow: hidden; }
+  .spark > .b { background: var(--accent); flex: 1 1 0; min-width: 1px; transition: height .2s; opacity: .85; }
   .spark > .b.zero { background: var(--line); opacity: .5; min-height: 1px; }
   .stat-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--dim); margin-top: 6px; }
   .stat-row span { color: var(--fg); }
+  /* Mobile / narrow screens */
+  @media (max-width: 720px) {
+    body { padding: 14px; }
+    h1 { font-size: 18px; }
+    .sub { font-size: 12px; margin-bottom: 14px; }
+    .grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .card { padding: 10px 12px; }
+    .card .label { font-size: 10px; }
+    .card .value { font-size: 18px; }
+    .card .sub2 { font-size: 11px; }
+    .section-title { margin: 20px 0 6px; }
+    th, td { padding: 6px 8px; font-size: 12px; }
+    .footer { padding: 10px 12px; font-size: 11px; }
+    .alert { padding: 10px 12px; font-size: 12px; }
+    button { padding: 6px 10px; }
+  }
+  @media (max-width: 420px) {
+    body { padding: 10px; }
+    .grid { grid-template-columns: 1fr 1fr; }
+    .card .value { font-size: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -359,9 +385,9 @@ function renderSealed(entries) {
     + '</tr>'
   ).join('');
   document.getElementById('sealed-table-wrap').innerHTML =
-    '<table><thead><tr>'
+    '<div class="scroll"><table><thead><tr>'
       + '<th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Address in enclave</th><th>Source</th>'
-    + '</tr></thead><tbody>' + rows + '</tbody></table>';
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function renderCounters(events) {
@@ -400,7 +426,7 @@ function renderPerSecret(events) {
     return;
   }
   document.getElementById('per-secret-wrap').innerHTML =
-    '<table><thead><tr><th>Secret name</th><th>Requests</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    '<div class="scroll"><table><thead><tr><th>Secret name</th><th>Requests</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function renderSpark(events) {
@@ -438,8 +464,8 @@ function renderTable(events) {
     + '</tr>'
   ).join('');
   document.getElementById('table-wrap').innerHTML =
-    '<table><thead><tr><th>When</th><th>Provider</th><th>Request</th><th>Status</th><th>Latency</th><th>Mode</th><th>Sentinel</th></tr></thead>'
-    + '<tbody>' + rows + '</tbody></table>';
+    '<div class="scroll"><table><thead><tr><th>When</th><th>Provider</th><th>Request</th><th>Status</th><th>Latency</th><th>Mode</th><th>Sentinel</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table></div>';
 }
 
 poll();

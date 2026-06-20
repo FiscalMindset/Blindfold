@@ -406,6 +406,149 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 
 ---
 
+## Cookbook — every command from clone to working, with expected output
+
+> If you're just starting, do these in order. Each block is copy-pasteable; the comment shows what you should see. If a step doesn't match, jump to [`vicky.md` Q6 (common errors)](vicky.md).
+
+### A. Install
+
+```bash
+git clone https://github.com/FiscalMindset/Blindfold.git
+cd Blindfold
+npm install
+# Expected: added N packages in Xs (no error)
+```
+
+### B. Claim T3 credentials (one-time, free, ~30s)
+
+Visit https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens and copy `T3N_API_KEY` (0x… 64 hex) and `DID` (did:t3n:…). Then:
+
+```bash
+cat >> .env <<'EOF'
+T3N_API_KEY=0xYOUR_HEX_HERE
+DID=did:t3n:YOUR_HEX_HERE
+EOF
+
+npm run blindfold -- doctor
+# Expected:
+#   mode:               REAL (T3)
+#   T3N_API_KEY set:    yes
+#   DID set:            yes
+#   T3 environment:     testnet
+#   default proxy port: 8787
+
+npm run blindfold -- verify
+# Expected:
+#   ✓ REAL T3 round-trip succeeded.
+```
+
+### C. One-command bootstrap (~30s)
+
+```bash
+npm run setup
+# Expected (last lines):
+#   [3/5] Authenticate to T3            ✓
+#   · Created tenant map "secrets"
+#   · Created tenant map "authorised-hosts"
+#   [4/5] Publish the wrapper contract  ✓ contract_id=NNN
+#                                       ✓ Granted read access on z:tid:secrets
+#   [5/5] Seal a secret into the enclave (skipped — no --seed)
+#   ✓ All done.
+```
+
+### D. Seal your first key (interactive, no `.env` touch)
+
+```bash
+npm run blindfold -- register --name openai_api_key
+#   Value for "openai_api_key" (input is hidden): ●●●●●●●● ↵
+# Expected:
+#   ✓ Registered "openai_api_key" — value lives only in the enclave.
+```
+
+### E. Confirm it's sealed (three ways, fastest first)
+
+```bash
+npm run blindfold -- sealed
+# Expected:
+#   WHEN  NAME  BYTES  MODE  WHERE
+#   2026-06-20 12:31:46   openai_api_key   51   real   z:<tid>:secrets/openai_api_key
+
+npm run env:fingerprint
+# Expected (the OPENAI_API_KEY line should NOT appear after you delete it from .env):
+#   T3N_API_KEY  = 0x1…56  (66 bytes)
+#   DID          = did…9f  (48 bytes)
+
+npx tsx scripts/test-v5-release.ts openai_api_key
+# Expected:
+#   ✓ released: sk-…XY  (51 bytes)  ·  reported length=51  ·  match=true
+```
+
+### F. Use it from your code (release-broker pattern — works today)
+
+```ts
+// minimal Node example — full version in examples/grok-via-blindfold.ts
+import { loadBlindfoldEnv, CONTRACT_VERSION } from "blindfold";
+
+const env = loadBlindfoldEnv();
+const sdk = await import("@terminal3/t3n-sdk");
+// ... auth + tenant client setup (do this ONCE at server start) ...
+
+const { value: apiKey } = await tenant.contracts.execute("blindfold-proxy", {
+  version: CONTRACT_VERSION,
+  functionName: "release-to-tenant",
+  input: { secret_key: "openai_api_key" },
+}) as { value: string };
+
+try {
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ /* … */ }),
+  });
+  return await r.json();
+} finally { /* apiKey out of scope */ }
+```
+
+Working files: [`examples/grok-via-blindfold.ts`](examples/grok-via-blindfold.ts) · [`scripts/smtp-with-blindfold.ts`](scripts/smtp-with-blindfold.ts) · [`INTEGRATION-AURORA.md`](INTEGRATION-AURORA.md).
+
+### G. The day-2 view
+
+```bash
+npm run blindfold -- proxy            # terminal 1, leave running
+npm run dashboard                     # terminal 2 → open http://127.0.0.1:8799
+# Expected: live dashboard with System / Sealed Keys / Audit / Traffic panels.
+# The audit panel turns yellow if a sealed key is ALSO present in .env (= leak surface).
+
+npm run blindfold -- stats            # CLI summary of usage.jsonl
+npm run blindfold -- stats:clear      # wipe the usage log
+npm run env:fingerprint               # safe-to-share view of .env (no full values)
+npm run test:report                   # full 9-check battery; appends to output_analysis.md
+```
+
+### H. Side-by-side leak demo (no T3 needed — for showing colleagues)
+
+```bash
+npm run demo
+# Expected:
+#   Agent A (no Blindfold) — fetches injected page, leaks fake key to attacker
+#   Agent B (with Blindfold) — same code, same injection, leaks only __BLINDFOLD__
+#   ✅ Demonstration successful: Blindfold neutralised the same attack.
+```
+
+### I. Common follow-ups
+
+| Goal | Command |
+|---|---|
+| Rotate a key | `npm run blindfold -- register --name openai_api_key` (overwrites) |
+| Add a new provider key | same `register` with a new `--name` |
+| Verify everything is working without sending traffic | `npm run blindfold -- doctor` → `verify` → `sealed` |
+| Scan for agent CLIs you have installed | `npm run blindfold -- compat` |
+| Test against real T3 end-to-end | `npm run test:real` (uses one contract slot) |
+| Send a real email through the release-broker | `npx tsx scripts/smtp-with-blindfold.ts you@example.com` |
+| Real Grok API call without the key in env | `npx tsx examples/grok-via-blindfold.ts "prompt here"` |
+
+---
+
 ## Real T3 mode — what works today
 
 | Capability | Status | Note |
