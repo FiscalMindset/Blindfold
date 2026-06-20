@@ -1,6 +1,27 @@
-// Release-only contract — kv-store + tenant-context. No http import,
-// since that causes instantiation failures on this tenant. Outbound
-// HTTP happens in the broker process (Aurora / our smtp script).
+// Blindfold proxy contract.
+//
+// IMPORTANT: we do NOT import `host:interfaces/http@2.1.0` here even
+// though that interface is what would let the contract make its OWN
+// outbound call. Our best-effort WIT stub for the http interface
+// (in `wit/deps/host-interfaces/world.wit`) appears to have signatures
+// that T3's runtime rejects — importing it causes the contract to
+// fail at instantiation (HTTP 500 with no typed body, even for
+// functions that never call http::call).
+//
+// Workaround in use (see scripts/smtp-with-blindfold.ts and Aurora's
+// EnclaveBroker): the contract releases the sealed plaintext to the
+// authenticated tenant over T3's encrypted session via
+// `release-to-tenant`; the local broker uses it for one outbound
+// call and drops it. Secret lives in TDX at rest; briefly in one
+// local process per call; never in the agent's process.
+//
+// To migrate to fully in-enclave outbound calls (the
+// `forward` function): replace `wit/deps/host-interfaces/world.wit`
+// with T3's canonical signatures, add `import host:interfaces/http
+// @2.1.0;` here, restore `forward`, and authorise egress via the
+// `tee:user/contracts` / `agent-auth-update` grant — that grant
+// mechanism is already wired and verified (see
+// scripts/grant-and-call.ts).
 package z:blindfold@0.1.0;
 
 world blindfold-proxy {
