@@ -4,6 +4,183 @@
 
 ---
 
+## Q15 (2026-06-20) — "I sealed my key. How do I actually USE it now where my code used to use the unsealed key?"
+
+Short answer: **swap "read it from env" → "release it from the enclave for one call, then drop it."** That's the only code change. Everything else — provider SDK, request shape, response handling — stays the same.
+
+### Pattern 1 — replace `process.env.X` with a release call
+
+**Before (key in env, leakable):**
+
+```ts
+const dgKey = process.env.DEEPGRAM_API_KEY!;
+const res = await fetch("https://api.deepgram.com/v1/listen", {
+  headers: { Authorization: `Token ${dgKey}` },
+  /* … */
+});
+```
+
+**After (key in enclave, sealed AND used):**
+
+```ts
+import { loadBlindfoldEnv, CONTRACT_VERSION } from "blindfold";
+
+const env = loadBlindfoldEnv();
+const sdk = await import("@terminal3/t3n-sdk");
+sdk.setEnvironment(env.t3Env);
+const t3n = new sdk.T3nClient({
+  baseUrl: sdk.NODE_URLS[env.t3Env],
+  wasmComponent: await sdk.loadWasmComponent(),
+  handlers: { EthSign: sdk.metamask_sign(sdk.eth_get_address(env.t3nApiKey), undefined, env.t3nApiKey) },
+});
+await t3n.handshake();
+await t3n.authenticate(sdk.createEthAuthInput(sdk.eth_get_address(env.t3nApiKey)));
+const tenant = new sdk.TenantClient({ environment: env.t3Env, baseUrl: sdk.NODE_URLS[env.t3Env], tenantDid: env.did, t3n });
+
+const { value: dgKey } = await tenant.contracts.execute("blindfold-proxy", {
+  version: CONTRACT_VERSION,
+  functionName: "release-to-tenant",
+  input: { secret_key: "deepgram_api_key" },
+}) as { value: string };
+
+try {
+  // Use exactly as before — provider sees the real key:
+  const res = await fetch("https://api.deepgram.com/v1/listen", {
+    headers: { Authorization: `Token ${dgKey}` },
+    /* … */
+  });
+} finally {
+  // dgKey is out of scope here — nothing persisted.
+}
+```
+
+**Working references** — copy these:
+
+| Provider type | File | What it shows |
+|---|---|---|
+| HTTPS LLM (xAI/Grok) | [`examples/grok-via-blindfold.ts`](examples/grok-via-blindfold.ts) | Real xAI auth via released key; agent process has no key |
+| SMTP / IMAP | [`scripts/smtp-with-blindfold.ts`](scripts/smtp-with-blindfold.ts) | Real Gmail send via released password |
+| Aurora-style server | [`INTEGRATION-AURORA.md`](INTEGRATION-AURORA.md) | EnclaveBroker pattern for an existing FastAPI app |
+
+### Pattern 2 — the local proxy + base-URL swap (HTTPS only)
+
+For tools that already honor `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` (OpenAI SDK, Anthropic SDK, LangChain, Aider, OpenCode, Codex CLI, Continue.dev, Cline), even simpler — no code change at all:
+
+```bash
+# Terminal 1
+npm run blindfold -- proxy
+
+# Terminal 2 — your existing agent code, just two env vars swapped:
+OPENAI_BASE_URL=http://127.0.0.1:8787/v1 \
+OPENAI_API_KEY=__BLINDFOLD__ \
+  node my-agent.js
+```
+
+Your code is unchanged. The proxy intercepts; the contract substitutes the real key inside the enclave. **Honest note:** the in-enclave http::call piece is currently gated on a T3-side WIT fix — see Pattern 1 (release-broker) for the production path that works today. Once T3 ships the canonical WIT, Pattern 2 becomes the one-line-zero-code path with no changes from you.
+
+### How to *prove* it's actually using the sealed key
+
+```bash
+# 1. Confirm there's nothing in env
+echo $DEEPGRAM_API_KEY     # → (empty)
+
+# 2. Confirm the value is in the enclave
+npm run blindfold -- sealed
+#   2026-06-20 12:31:46  deepgram_api_key   40  real  z:d20…071a9f:secrets/deepgram_api_key
+
+# 3. Confirm the release call returns the right value (fingerprint only)
+npx tsx scripts/test-v5-release.ts deepgram_api_key
+#   ✓ released: fcb…76  (40 bytes)  ·  reported length=40  ·  match=true
+
+# 4. Run your code — provider responds normally (or with a billing error, never an auth error)
+```
+
+### "Do I have to do all that SDK setup every call?"
+
+No. Create the `tenant` client *once* (e.g. at server startup) and reuse it. The release call (`tenant.contracts.execute(...)`) is the only per-request part — and it's a single round-trip to T3. For a FastAPI / Express server, keep the tenant client on the app/state; each request fetches a fresh value.
+
+---
+
+## Q14 (2026-06-20) — "Can I share my sealed secrets with my team or use them from multiple machines?"
+
+Yes — anyone with the same `T3N_API_KEY` + `DID` reaches the same tenant and can release the same sealed values. So in practice:
+
+- **Multiple machines, same person:** copy `T3N_API_KEY` + `DID` to each `.env` (or your password manager). Each machine can release sealed keys independently.
+- **Team:** create a *separate* T3 tenant for the team. Don't share your personal `T3N_API_KEY`. Use the shared tenant's credentials in CI / shared dev environments. Personal vs shared keys remain separate.
+- **Read-only team access:** T3 supports per-contract ACLs (we use this already — see `tenant.maps.update("secrets", { readers: { only: [<contract_id>] } })`). Granting read to a contract you control is the way to give a teammate's code access without giving them your `T3N_API_KEY`.
+
+For production: each customer / each environment should have its own T3 tenant, not your dev one.
+
+---
+
+## Q13 (2026-06-20) — "What if I lose my T3N_API_KEY? Are my sealed keys gone forever?"
+
+Yes — losing `T3N_API_KEY` permanently locks you out of that tenant, and the sealed secrets inside it become unrecoverable. This is by design: the only thing that can authenticate to your tenant is the holder of the matching private key. No one — not Terminal 3, not Anthropic, not the cloud provider — can reset it for you.
+
+Practical defenses:
+
+1. **Treat `T3N_API_KEY` like a root credential.** Back it up in your password manager *immediately* after claiming it. Print it on paper if you want.
+2. **Use separate tenants per environment** (dev / staging / prod). Losing dev's key doesn't lose prod's sealed credentials.
+3. **For genuinely critical credentials** (production payment keys etc.), don't rely on a single tenant. Seal in two T3 tenants you control independently; lose one, the other still works.
+
+The provider-side credentials themselves (your OpenAI key, Stripe key, etc.) aren't lost from the providers' side — you can always re-issue and re-seal a new one. What's lost is the *sealed copy*, not your provider account.
+
+---
+
+## Q12 (2026-06-20) — "How do I rotate a sealed key (e.g. after a leak)?"
+
+Easy. Sealing the same name *overwrites* the previous value in `z:<tid>:secrets`. Three steps:
+
+```bash
+# 1. Issue a new key at the provider's dashboard, revoke the old one.
+# 2. Seal the new value (interactive prompt, no echo, no .env edit):
+npm run blindfold -- register --name openai_api_key
+#    Value for "openai_api_key" (input is hidden): ●●●●●●●● ↵
+# 3. Done. Next release call picks up the new value automatically.
+#    Running services don't need a restart.
+```
+
+The sealed-keys ledger (`blindfold sealed`) will show two entries for `openai_api_key` — the older one is historical; the enclave only holds the latest.
+
+---
+
+## Q11 (2026-06-20) — "How do I delete a sealed key I no longer need?"
+
+T3 doesn't expose `map-entry-delete` on the control plane (verified — we probed). The current way is to *overwrite* with an obviously-dead placeholder:
+
+```bash
+echo "OLD_KEY=__deleted_unused__" >> .env
+npm run blindfold -- register --name openai_api_key --from-env OLD_KEY
+# Remove OLD_KEY from .env again.
+```
+
+The map entry still exists in `z:<tid>:secrets`, but its value is the placeholder `__deleted_unused__` — anyone who released it (your own broker code) would get that string and fail to authenticate. Effectively dead.
+
+A proper delete API would be a nice T3 add — open issue. For now, overwrite is the safe pattern.
+
+---
+
+## Q10 (2026-06-20) — "How does Blindfold compare to Doppler / HashiCorp Vault / AWS Secrets Manager?"
+
+Different problem.
+
+| Tool | Where the secret lives | Where it gets *used* |
+|---|---|---|
+| **`.env` files** | on your laptop's disk | injected into your process at startup; sits in `process.env` for the process's lifetime |
+| **Doppler / Vault / AWS Secrets Manager** | in their cloud, encrypted | fetched into your process at startup or just-in-time; **sits in your process memory** while the call happens |
+| **Blindfold** | inside Intel TDX-encrypted memory on a T3 node | released to your process for **one** call, then dropped |
+
+The big-vault tools (Doppler/Vault/AWS) solve **distribution** (rotation, audit, access control) but they don't change *where the secret ends up when it's actually used* — it's in your agent's process memory, where a prompt-injection can reach it. Blindfold solves the use-time problem too: the value is in your process for milliseconds during one outbound call.
+
+Most projects benefit from **both**:
+
+- Use Doppler/Vault to *distribute* the `T3N_API_KEY` (the one root credential) to your servers.
+- Use Blindfold to keep every *provider* key out of process memory.
+
+This works because Blindfold doesn't replace your secrets manager — it adds one extra layer just for the keys that AI agents directly handle.
+
+---
+
 ## Q9 (2026-06-20) — "When I run a command, what does each output line actually mean? And what's a real error vs an OK error?"
 
 ### `npm run blindfold -- doctor`
