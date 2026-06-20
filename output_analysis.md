@@ -68,6 +68,31 @@ The script lives at `scripts/run-tests.ts` and exits non-zero if any check fails
 ## Test runs
 
 <!-- TEST_RUNS_BELOW -->
+### Real-T3 run 2026-06-20 09:17:35 UTC
+
+| # | Step | Status | Detail |
+|---|------|--------|--------|
+| S1 | handshake + authenticate | ✅ | round-trip succeeded |
+| S2 | executeControl(map-entry-set) | ✅ | wrote key="blindfold_test_1781947048" len=19 (value never logged) |
+| S3 | contracts.register | ✅ | already at version (idempotent); contract_id=0 |
+| S4 | execute(forward) | ✅ | secret_len=19(want 19); auth_len=26(want 26); ok=true |
+
+### Run 2026-06-20 09:10:53 UTC
+
+**✅ ALL PASS** — 9/9 tests passed.
+
+| # | Test | Status | Detail |
+|---|------|--------|--------|
+| T1 | Side-by-side demo (A leaks real key, B leaks only sentinel) | ✅ | exit=0; A_leaked_real=true; B_sentinel_only=true |
+| T2 | CLI doctor detects T3N_API_KEY + DID | ✅ | Blindfold doctor: \|   mode:               REAL (T3) |
+| T3 | register never logs the plaintext secret | ✅ | value never appeared in stdout/stderr |
+| T4 | proxy /health responds | ✅ | status=200 body={"ok":true,"mock":true} |
+| T5 | proxy forwards and returns a response | ✅ | status=200 body~={"mock":true,"note":"Blindfold mock mode — no real call made.","echo":{"url":"ht |
+| T6 | proxy logs do NOT contain agent-supplied Authorization | ✅ | no bearer in 402 log bytes |
+| T7 | wrap() mutates client: real key → sentinel | ✅ | output={"ok":true,"baseURL":"http://127.0.0.1:8787/v1","apiKey":"__BLINDFOLD__"} |
+| T8 | redact() strips authorization / x-api-key / cookie | ✅ | output={"ok":true,"sample":"{\"a\":{\"headers\":{\"authorization\":\"[redacted]\"}},\"b\":{\"headers\":[[\"Authorization\",\"[redacted]\"],[\"X-API-Key\",\"[red |
+| T9 | usage log records the request (metadata only) | ✅ | event={"t":"2026-06-20T09:10:53.390Z","mode":"mock","provider":"openai","method":"POST","path":"/v1/chat/completions","upstream":"https://api.openai.com/v1/chat |
+
 ### Run 2026-06-19 21:46:38 UTC
 
 **✅ ALL PASS** — 9/9 tests passed.

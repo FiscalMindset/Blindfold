@@ -411,15 +411,15 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 | Capability | Status | Note |
 |---|---|---|
 | Handshake + authenticate against testnet | ✅ verified live | `npm run blindfold -- verify` |
-| Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` |
+| Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` and by `blindfold register` interactively |
 | Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
-| Publish the contract via `tenant.contracts.register` | ✅ **verified live** | got `contract_id` back from T3 testnet |
-| Create the tenant's `secrets` map (one-time per new tenant) | ✅ **verified live** | `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })` — `blindfold init` does this automatically |
-| Create + populate the tenant's `authorised-hosts` map | ✅ **verified live** | T3 accepts the map and entries; `blindfold init` creates it. Whether T3's runtime actually consults this map for egress is unconfirmed (see below). |
-| Grant the contract read access to maps (`tenant.maps.update`) | ✅ **verified live + auto-wired into `init`** | `{ readers: { only: [<contract_id>] } }` — applied to both `secrets` and `authorised-hosts` after publish |
-| **In-enclave secret read + sentinel substitution (the Blindfold security property)** | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns only the *lengths* as proof (never the value). 19-byte secret → 26-char `Authorization`, math checks. |
-| Real provider keys sealed (`grok_api_key`) | ✅ **verified live** | Contract reads back the user's actual xAI/Grok key from TDX: `secret_len=84`. Value never appears outside the enclave. |
-| In-enclave `http::call` for outbound forwarding | 🚧 opaque HTTP 500 from T3 | The one open gap. Probed: 12+ egress-control action names, multiple WIT signature shapes, all return the same opaque 500. T3's contract `logs()` is empty for failed runs. Closes once T3 publishes the canonical host WIT files — no code change needed on our side. |
+| Publish the contract via `tenant.contracts.register` | ✅ **verified live** | currently at v0.5.1, contract_id 285 |
+| Tenant scaffolding — `secrets` + `authorised-hosts` maps | ✅ **verified live + auto-wired into `init`** | `tenant.maps.create({ tail, visibility:"private", writers:"all" })` idempotent |
+| ACL grant to the contract (`tenant.maps.update`) | ✅ **verified live + auto-wired into `init`** | `{ readers: { only: [<contract_id>] } }` — applied to both maps after publish |
+| **Egress authorization** — `t3n.execute({ script_name:"tee:user/contracts", function_name:"agent-auth-update", … })` | ✅ **verified live** | Accepted with real tx_hash (e.g. `tx:302:54024`) on the tenant. Per-(agent, contract, function, host) scope; `versionReq:">=0.5.0"`, `allowedHosts:["api.x.ai"]`. Discovered via T3 team feedback — was the previously-mysterious 500 vector. |
+| **In-enclave secret read + sentinel substitution** (the Blindfold security property) | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns *lengths only* as proof (never the value). 19-byte secret → 26-char `Authorization`. Math checks. |
+| **Release-broker** — sealed secret → released to local broker → real outbound call → drop | ✅ **verified live, repeatedly** | `scripts/smtp-with-blindfold.ts` and `examples/grok-via-blindfold.ts` send real Gmail emails and call real xAI/Grok endpoints with the sealed password/key. Agent's process never has the value. |
+| In-enclave `http::call` from the contract itself (the dream "secret never leaves enclave" mode) | 🚧 blocked on canonical T3 host WIT | Egress grant ✅ verified. The remaining blocker is isolated to one file: `contract/wit/deps/host-interfaces/world.wit` — our best-effort stub for `host:interfaces/http@2.1.0` has signatures T3's runtime rejects. T3 team aware. When canonical WIT lands: one file swap, re-add `import host:interfaces/http@2.1.0;`, run `scripts/grant-and-call.ts` (already wired) to verify. |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 
