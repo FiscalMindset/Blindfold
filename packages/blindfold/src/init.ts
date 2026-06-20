@@ -16,6 +16,7 @@ import path from "node:path";
 import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv, loadEnvFromFile, pluckSecret } from "./env.ts";
+import { recordSealed } from "./sealed-ledger.ts";
 import { openT3Client } from "./t3-client.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -202,7 +203,16 @@ export async function runInit(opts: InitOpts = {}): Promise<void> {
     try {
       const value = pluckSecret(fromEnv);
       await t3.seedSecret(name, value);
-      ok(`Sealed ${bold(name)} (read from ${fromEnv}, then dropped). You can DELETE ${fromEnv} from .env now.`);
+      recordSealed({
+        t: new Date().toISOString(),
+        name,
+        source: `env:${fromEnv}`,
+        length: value.length,
+        mode: env.mock ? "mock" : "real",
+        tenant_did: env.did,
+        map_name: `z:${env.did.replace(/^did:t3n:/, "")}:secrets`,
+      });
+      ok(`Sealed ${bold(name)} (read from ${fromEnv}, ${value.length} bytes, then dropped). You can DELETE ${fromEnv} from .env now.`);
     } catch (e) {
       fail(`Could not seal "${name}".`, `Error: ${(e as Error).message}\nMake sure ${fromEnv} is set in .env (you can delete it after sealing).`);
     }

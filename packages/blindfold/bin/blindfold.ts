@@ -20,6 +20,7 @@ import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
 import { runCompat } from "../src/compat.ts";
+import { defaultSealedLogPath, readSealed } from "../src/sealed-ledger.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -163,6 +164,26 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "sealed": {
+      // List sealed keys (metadata only) for the current ledger.
+      const entries = readSealed();
+      if (entries.length === 0) {
+        console.log(`No sealed-keys ledger yet at ${defaultSealedLogPath()}.`);
+        console.log(`Seal one with:  blindfold register --name <KV_KEY>`);
+        return;
+      }
+      console.log(`Sealed keys  (source: ${defaultSealedLogPath()})\n`);
+      console.log("  WHEN                  NAME                       BYTES  MODE   WHERE");
+      console.log("  ────                  ────                       ─────  ────   ─────");
+      for (const e of entries) {
+        const when = e.t.replace("T", " ").slice(0, 19);
+        const where = e.map_name.length > 60 ? e.map_name.slice(0, 57) + "…" : e.map_name;
+        console.log(`  ${when}   ${e.name.padEnd(26)}  ${String(e.length).padStart(5)}  ${e.mode.padEnd(5)}  ${where}/${e.name}`);
+      }
+      console.log("\n  (values are NOT stored in this ledger — only metadata. The canonical copy lives in the enclave.)");
+      return;
+    }
+
     case "doctor": {
       const env = loadBlindfoldEnv();
       console.log("Blindfold doctor:");
@@ -194,6 +215,7 @@ Commands:
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
+  sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
   dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
