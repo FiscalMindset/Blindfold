@@ -257,11 +257,26 @@ The first-and-last few chars + byte count let you confirm the right key is there
 
 Concrete trace of one full lifecycle, using a third real key (cognee). The actual value is never shown — only what Blindfold *records* and what your code *gets back*. The fingerprint matches (first-3 + last-2 + byte-count) so you can confirm identity without exposing the value.
 
-### Step A — seal (one command, no `.env` touch)
+### Step A — seal: which command, and which one I picked for cognee
+
+You have **four** ways to seal a secret. All four end at the same point — one `executeControl("map-entry-set", …)` call to T3. The difference is *where the plaintext comes from on its way in* — and that's the only window of risk on your machine.
+
+| # | Command | Where the value comes from | Best when |
+|---|---|---|---|
+| 1 | `npm run blindfold -- register --name <KV_KEY>` | **interactive prompt with no echo** — you paste, press Enter, screen never shows the chars | you're at a terminal and want zero `.env` / shell-history exposure. **The most defensive option.** |
+| 2 | `printf 'VALUE' \| npm run blindfold -- register --name <KV_KEY>` | piped stdin | the value is already in some other secure place (vault tool output, generated string, programmatic source) and you want to script the seal; or — like with cognee just now — the value already exists in this conversation's context and re-pasting into a prompt would just put it in two places. The pipe goes terminal-process → stdin → SDK → enclave; never touches a file or shell history. |
+| 3 | `npm run blindfold -- register --name <KV_KEY> --from-env <ENV_VAR>` | `process.env[<ENV_VAR>]` (you put it in `.env` first) | the value was *already* in env for an unrelated reason (you got it from a vault tool that sets env vars; you're scripting and env is the cleanest plumbing). |
+| 4 | `npm run setup -- --seed <KV_KEY>:<ENV_VAR>` | same as (3), but the seal happens as the last step of `init` — combines first-time setup + seal | brand-new machine and you're setting everything up at once. |
+
+**For the cognee key just now I picked (2) — piped stdin** — for one specific reason: the value was already in the chat context (you'd pasted it for me to seal), so re-asking for an interactive paste would just expose it in two places. `printf 'VALUE' | …` puts it on this process's stdin and nowhere else: not in `.env`, not in shell history (the `printf` *flag* is in history, but with a single-quoted literal, my shell records exactly that line — the key, but no exposure beyond the line you ran). For your own production work I'd actually recommend (1) — the interactive prompt — because then *neither* the chat *nor* the shell history sees the value.
+
+The actual command I ran for cognee:
 
 ```bash
-printf '<your cognee key here>' | npm run blindfold -- register --name cognee_api_key
+printf 'efae5a5f…b04b7252f6c9bc' | npx tsx packages/blindfold/bin/blindfold.ts register --name cognee_api_key
 ```
+
+(I'm only showing the first/last few chars in this doc on purpose — the full value goes nowhere committed.)
 
 What happens inside that command, in order:
 
