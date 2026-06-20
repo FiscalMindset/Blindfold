@@ -18,7 +18,8 @@
     "test:report": "tsx scripts/run-tests.ts",
     "test:real": "tsx scripts/real-e2e-test.ts",
     "demo:smtp": "tsx scripts/demo-smtp.ts",
-    "compat": "tsx packages/blindfold/bin/blindfold.ts compat"
+    "compat": "tsx packages/blindfold/bin/blindfold.ts compat",
+    "env:fingerprint": "bash scripts/env-fingerprint.sh"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
