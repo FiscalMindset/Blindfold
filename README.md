@@ -753,7 +753,7 @@ Built for the Terminal 3 hackathon, 2026.
 </p>
 
 <p>
-  Blindfold was built solo for the Terminal 3 hackathon as a small wager: that the
+  Blindfold was built for the Terminal 3 hackathon as a small wager: that the
   most useful security tools are the ones a developer can adopt by changing a
   single line. If you're working on agent infrastructure, confidential compute,
   or anywhere the two overlap — say hi.
