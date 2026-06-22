@@ -774,10 +774,16 @@ Built for the Terminal 3 hackathon, 2026.
 </td>
 <td valign="top">
 
-<h3>Sachin Prajapati — Team Member</h3>
+<h3>Sachin Prajapati — Tester &amp; Feedback Engineer</h3>
+
+<p>
+  <img src="https://img.shields.io/badge/role-Tester%20%26%20Feedback%20Engineer-f59e0b?style=flat-square" alt="role"/>
+</p>
 
 <p>
   <a href="https://github.com/SACHINN122"><img src="https://img.shields.io/badge/GitHub-SACHINN122-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  &nbsp;
+  <a href="mailto:sachinprajapati26692881@gmail.com"><img src="https://img.shields.io/badge/Email-sachinprajapati26692881%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
 </p>
 
 </td>
@@ -795,7 +801,11 @@ Built for the Terminal 3 hackathon, 2026.
 </td>
 <td valign="top">
 
-<h3>Shiv Kumar — Team Member</h3>
+<h3>Shiv Kumar — Tester &amp; Feedback Engineer</h3>
+
+<p>
+  <img src="https://img.shields.io/badge/role-Tester%20%26%20Feedback%20Engineer-f59e0b?style=flat-square" alt="role"/>
+</p>
 
 <p>
   <a href="https://github.com/Creativesoul0001"><img src="https://img.shields.io/badge/GitHub-Creativesoul0001-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
@@ -818,7 +828,11 @@ Built for the Terminal 3 hackathon, 2026.
 </td>
 <td valign="top">
 
-<h3>Yashraj Chauhan — Team Member</h3>
+<h3>Yashraj Chauhan — Tester &amp; Feedback Engineer</h3>
+
+<p>
+  <img src="https://img.shields.io/badge/role-Tester%20%26%20Feedback%20Engineer-f59e0b?style=flat-square" alt="role"/>
+</p>
 
 <p>
   <a href="https://github.com/imyashrajchauhan"><img src="https://img.shields.io/badge/GitHub-imyashrajchauhan-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
