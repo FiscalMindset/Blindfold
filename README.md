@@ -808,15 +808,21 @@ Built for the Terminal 3 hackathon, 2026.
 
 <tr>
 <td width="140" valign="top" align="center">
-  <img src="https://ui-avatars.com/api/?name=Yashraj&background=6e44ff&color=fff&size=120&rounded=true" width="120" height="120" alt="Yashraj"/>
+  <a href="https://github.com/imyashrajchauhan">
+    <img src="https://github.com/imyashrajchauhan.png" width="120" height="120" alt="Yashraj Chauhan" style="border-radius:50%"/>
+  </a>
   <br/>
-  <sub><b>Yashraj</b></sub>
+  <sub><b>Yashraj Chauhan</b></sub>
+  <br/>
+  <sub><code>@imyashrajchauhan</code></sub>
 </td>
 <td valign="top">
 
-<h3>Yashraj — Team Member</h3>
+<h3>Yashraj Chauhan — Team Member</h3>
 
 <p>
+  <a href="https://github.com/imyashrajchauhan"><img src="https://img.shields.io/badge/GitHub-imyashrajchauhan-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  &nbsp;
   <a href="mailto:masterstrokeryashraj@gmail.com"><img src="https://img.shields.io/badge/Email-masterstrokeryashraj%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
 </p>
 
