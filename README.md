@@ -721,7 +721,7 @@ Built for the Terminal 3 hackathon, 2026.
 
 ---
 
-## About the author
+## About the team
 
 <table>
 <tr>
@@ -736,12 +736,12 @@ Built for the Terminal 3 hackathon, 2026.
 </td>
 <td valign="top">
 
-<h3>👋 Hi, I'm Vicky</h3>
+<h3>👋 Vicky Kumar — Lead Developer</h3>
 
 <p><i>Building AI products and real-world systems.</i></p>
 
 <p>
-  <img src="https://img.shields.io/badge/role-AI%20%2B%20full--stack%20builder-6e44ff?style=flat-square" alt="role"/>
+  <img src="https://img.shields.io/badge/role-Lead%20Developer-6e44ff?style=flat-square" alt="role"/>
   <img src="https://img.shields.io/badge/focus-agents%20%C2%B7%20secure%20compute%20%C2%B7%20DX-0071c5?style=flat-square" alt="focus"/>
   <img src="https://img.shields.io/badge/status-hireable-2ea44f?style=flat-square" alt="hireable"/>
 </p>
@@ -757,6 +757,46 @@ Built for the Terminal 3 hackathon, 2026.
   most useful security tools are the ones a developer can adopt by changing a
   single line. If you're working on agent infrastructure, confidential compute,
   or anywhere the two overlap — say hi.
+</p>
+
+</td>
+</tr>
+
+<tr>
+<td width="140" valign="top" align="center">
+  <a href="https://github.com/SACHINN122">
+    <img src="https://github.com/SACHINN122.png" width="120" height="120" alt="Sachin" style="border-radius:50%"/>
+  </a>
+  <br/>
+  <sub><b>Sachin</b></sub>
+  <br/>
+  <sub><code>@SACHINN122</code></sub>
+</td>
+<td valign="top">
+
+<h3>Sachin — Team Member</h3>
+
+<p>
+  <a href="https://github.com/SACHINN122"><img src="https://img.shields.io/badge/GitHub-SACHINN122-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  &nbsp;
+  <a href="mailto:kumarshiv152005@gmail.com"><img src="https://img.shields.io/badge/Email-kumarshiv152005%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
+</p>
+
+</td>
+</tr>
+
+<tr>
+<td width="140" valign="top" align="center">
+  <img src="https://ui-avatars.com/api/?name=Yashraj&background=6e44ff&color=fff&size=120&rounded=true" width="120" height="120" alt="Yashraj"/>
+  <br/>
+  <sub><b>Yashraj</b></sub>
+</td>
+<td valign="top">
+
+<h3>Yashraj — Team Member</h3>
+
+<p>
+  <a href="mailto:masterstrokeryashraj@gmail.com"><img src="https://img.shields.io/badge/Email-masterstrokeryashraj%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
 </p>
 
 </td>
