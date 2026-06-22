@@ -62,6 +62,11 @@ export interface T3ClientHandle {
   seedSecret: (name: string, value: string) => Promise<void>;
   invokeForward: (req: ForwardRequest) => Promise<ForwardResponse>;
   registerContract: (wasm: Uint8Array) => Promise<{ contractId: string | number }>;
+  /**
+   * Release a sealed secret from the enclave by name.
+   * for short-lived use — drop the returned value from scope as soon as the call is done.
+   */
+  releaseSecret: (name: string) => Promise<string>;
   /** True if a real T3 round-trip happened during construction. */
   isReal: boolean;
 }
@@ -138,6 +143,16 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     return raw;
   };
 
+  const releaseSecret = async (name: string): Promise<string> => {
+    const r = (await tenant.contracts.execute(CONTRACT_TAIL, {
+      version: CONTRACT_VERSION,
+      functionName: "release-to-tenant",
+      input: { secret_key: name },
+    })) as { ok: boolean; value: string; length: number };
+    if (!r.ok || !r.value) throw new Error(`release-to-tenant returned no value for "${name}"`);
+    return r.value;
+  };
+
   return {
     close: async () => {
       /* SDK has no close()  */
@@ -145,6 +160,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     seedSecret,
     invokeForward,
     registerContract,
+    releaseSecret,
     isReal: true,
   };
 }
@@ -173,6 +189,10 @@ function openMockClient(): T3ClientHandle {
       });
       const body = `{"mock":true,"note":"Blindfold mock mode — no real call made.","echo":{"url":${JSON.stringify(req.url)}}}`;
       return { status: 200, headers: [["content-type", "application/json"]], body };
+    },
+    async releaseSecret(name) {
+      safeLog("info", { msg: "mock-release", name });
+      return `mock-released:${name}`;
     },
     isReal: false,
   };

@@ -21,6 +21,7 @@ import { safeLog } from "./log.ts";
 import { readSecretLine } from "./prompt.ts";
 import { recordSealed } from "./sealed-ledger.ts";
 import { openT3Client } from "./t3-client.ts";
+import { SENTINEL } from "./constants.ts";
 import type { RegisterOpts } from "./types.ts";
 
 export async function registerSecret(opts: RegisterOpts): Promise<void> {
@@ -44,6 +45,10 @@ export async function registerSecret(opts: RegisterOpts): Promise<void> {
     } else {
       value = await readSecretLine(`  Value for "${opts.name}" (input is hidden): `);
       if (!value) throw new Error("empty value");
+    }
+
+    if (value.includes(SENTINEL)) {
+      throw new Error(`Secret value contains the Blindfold sentinel string "${SENTINEL}" — this would cause infinite substitution. Use a different value.`);
     }
 
     await t3.seedSecret(opts.name, value);

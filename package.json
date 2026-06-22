@@ -19,7 +19,8 @@
     "test:real": "tsx scripts/real-e2e-test.ts",
     "demo:smtp": "tsx scripts/demo-smtp.ts",
     "compat": "tsx packages/blindfold/bin/blindfold.ts compat",
-    "env:fingerprint": "bash scripts/env-fingerprint.sh"
+    "env:fingerprint": "bash scripts/env-fingerprint.sh",
+    "seal:blogger": "tsx scripts/seal-blogger-key.ts"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
@@ -29,6 +30,7 @@
   "dependencies": {
     "@terminal3/t3n-sdk": "^3.9.0",
     "@types/nodemailer": "^8.0.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "openai": "^6.44.0"
   }
 }

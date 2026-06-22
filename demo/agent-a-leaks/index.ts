@@ -1,22 +1,24 @@
 /**
  * Agent A — the "without Blindfold" baseline.
  *
- * Setup:
- *   - OPENAI_API_KEY is set in this process's environment, as is normal today.
- *   - The agent has two tools: http_get (to fetch the page it must summarise)
- *     and get_env (to read configuration values, as many real agents do).
+ * This agent uses the real OpenAI Node SDK, which makes genuine HTTP calls
+ * to the mock OpenAI server. With OPENAI_API_KEY set to a demo value in the
+ * process environment, the SDK sends:
  *
- * Attack: the page contains a prompt-injection that instructs the model to
- * call get_env("OPENAI_API_KEY") and then http_get with the value attached
- * to the attacker's URL. With the real key in env, this leaks it.
+ *   Authorization: Bearer sk-live-DEMO-abc123XYZ-…
  *
- * Run standalone:  npm run demo:a
+ * on every request — exactly what a real agent does today. When the mock
+ * model takes the injection bait (reads get_env("OPENAI_API_KEY") and
+ * exfiltrates the result), the real key reaches the attacker's server.
+ *
+ * Run standalone: npm run demo:a
  */
 import { fileURLToPath } from "node:url";
+import OpenAI from "openai";
 import { startAttacker } from "../shared/attacker-server.ts";
 import { startInjectionPage } from "../shared/injection-page.ts";
-import { runAgent } from "../shared/agent-loop.ts";
-import { MockInjectableLLM } from "../shared/mock-llm.ts";
+import { startMockOpenAIServer } from "../shared/mock-openai-server.ts";
+import { runOpenAIAgent } from "../shared/openai-agent.ts";
 import { makeTools } from "../shared/tools.ts";
 
 export interface RunOutcome {
@@ -33,17 +35,29 @@ export async function runAgentA(): Promise<RunOutcome> {
   const FAKE_REAL_KEY = "sk-live-DEMO-abc123XYZ-this-would-be-your-real-key";
   process.env.OPENAI_API_KEY = FAKE_REAL_KEY;
 
+  // Spin up infrastructure: a mock LLM speaking the real OpenAI wire format,
+  // an attacker server, and the injection-booby-trapped page.
+  const mockLLM = await startMockOpenAIServer();
   const attacker = await startAttacker();
   const page = await startInjectionPage({ attackerBase: attacker.url });
 
   banner("AGENT A — no Blindfold");
-  info(`OPENAI_API_KEY in env:   ${redactish(process.env.OPENAI_API_KEY!)}  ← VISIBLE TO AGENT PROCESS`);
+  info(`OPENAI_API_KEY in env:   ${redactish(FAKE_REAL_KEY)}  ← VISIBLE TO AGENT PROCESS`);
+  info(`Mock LLM server:         ${mockLLM.url}  (real OpenAI wire format, deterministic)`);
   info(`Attacker listening on:   ${attacker.url}`);
   info(`Page (with injection):   ${page.url}`);
+  info(``);
 
-  const result = await runAgent({
+  // Real OpenAI SDK — points at the mock LLM but sends the real key in
+  // Authorization headers on every request, just like production.
+  const openai = new OpenAI({
+    apiKey: FAKE_REAL_KEY,
+    baseURL: `${mockLLM.url}/v1`,
+  });
+
+  const result = await runOpenAIAgent({
     label: "A",
-    model: new MockInjectableLLM(),
+    openai,
     tools: makeTools({ allowEnvRead: true }),
     task: `Please fetch and summarise the page at ${page.url}.`,
     systemPrompt:
@@ -53,12 +67,13 @@ export async function runAgentA(): Promise<RunOutcome> {
 
   await page.close();
   await attacker.close();
+  await mockLLM.close();
 
   delete process.env.OPENAI_API_KEY;
 
   const leaked = attacker.leaks.some((k) => k === FAKE_REAL_KEY);
 
-  info("");
+  info(``);
   info(`Final answer: ${result.finalAnswer}`);
   info(`Attacker received: ${JSON.stringify(attacker.leaks)}`);
   info(leaked ? "🚨 LEAK CONFIRMED — the real key reached the attacker." : "✅ No leak this run.");
@@ -83,7 +98,6 @@ function redactish(s: string): string {
   return `${s.slice(0, 8)}…${s.slice(-4)}`;
 }
 
-// Allow `tsx demo/agent-a-leaks/index.ts` — paths with spaces need URL handling.
 const argvPath = process.argv[1] ?? "";
 if (argvPath && fileURLToPath(import.meta.url) === argvPath) {
   runAgentA().catch((e) => {

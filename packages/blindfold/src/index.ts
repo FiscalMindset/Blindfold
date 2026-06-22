@@ -2,8 +2,10 @@ export { SENTINEL, DEFAULT_PORT, CONTRACT_TAIL, CONTRACT_VERSION, DEFAULT_DASHBO
 export { startProxy } from "./proxy.ts";
 export { startDashboard } from "./dashboard.ts";
 export { registerSecret, registerContract } from "./register.ts";
+export { release } from "./release.ts";
 export { wrap } from "./wrap.ts";
 export { loadBlindfoldEnv, assertRealReady } from "./env.ts";
 export { readUsage, clearUsage, defaultLogPath } from "./usage-log.ts";
 export type { UsageEvent } from "./usage-log.ts";
 export type { BlindfoldEnv, ForwardRequest, ForwardResponse, RegisterOpts } from "./types.ts";
+export type { ReleaseOpts } from "./release.ts";

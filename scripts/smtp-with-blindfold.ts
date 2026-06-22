@@ -21,6 +21,7 @@ import { fileURLToPath } from "node:url";
 import nodemailer from "nodemailer";
 import { loadBlindfoldEnv } from "../packages/blindfold/src/env.ts";
 import { CONTRACT_VERSION } from "../packages/blindfold/src/constants.ts";
+import { release } from "../packages/blindfold/src/release.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WASM = path.join(ROOT, "contract", "target", "wasm32-wasip2", "release", "blindfold_proxy.wasm");
@@ -62,17 +63,11 @@ async function main(): Promise<void> {
     }
   }
 
-  // --- 3. release_to_tenant ---
+  // --- 3. release smtp_password from enclave ---
   let smtpPassword: string;
   try {
-    const r = await tenant.contracts.execute("blindfold-proxy", {
-      version: CONTRACT_VERSION,
-      functionName: "release-to-tenant",
-      input: { secret_key: "smtp_password" },
-    }) as { ok: boolean; value: string; length: number };
-    if (!r.ok || typeof r.value !== "string") throw new Error("release returned no value");
-    smtpPassword = r.value;
-    console.log(`  ✓ released from enclave: length=${r.length}`);
+    smtpPassword = await release("smtp_password");
+    console.log(`  ✓ released from enclave: length=${smtpPassword.length}`);
   } catch (e) {
     console.log("  ✖ release failed:", (e as Error).message.slice(0, 200));
     process.exit(1);
