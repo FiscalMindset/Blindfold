@@ -765,19 +765,40 @@ Built for the Terminal 3 hackathon, 2026.
 <tr>
 <td width="140" valign="top" align="center">
   <a href="https://github.com/SACHINN122">
-    <img src="https://github.com/SACHINN122.png" width="120" height="120" alt="Sachin" style="border-radius:50%"/>
+    <img src="https://github.com/SACHINN122.png" width="120" height="120" alt="Sachin Kumar" style="border-radius:50%"/>
+  </a>
+  <br/>
+  <sub><b>Sachin Kumar</b></sub>
+  <br/>
+  <sub><code>@SACHINN122</code></sub>
+</td>
+<td valign="top">
+
+<h3>Sachin Kumar — Team Member</h3>
+
+<p>
+  <a href="https://github.com/SACHINN122"><img src="https://img.shields.io/badge/GitHub-SACHINN122-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+</p>
+
+</td>
+</tr>
+
+<tr>
+<td width="140" valign="top" align="center">
+  <a href="https://github.com/Creativesoul0001">
+    <img src="https://github.com/Creativesoul0001.png" width="120" height="120" alt="Shiv Kumar" style="border-radius:50%"/>
   </a>
   <br/>
   <sub><b>Shiv Kumar</b></sub>
   <br/>
-  <sub><code>@SACHINN122</code></sub>
+  <sub><code>@Creativesoul0001</code></sub>
 </td>
 <td valign="top">
 
 <h3>Shiv Kumar — Team Member</h3>
 
 <p>
-  <a href="https://github.com/SACHINN122"><img src="https://img.shields.io/badge/GitHub-SACHINN122-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  <a href="https://github.com/Creativesoul0001"><img src="https://img.shields.io/badge/GitHub-Creativesoul0001-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   &nbsp;
   <a href="mailto:kumarshiv152005@gmail.com"><img src="https://img.shields.io/badge/Email-kumarshiv152005%40gmail.com-d14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/></a>
 </p>
