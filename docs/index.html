@@ -448,6 +448,15 @@
       table th, table td { padding: 5px 6px; }
 
       .presenter-hint { font-size: 0.7rem; margin-top: 12px; }
+
+      /* Slide 8: side-by-side demo — needs extra compression to fit two panels */
+      #slide8 h2               { margin-bottom: 8px; }
+      #slide8 .split-screen    { grid-template-columns: 1fr; gap: 6px; margin: 6px 0; }
+      #slide8 .split-item      { padding: 8px; }
+      #slide8 .split-item h3   { font-size: 0.8rem; margin-bottom: 4px; }
+      #slide8 .split-item p    { font-size: 0.72rem; margin: 3px 0; }
+      #slide8 .demo-output     { max-height: 100px; font-size: 0.55rem; padding: 6px; margin: 4px 0; }
+      #slide8 .slide8-footer   { display: none; } /* footer hidden on phones — panels say it all */
     }
   </style>
 </head>
@@ -671,7 +680,7 @@ await t3.seedSecret(opts.name, value);<br />
       </div>
 
       <!-- SLIDE 8: SIDE-BY-SIDE DEMO -->
-      <div class="slide">
+      <div class="slide" id="slide8">
         <div class="slide-content">
           <h2>The Attack (Side-by-Side)</h2>
 
@@ -708,7 +717,7 @@ await t3.seedSecret(opts.name, value);<br />
             </div>
           </div>
 
-          <p style="margin-top: 20px; color: #666; font-size: 1.1rem;">
+          <p class="slide8-footer" style="margin-top: 20px; color: #666; font-size: 1.1rem;">
             <strong>Same model. Same injection. Same task.</strong><br />
             Only difference: one line of environment config.
           </p>
