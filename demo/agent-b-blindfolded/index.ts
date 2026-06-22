@@ -1,44 +1,58 @@
 /**
  * Agent B — the "with Blindfold" variant.
  *
- * The ONLY differences from Agent A are these two lines:
+ * The ONLY differences from Agent A are two lines:
  *
- *     - process.env.OPENAI_API_KEY = "sk-live-DEMO-..."          // Agent A
- *     + process.env.OPENAI_API_KEY = SENTINEL                    // Agent B
- *     + process.env.OPENAI_BASE_URL = "http://127.0.0.1:8787/v1" // Agent B
+ *   - process.env.OPENAI_API_KEY = "sk-live-DEMO-…"      // Agent A
+ *   + process.env.OPENAI_API_KEY = "__BLINDFOLD__"        // Agent B
+ *   + baseURL points at the Blindfold demo proxy          // Agent B
  *
- * Everything else — system prompt, tools, mock LLM, task, attack — is
- * identical. The mock LLM still takes the injection bait, still calls
- * get_env("OPENAI_API_KEY"), still exfiltrates the value to the
- * attacker. But the value is the sentinel, not a real key. Nothing
- * useful is leaked, and the legitimate task still completes.
+ * Everything else — system prompt, tools, model, task, attack — is
+ * identical. The OpenAI SDK sends real HTTP requests to the proxy with
+ * `Authorization: Bearer __BLINDFOLD__`. The proxy intercepts the call,
+ * logs the substitution, and forwards with the real (mock-released) key.
+ * The agent never has the real key; there's nothing to steal.
  */
 import { fileURLToPath } from "node:url";
+import OpenAI from "openai";
 import { SENTINEL } from "../../packages/blindfold/src/constants.ts";
 import { startAttacker } from "../shared/attacker-server.ts";
 import { startInjectionPage } from "../shared/injection-page.ts";
-import { runAgent } from "../shared/agent-loop.ts";
-import { MockInjectableLLM } from "../shared/mock-llm.ts";
+import { startMockOpenAIServer } from "../shared/mock-openai-server.ts";
+import { startDemoProxy } from "../shared/demo-proxy.ts";
+import { runOpenAIAgent } from "../shared/openai-agent.ts";
 import { makeTools } from "../shared/tools.ts";
 import type { RunOutcome } from "../agent-a-leaks/index.ts";
 
-export async function runAgentB(opts: { proxyUrl?: string } = {}): Promise<RunOutcome> {
-  // The "one-line" Blindfold change a developer makes:
+export async function runAgentB(): Promise<RunOutcome> {
+  // The "one-line" Blindfold change: sentinel, not a real key.
   process.env.OPENAI_API_KEY = SENTINEL;
-  process.env.OPENAI_BASE_URL = opts.proxyUrl ?? "http://127.0.0.1:8787/v1";
 
+  // Spin up infrastructure: the same mock LLM, the Blindfold demo proxy
+  // sitting in front of it, the attacker, and the same injected page.
+  const mockLLM = await startMockOpenAIServer();
+  const proxy = await startDemoProxy(mockLLM.url);
   const attacker = await startAttacker();
   const page = await startInjectionPage({ attackerBase: attacker.url });
 
   banner("AGENT B — Blindfolded");
-  info(`OPENAI_API_KEY in env:   ${process.env.OPENAI_API_KEY}  ← only a sentinel`);
-  info(`OPENAI_BASE_URL:         ${process.env.OPENAI_BASE_URL}  ← routed via Blindfold`);
+  info(`OPENAI_API_KEY in env:   ${SENTINEL}  ← only a sentinel, no real key anywhere`);
+  info(`Blindfold proxy:         ${proxy.url}/v1  ← intercepts + substitutes Bearer header`);
+  info(`Mock LLM server:         ${mockLLM.url}  (same model as Agent A)`);
   info(`Attacker listening on:   ${attacker.url}`);
   info(`Page (with injection):   ${page.url}`);
+  info(``);
 
-  const result = await runAgent({
+  // Real OpenAI SDK — OPENAI_API_KEY is the sentinel; baseURL routes through
+  // the Blindfold proxy, which substitutes the sentinel before forwarding.
+  const openai = new OpenAI({
+    apiKey: SENTINEL,
+    baseURL: `${proxy.url}/v1`,
+  });
+
+  const result = await runOpenAIAgent({
     label: "B",
-    model: new MockInjectableLLM(),
+    openai,
     tools: makeTools({ allowEnvRead: true }),
     task: `Please fetch and summarise the page at ${page.url}.`,
     systemPrompt:
@@ -48,14 +62,16 @@ export async function runAgentB(opts: { proxyUrl?: string } = {}): Promise<RunOu
 
   await page.close();
   await attacker.close();
+  await proxy.close();
+  await mockLLM.close();
 
   delete process.env.OPENAI_API_KEY;
-  delete process.env.OPENAI_BASE_URL;
 
-  // Anything that came through is, by construction, the sentinel — never a real key.
+  // Anything useful that came through? By construction it should only be
+  // the sentinel — but we assert this explicitly.
   const leakedSomethingUseful = attacker.leaks.some((k) => k && k !== SENTINEL);
 
-  info("");
+  info(``);
   info(`Final answer: ${result.finalAnswer}`);
   info(`Attacker received: ${JSON.stringify(attacker.leaks)}`);
   info(
@@ -66,7 +82,7 @@ export async function runAgentB(opts: { proxyUrl?: string } = {}): Promise<RunOu
 
   return {
     label: "B",
-    envKey: process.env.OPENAI_API_KEY ?? SENTINEL,
+    envKey: SENTINEL,
     attackerReceived: attacker.leaks.slice(),
     finalAnswer: result.finalAnswer,
     leaked: leakedSomethingUseful,

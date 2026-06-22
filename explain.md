@@ -69,6 +69,16 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ## Running log
 
+### 2026-06-22 — demo real HTTP, release() helper, CI, sentinel guard, dead code removed
+
+- **Demo is now real HTTP** (not a deterministic script): both Agent A and Agent B use the actual OpenAI Node SDK making genuine `POST /v1/chat/completions` HTTP calls to a local mock server that speaks the real OpenAI wire format. Agent B's calls visibly flow through a running Blindfold proxy (`demo/shared/demo-proxy.ts`) — you can see the proxy intercept `Bearer __BLINDFOLD__` and substitute it on every LLM turn. Injection page now hides payload in JSON-LD structured data + hidden `<div>` (realistic attacker technique) instead of an obvious `<!-- INJECTION_TRIGGER -->` HTML comment.
+- **`release()` one-liner** added (`packages/blindfold/src/release.ts`, exported from index). Replaces the ~30-line release-broker boilerplate. `examples/grok-via-blindfold.ts` and `scripts/smtp-with-blindfold.ts` both updated to use it.
+- **Sentinel collision guard** in `registerSecret`: throws if the plaintext value contains `__BLINDFOLD__` — prevents infinite substitution.
+- **GitHub Actions CI** at `.github/workflows/ci.yml` — runs `npm run demo` + `npm run test:report` on every push/PR with `BLINDFOLD_MOCK=1` (no T3 credentials needed).
+- **Dead code removed**: `demo/shared/mock-llm.ts` and `demo/shared/agent-loop.ts` are no longer imported by anything (new agents use `openai-agent.ts` + `mock-openai-server.ts`).
+- **T3 testnet status (as of 2026-06-22)**: `handshake + authenticate` ✅. All control-plane write operations (`map-entry-set`, `contracts.register`, `contracts.execute`) returning HTTP 500 — testnet outage, not a local issue. `blogger_api_key` sealing pending testnet recovery; `scripts/seal-blogger-key.ts` + `npm run seal:blogger` ready to run when it comes back.
+- All 9 tests pass: `npm run test:report` → 9/9 ✅.
+
 ### 2026-06-20 — drop silent mock; make REAL the only default; wizard auto-scaffolds
 - **Mock is now opt-in.** Previously `BLINDFOLD_MOCK=1 || !T3N_API_KEY || !DID` would silently fall to mock — misleading. Now only `BLINDFOLD_MOCK=1` triggers it. Missing creds in REAL mode produce a loud, actionable error pointing at the T3 claim page.
 - New `assertRealReady(env)` helper. `openT3Client` calls it before any T3 round-trip.
