@@ -9,6 +9,8 @@
 
 **One line of change. Zero added risk. Prompt-injection-proof.**
 
+[**📊 View the Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) — 12-slide deck with live demos
+
 </div>
 
 ---
