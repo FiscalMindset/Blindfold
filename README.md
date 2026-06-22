@@ -768,13 +768,13 @@ Built for the Terminal 3 hackathon, 2026.
     <img src="https://github.com/SACHINN122.png" width="120" height="120" alt="Sachin" style="border-radius:50%"/>
   </a>
   <br/>
-  <sub><b>Sachin</b></sub>
+  <sub><b>Shiv Kumar</b></sub>
   <br/>
   <sub><code>@SACHINN122</code></sub>
 </td>
 <td valign="top">
 
-<h3>Sachin — Team Member</h3>
+<h3>Shiv Kumar — Team Member</h3>
 
 <p>
   <a href="https://github.com/SACHINN122"><img src="https://img.shields.io/badge/GitHub-SACHINN122-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
