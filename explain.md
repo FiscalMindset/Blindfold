@@ -60,7 +60,7 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 1. ✅ **`TenantClient` `baseUrl` for testnet** — RESOLVED. SDK v3 exposes `NODE_URLS.testnet` = `https://cn-api.sg.testnet.t3n.terminal3.io`. Wired in `t3-client.ts`.
 2. ✅ **`script_version` typing** — RESOLVED. SDK v3's `ContractExecuteInput.version` is `string` (semver); no integer mapping. Wired.
 3. ✅ **`T3N_API_KEY` role + DID derivation** — RESOLVED 2026-06-28, and it overturned a wrong assumption. (a) An API key only works if T3 has an **active tenant provisioned** for it; an un-provisioned key 500s on *everything*, including a read-only `me()`. (b) **The tenant DID is NOT `did:t3n:<key eth address>`** — it is server-assigned and unrelated (t1 key `06165c…` → tenant `58f5f5f9…`). `.env` must carry the key **and** its real tenant DID (from `me().tenant`). This was the actual cause of all the seal 500s — see the 2026-06-28 log entry.
-4. ⏳ **Egress allowlist setup** — still untested; will surface as `host/http.egress_denied` if missing. Plan unchanged.
+4. ✅ **Egress allowlist setup** — RESOLVED 2026-06-28. Egress is granted via `t3n.execute({ script_name:"tee:user/contracts", function_name:"agent-auth-update", input:{ agents:[{ agentDid, scripts:[{ scriptName, versionReq, functions, allowedHosts }] }] } })`. Verified live: with `allowedHosts:["api.github.com"]` the contract's in-enclave `http::call` reached GitHub and got `200`. See the 2026-06-28 log entry.
 5. ✅ **`loadWasmComponent()` source** — RESOLVED. Default load (no args) works against testnet; verified by the live `verify` round-trip.
 6. ⏳ **ACL setup before `map-entry-set`** — still untested at HEAD; will surface as `access denied` if needed.
 7. ✅ **Host WIT package canonical source** — RESOLVED 2026-06-25. The T3 dev team delivered the canonical host WITs. Vendored at `contract/wit/deps/host-tenant-1.0.0/package.wit` and `host-interfaces-2.1.0/package.wit` (stubs deleted). `world.wit` now imports all four capabilities including `http`; `cargo build --target wasm32-wasip2 --release` is clean. Root cause of the old instantiation 500 confirmed: the stub's `http.response` carried a `headers` field that T3's canonical `response` (`{ code, payload }`) does not. Full text + diff in repo-root `response.md`. (Publish + live execute at HEAD still pending a testnet recovery — see the running log.)
@@ -68,6 +68,13 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 ---
 
 ## Running log
+
+### 2026-06-28 (pm) — seal↔use symmetry, live `doctor`, and the pure enclave-egress path
+
+- **`blindfold use` added** — the missing half. `blindfold use --name <secret> -- <command>` releases the secret and runs the command with it injected as an env var for that subprocess only (no code, works with any tool); `--url <https>` is a quick auth check. `register` now prints the matching "how to use it" recipe. Verified live: `use --as GH_TOKEN -- gh api user` → authenticated as the token owner; `use --url …` → GitHub 200. **There is no per-secret `.ts` to write** — the CLI is generic over any secret.
+- **`release()` made robust** — falls back to a direct tenant read of the secrets map when the contract isn't published, so the use path works without publishing first.
+- **`doctor` now does a LIVE check** (handshake + authenticate + `me()`) and explains failures in plain English: unprovisioned key (500), out-of-credit tenant (403 InsufficientCredit), or DID mismatch (server-assigned tenant ≠ key address). This is exactly the diagnosis that took days by hand.
+- **#3 — in-enclave `http::call` turned ON.** `forward()` now substitutes the sealed secret and makes the outbound HTTPS call *inside the TDX enclave*. Rebuilt (`http` import now retained, not tree-shaken). Published v0.5.3 (contract_id 458), granted secrets read-ACL + egress to `api.github.com`, then: dry-run proved in-enclave substitution (`length=100 = "Bearer "+93`), and the **real** call returned `code=200` — GitHub authenticated as the token owner with the plaintext **never leaving the enclave**. Repro: `scripts/test-enclave-egress.ts`.
 
 ### 2026-06-28 — RESOLVED: github_token sealed for real; root cause was an unprovisioned API key (not the network)
 

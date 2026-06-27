@@ -248,6 +248,62 @@ async function main(): Promise<void> {
         console.log(`     Claim them: https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
         console.log(`     Or run \`npm run setup\` and the wizard will walk you through it.`);
         process.exitCode = 1;
+        return;
+      }
+      if (env.mock) return;
+
+      // LIVE check: authenticate, then read the tenant behind the key. This is
+      // what catches the painful "key authenticates but has no tenant" case,
+      // which the server otherwise reports only as a bare HTTP 500.
+      console.log("");
+      console.log("  Live check (handshake + authenticate + me) …");
+      const { openT3Client } = await import("../src/t3-client.ts");
+      let client;
+      try {
+        client = await openT3Client(env);
+        console.log(`  auth:               ✅ handshake + authenticate OK`);
+      } catch (e) {
+        console.log(`  auth:               ✖ ${(e as Error).message}`);
+        console.log(`     → Check T3N_API_KEY is a 0x 32-byte hex private key and DID looks like did:t3n:<hex>.`);
+        process.exitCode = 1;
+        return;
+      }
+      try {
+        const info = await client.me();
+        console.log(`  tenant:             ✅ ${info.tenant}  (status=${info.status ?? "?"})`);
+        const didHex = env.did.replace(/^did:t3n:/, "").toLowerCase();
+        const meHex = info.tenant.replace(/^did:t3n:/, "").toLowerCase();
+        if (meHex && didHex && meHex !== didHex) {
+          console.log("");
+          console.log(`  ⚠  DID MISMATCH: your .env DID (${env.did}) is not this key's tenant.`);
+          console.log(`     The tenant DID is server-assigned, not derived from the key address.`);
+          console.log(`     Fix: set  DID=${info.tenant}  in .env  (writes/seals target this tenant).`);
+          process.exitCode = 1;
+        } else if (info.status && info.status !== "active") {
+          console.log(`  ⚠  tenant status is "${info.status}" (not active) — seals/writes may fail.`);
+          process.exitCode = 1;
+        } else {
+          console.log(`  ✅ Ready to seal & use secrets on this tenant.`);
+        }
+      } catch (e) {
+        const msg = (e as Error).message;
+        console.log(`  tenant:             ✖ ${msg}`);
+        console.log("");
+        if (/InsufficientCredit|forbidden|403/i.test(msg)) {
+          console.log(`  ⚠  This key has a tenant but NO CREDITS. Seals/writes need credit.`);
+          console.log(`     Fix: request testnet credits / claim tokens, then re-run \`blindfold doctor\`:`);
+          console.log(`       https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
+        } else if (/500|internal_error/i.test(msg)) {
+          console.log(`  ⚠  This key AUTHENTICATES but its tenant is unusable: a read-only me()`);
+          console.log(`     returns a server error. Every seal/write with it will also 500.`);
+          console.log(`     Fix one of:`);
+          console.log(`       • switch .env to a key whose tenant is active (check with this doctor), or`);
+          console.log(`       • ask Terminal 3 to provision/claim a tenant for this key.`);
+        } else {
+          console.log(`  ⚠  Could not read the tenant behind this key — seals/writes will likely fail.`);
+          console.log(`     Verify the key is provisioned, or switch to a key that passes this doctor.`);
+        }
+        process.exitCode = 1;
       }
       return;
     }

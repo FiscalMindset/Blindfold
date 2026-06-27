@@ -67,6 +67,11 @@ export interface T3ClientHandle {
    * for short-lived use — drop the returned value from scope as soon as the call is done.
    */
   releaseSecret: (name: string) => Promise<string>;
+  /**
+   * Linearizable read of the tenant behind the current key. Throws if the key
+   * has no provisioned tenant (the failure mode that surfaces as a bare 500).
+   */
+  me: () => Promise<{ tenant: string; status?: string }>;
   /** True if a real T3 round-trip happened during construction. */
   isReal: boolean;
 }
@@ -183,6 +188,12 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     return direct;
   };
 
+  const me = async (): Promise<{ tenant: string; status?: string }> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = (await (tenant as any).tenant.me()) as Record<string, unknown>;
+    return { tenant: String(info.tenant ?? ""), status: info.status as string | undefined };
+  };
+
   return {
     close: async () => {
       /* SDK has no close()  */
@@ -191,6 +202,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     invokeForward,
     registerContract,
     releaseSecret,
+    me,
     isReal: true,
   };
 }
@@ -223,6 +235,9 @@ function openMockClient(): T3ClientHandle {
     async releaseSecret(name) {
       safeLog("info", { msg: "mock-release", name });
       return `mock-released:${name}`;
+    },
+    async me() {
+      return { tenant: "did:t3n:mock", status: "active" };
     },
     isReal: false,
   };
