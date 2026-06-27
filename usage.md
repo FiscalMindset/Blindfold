@@ -52,7 +52,7 @@ There are two patterns. **Use the one that fits your protocol.**
 
 ### 3a. Pattern A — base-URL swap (HTTP/HTTPS APIs only; gated today)
 
-Works for OpenAI / Anthropic / Grok / Groq / any OpenAI-compatible API once T3's canonical `host:interfaces/http@2.1.0` WIT lands. Code change today is already correct — the runtime piece is what's blocked. See §11 for the honest status.
+Works for OpenAI / Anthropic / Grok / Groq / any OpenAI-compatible API once `forward()` is wired to call `http::call`. As of 2026-06-25 the canonical `host:interfaces/http@2.1.0` WIT has landed and imports cleanly, so the WIT-level blocker is gone; what remains is the contract-code wiring plus a live execute. Code change in your app today is already correct. See §11 for the honest status.
 
 ```bash
 # 1. Seal your key (interactive prompt — no echo, no .env edit needed)
@@ -290,7 +290,7 @@ Indexed by keyword in the error message.
 | `access denied: TenantContract(.../<id>) cannot read map` | The contract isn't authorised | Wizard does this on publish; for old contracts: `npx tsx scripts/grant-secrets-read.ts <contract_id>` |
 | `version not higher` | Same `CONTRACT_VERSION` as last publish | Bump it in both `packages/blindfold/src/constants.ts` AND `contract/Cargo.toml` |
 | `InsufficientCredit (account=..., available=0)` | Testnet quota exhausted | Re-claim at the T3 claim page |
-| `HTTP 500: Internal error` on a contract execute that has `http` in the wit | Known: our http WIT stub doesn't match T3's runtime; the import alone breaks the contract | Use the release-broker pattern (§3b). T3 team aware; canonical WIT pending. |
+| `HTTP 500: Internal error` on a contract execute | Was caused by the http WIT stub's extra `response.headers` field (fixed 2026-06-25 with canonical WITs). If you still see 500s on *all* executes/seals while `verify` is green, it's a transient T3 testnet outage (recurred 2026-06-25) — save the `request_id`, email devrel@terminal3.io. | Use the release-broker pattern (§3b) meanwhile. |
 | `HTTP 400: Invalid semver format: latest` | A SYSTEM script needs a numeric semver, not "latest" | Use `getScriptVersion(rpcUrl, scriptName)` — handled in `scripts/grant-and-call.ts` |
 | `aborted by user` during `register` | You hit Ctrl+C at the prompt | Re-run |
 | `@terminal3/t3n-sdk not installed` | npm dep missing | `npm install @terminal3/t3n-sdk` |
@@ -302,10 +302,10 @@ Indexed by keyword in the error message.
 
 | Pattern | What's working today | What's gated |
 |---|---|---|
-| **A. HTTP/HTTPS base-URL swap** (the dream "one-line adoption") | Wrapper code, proxy, dashboard, ACL grant, egress authorization via `agent-auth-update` — all verified live | The contract's in-enclave `http::call` itself: our best-effort WIT stub for `host:interfaces/http@2.1.0` causes T3 to reject the contract at instantiation. T3 team aware; canonical WIT pending. When it lands: one file swap (`contract/wit/deps/host-interfaces/world.wit`), re-add `import host:interfaces/http@2.1.0;` to `contract/wit/world.wit`, run `npx tsx scripts/grant-and-call.ts` to verify. |
+| **A. HTTP/HTTPS base-URL swap** (the dream "one-line adoption") | Wrapper code, proxy, dashboard, ACL grant, egress authorization via `agent-auth-update` — all verified live. **Canonical host WITs landed 2026-06-25**: `host:interfaces/http@2.1.0` now imports and builds cleanly (root cause of the old instantiation 500 was the stub's extra `response.headers` field). | The contract's in-enclave `http::call` itself is now only gated on application code: `forward()` must be wired to build a `request` and call `http::call`, then verified live with `npx tsx scripts/grant-and-call.ts`. (Live verification currently also waiting on a transient T3 testnet outage.) |
 | **B. Release-broker** (works today, any protocol) | End-to-end verified live with both fake test secrets and real production secrets (real Gmail SMTP send to `algsoch@gmail.com`) | Plaintext is briefly in the broker process during one call (vs never even there in Pattern A). For prompt-injection threats — the thing Blindfold exists to fix — this is still fully protected because the broker process is separate from the agent process. |
 
-Use Pattern B today; switch to A when the canonical WIT ships, no code change in your app.
+Use Pattern B today; switch to A once `forward()` is wired to `http::call` (now unblocked at the WIT level) — no code change in your app either way.
 
 ---
 

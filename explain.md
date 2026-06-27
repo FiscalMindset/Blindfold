@@ -59,15 +59,61 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 1. ✅ **`TenantClient` `baseUrl` for testnet** — RESOLVED. SDK v3 exposes `NODE_URLS.testnet` = `https://cn-api.sg.testnet.t3n.terminal3.io`. Wired in `t3-client.ts`.
 2. ✅ **`script_version` typing** — RESOLVED. SDK v3's `ContractExecuteInput.version` is `string` (semver); no integer mapping. Wired.
-3. ⚠ **`T3N_API_KEY` role** — still using the single secp256k1 key as both tenant + agent (validates handshake + auth against testnet). Splitting into a separate agent key is hardening for later.
+3. ✅ **`T3N_API_KEY` role + DID derivation** — RESOLVED 2026-06-28, and it overturned a wrong assumption. (a) An API key only works if T3 has an **active tenant provisioned** for it; an un-provisioned key 500s on *everything*, including a read-only `me()`. (b) **The tenant DID is NOT `did:t3n:<key eth address>`** — it is server-assigned and unrelated (t1 key `06165c…` → tenant `58f5f5f9…`). `.env` must carry the key **and** its real tenant DID (from `me().tenant`). This was the actual cause of all the seal 500s — see the 2026-06-28 log entry.
 4. ⏳ **Egress allowlist setup** — still untested; will surface as `host/http.egress_denied` if missing. Plan unchanged.
 5. ✅ **`loadWasmComponent()` source** — RESOLVED. Default load (no args) works against testnet; verified by the live `verify` round-trip.
 6. ⏳ **ACL setup before `map-entry-set`** — still untested at HEAD; will surface as `access denied` if needed.
-7. ⏳ **Host WIT package canonical source** — NEW. T3 doesn't publish (or doesn't document publishing) the host WIT files needed to compile a tenant contract. We authored best-effort stubs at `contract/wit/deps/`. Local build works; publish + execute at HEAD untested. When T3 publishes the canonical WITs, swap them in. See `contract/wit/deps/README.md`.
+7. ✅ **Host WIT package canonical source** — RESOLVED 2026-06-25. The T3 dev team delivered the canonical host WITs. Vendored at `contract/wit/deps/host-tenant-1.0.0/package.wit` and `host-interfaces-2.1.0/package.wit` (stubs deleted). `world.wit` now imports all four capabilities including `http`; `cargo build --target wasm32-wasip2 --release` is clean. Root cause of the old instantiation 500 confirmed: the stub's `http.response` carried a `headers` field that T3's canonical `response` (`{ code, payload }`) does not. Full text + diff in repo-root `response.md`. (Publish + live execute at HEAD still pending a testnet recovery — see the running log.)
 
 ---
 
 ## Running log
+
+### 2026-06-28 — RESOLVED: github_token sealed for real; root cause was an unprovisioned API key (not the network)
+
+The recurring `HTTP 500`s on every seal were **not** a testnet outage and **not**
+a credential *mismatch*. The real cause: **the `T3N_API_KEY` in `.env`
+(`df48744c…`) has no provisioned tenant on T3**, so every call with it fails.
+
+**Why your key didn't work vs. why the team keys do** (per-key probe,
+`me()` = read, `map-entry-set` = write):
+
+| key | eth addr | `me()` | tenant DID | write |
+|-----|----------|--------|------------|-------|
+| **current** (`.env`) | `df48744c…` | ❌ HTTP 500 | — (none) | ❌ 500 |
+| **t1** (team) | `06165c…` | ✅ OK | `did:t3n:58f5f5f9…` (active) | ✅ |
+| **t2** (team) | `94ae6a…` | ✅ OK | `did:t3n:3abddb60…` (active) | ✅ |
+
+- `me()` needs no consensus/credits/write — it just reads the tenant behind the
+  key. The `df48744c…` key 500s even there ⇒ **no tenant is bound to it**. That
+  is why *everything* failed and why it masqueraded as an "outage."
+- The team keys return **active** tenants with quotas ⇒ reads succeed, writes
+  commit. The cluster was healthy the whole time (commit index advancing).
+- **Second finding (corrects a long-standing assumption):** tenant DID ≠
+  `did:t3n:<key address>`. It is server-assigned. The seal must target
+  `me().tenant` → map `z:<tenant-hex>:secrets`.
+
+**Fix applied:** pointed `.env` at the provisioned **t1** key + its real tenant
+DID (`did:t3n:58f5f5f9…`); old `.env` backed up to `.env.bak.*` (gitignored).
+Then the standard no-paste seal succeeded:
+
+```
+✓ Registered "github_token"  (mode=real, length=93, value read from env once then dropped)
+sealed ledger:  93  real  z:58f5f5f9…:secrets/github_token
+verify: map-entry-get OK (stored length=93)
+```
+
+`GITHUB_TOKEN` line then removed from `.env` (value now lives only in the
+enclave). If the `df48744c…` key must be used specifically, the only ask to T3
+is: *"provision/claim a tenant for key `df48744c…` — it has none."* Diagnostic:
+`scripts/seal-via-working-key.ts`. Full detail in repo-root `response.md`.
+
+### 2026-06-25 — canonical host WITs implemented; GitHub-token seal attempted (testnet down)
+
+- **Canonical host WITs vendored.** Replaced the best-effort stubs with T3's canonical packages (delivered verbatim by the dev team; archived in repo-root `response.md`): `contract/wit/deps/host-tenant-1.0.0/package.wit` + `host-interfaces-2.1.0/package.wit`. Deleted the old `host-tenant/` + `host-interfaces/` stub dirs. Updated `contract/wit/deps/README.md` from "stubs" → "canonical".
+- **`world.wit` now imports all four capabilities including `http`** (previously omitted because the stub broke instantiation). Confirmed root cause: stub `http.response` had a `headers` field; canonical `response` is `{ code: u16, payload: list<u8> }` only. `lib.rs`/`forward.rs` unchanged.
+- **Build verified.** `cargo build --target wasm32-wasip2 --release` clean (~152 KB). `wasm-tools component wit` shows the unused `http`/`logging` imports are tree-shaken out — so importing them is harmless until `forward()` calls them.
+- **GitHub-token seal attempted via the no-paste path** (`blindfold register --name github_token --from-env GITHUB_TOKEN`) — fails `HTTP 500`. Initially read as a testnet outage; deeper probing found the real headline cause: a **`.env` credential mismatch**. The `T3N_API_KEY` resolves to address `2f548795…`, but `DID` is `256ddb4f…` (a stale mock-session tenant), while the provisioned tenant with the contract + the 2026-06-20 deepgram seal is a third identity `d20089c4…`. Single-key-as-tenant requires `DID` hex == key address; it doesn't. `handshake`/`authenticate` pass (key-only), but every write/execute (`map-entry-set`, `map-entry-delete`, `contracts.execute`, even `maps.create` on the key's own tenant) 500s; re-sealing known-good 40 B/39 B secrets 500s too — so it's not github-specific or value-specific. Fix: restore the matching key+DID for `d20089c4…` (has the contract + seals) or claim/`init` a fresh tenant for the current key. Full diagnosis + request_ids in repo-root `response.md`. (A genuine testnet outage can't be ruled out as a *secondary* factor, since `maps.create` on the key's own tenant could 500 from either an unclaimed key or a server outage — see the 2026-06-22 outage below for the same surface symptom.)
 
 ### 2026-06-22 — demo real HTTP, release() helper, CI, sentinel guard, dead code removed
 
@@ -97,7 +143,7 @@ From Step 2. Each has a planned fallback; nothing blocks development, but the us
 
 ### 2026-06-20 — REAL T3 e2e fully green + Grok key sealed
 - Fixed two .env typos (`TT3N_API_KEY` → `T3N_API_KEY`; `grok_api_key` → `GROK_API_KEY` since the value starts with `xai-` not `gsk_`, confirming it's xAI's Grok, not Groq the inference company).
-- New T3 tenant `did:t3n:3abddb60dd62cbd6a95175771a4e642daee81729` (testnet) — re-verified handshake + authenticate ✅.
+- New T3 tenant `did:t3n:3abddb60…` (testnet) — re-verified handshake + authenticate ✅.
 - Discovered new tenants need explicit map creation. Wrote `scripts/init-tenant.ts` that calls `tenant.tenant.claim()` + `tenant.maps.create({ tail: "secrets", visibility: "private", writers: "all" })`. Created the secrets map for this tenant.
 - **Full real-mode pipeline now passes end-to-end on T3 testnet:**
   - S1 handshake + authenticate ✅

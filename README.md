@@ -574,7 +574,7 @@ npm run demo
 |---|---|---|
 | Handshake + authenticate against testnet | ✅ verified live | `npm run blindfold -- verify` |
 | Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | exercised by `npm run test:real` and by `blindfold register` interactively |
-| Build the Rust→WASM contract locally | ✅ works | uses best-effort host WIT stubs — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
+| Build the Rust→WASM contract locally | ✅ works | uses T3's **canonical** host WITs (delivered 2026-06-25) — see [`contract/wit/deps/README.md`](contract/wit/deps/README.md) |
 | Publish the contract via `tenant.contracts.register` | ✅ **verified live** | currently at v0.5.1, contract_id 310 on the current tenant (`did:t3n:d20…071a9f`) — bumps every time the contract source changes |
 | Tenant scaffolding — `secrets` + `authorised-hosts` maps | ✅ **verified live + auto-wired into `init`** | `tenant.maps.create({ tail, visibility:"private", writers:"all" })` idempotent |
 | ACL grant to the contract (`tenant.maps.update`) | ✅ **verified live + auto-wired into `init`** | `{ readers: { only: [<contract_id>] } }` — applied to both maps after publish |
@@ -582,7 +582,7 @@ npm run demo
 | **In-enclave secret read + sentinel substitution** (the Blindfold security property) | ✅ **verified live end-to-end** | Contract reads the sealed secret in TDX, substitutes `__BLINDFOLD__` → `<real-value>` in `Authorization`, returns *lengths only* as proof (never the value). 19-byte test secret → 26-char `Authorization`. Math checks. |
 | Sealed-keys ledger (`blindfold sealed`) | ✅ **verified live** | Records every seal as a metadata-only JSONL line (name, byte-length, source, mode, tenant DID, full map name) — *never the value*. 3 real keys currently in the ledger on this tenant: `deepgram_api_key` (40B), `grok_api_key` (84B), `cognee_api_key` (64B). |
 | **Release-broker** — sealed secret → released to local broker → real outbound call → drop | ✅ **verified live, repeatedly** | `scripts/smtp-with-blindfold.ts` sends real Gmail emails via the released SMTP password. `examples/grok-via-blindfold.ts` authenticates against real xAI endpoints with the released Grok key. `scripts/test-v5-release.ts` verifies any sealed key by fingerprint (verified the cognee 64B key matches `efa…bc`). Agent's process never has the value. |
-| In-enclave `http::call` from the contract itself (the dream "secret never leaves enclave" mode) | 🚧 blocked on canonical T3 host WIT | Egress grant ✅ verified. The remaining blocker is isolated to one file: `contract/wit/deps/host-interfaces/world.wit` — our best-effort stub for `host:interfaces/http@2.1.0` has signatures T3's runtime rejects. T3 team aware. When canonical WIT lands: one file swap, re-add `import host:interfaces/http@2.1.0;`, run `scripts/grant-and-call.ts` (already wired) to verify. |
+| In-enclave `http::call` from the contract itself (the dream "secret never leaves enclave" mode) | 🟡 WIT-level unblocked (2026-06-25); `forward()` wiring + live test remain | Canonical WITs landed: the `host:interfaces/http@2.1.0` import that used to 500 at instantiation now builds cleanly (root cause was the stub's extra `response.headers` field). Egress grant ✅ verified. Remaining: rewrite `forward()` to call `http::call`, then run `scripts/grant-and-call.ts` (already wired) to verify live. |
 
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 
