@@ -11,6 +11,10 @@
 
 [**📊 View the Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) — 12-slide deck with live demos
 
+<br/>
+
+### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+
 </div>
 
 ---

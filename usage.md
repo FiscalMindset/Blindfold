@@ -1,6 +1,18 @@
-# Blindfold — Usage Guide
+<div align="center">
 
-> How to actually use Blindfold for the cases people actually have. Read the matching scenario, copy the commands. If anything errors, jump to §10.
+# 📘 Blindfold — Usage Guide
+
+**Seal a key once. Then use it from anywhere — your agent, your CLI, your app — without the plaintext ever touching your code again.**
+
+### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; **[Usage Guide](usage.md)** &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
+
+> **How to read this:** find the one scenario that matches you in the tree below, copy the commands, done. Each scenario is self-contained. If anything errors, jump to [§10 Troubleshooting](#10-troubleshooting-errors-youll-actually-hit).
+
+> 🧠 **The whole idea in one breath:** `register` puts a secret into the enclave under a *name*. Everything after that just refers to the *name* — you never paste, store, or script-per-secret the real value again.
 
 ---
 
@@ -24,6 +36,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | You want to … | Jump to |
 |---|---|
 | Try Blindfold without doing any T3 setup | §2 |
+| **Use a sealed secret with ANY command-line tool (no code)** | **§3c** |
 | Protect the key your own agent uses (Node/Python/whatever) | §3 |
 | Protect the key Claude Code / OpenCode / Aider / Codex CLI uses | §4 |
 | Protect the key your custom chatbot / FastAPI / Next.js app uses | §5 |
@@ -117,6 +130,38 @@ async function callSomethingThatNeedsApiKey() {
 ```
 
 Full working example: [`scripts/smtp-with-blindfold.ts`](scripts/smtp-with-blindfold.ts) (real SMTP send via T3-released password).
+
+---
+
+## 3c. ⭐ Pattern C — `blindfold use` (no code, any tool)
+
+The easiest way to *use* a sealed secret. Blindfold releases it from the enclave and injects it as an environment variable into **one** subprocess — it never goes back into your shell, and it's never printed. Works with `gh`, `git`, `curl`, `psql`, `docker`, `aws`, anything that reads an env var.
+
+```bash
+# Seal once:
+blindfold register --name github_token --from-env GITHUB_TOKEN
+
+# Then use it with any tool. --as sets the env-var name (default: NAME upper-cased).
+blindfold use --name github_token --as GH_TOKEN -- gh api user --jq .login
+# ✓ released "github_token" (93 B) → injecting $GH_TOKEN into: gh api user --jq .login
+# FiscalMindset
+```
+
+More recipes:
+
+```bash
+# git push with a sealed token — nothing in your environment
+blindfold use --name github_token --as GH_TOKEN -- git push origin main
+
+# psql with a sealed DB password
+blindfold use --name db_password --as PGPASSWORD -- psql -h db.internal -U app
+
+# quick "does this key still work?" check (no command)
+blindfold use --name github_token --url https://api.github.com/user
+#   HTTP 200 OK  ✅ accepted
+```
+
+**Why this is safe:** the plaintext lives only inside the child process's environment for the lifetime of that single command, then it's gone. Your shell history, your `.env`, and your scripts never see it. See [EXAMPLES.md §1](EXAMPLES.md#1-no-code--blindfold-use) for more.
 
 ---
 
@@ -290,7 +335,7 @@ Indexed by keyword in the error message.
 | `access denied: TenantContract(.../<id>) cannot read map` | The contract isn't authorised | Wizard does this on publish; for old contracts: `npx tsx scripts/grant-secrets-read.ts <contract_id>` |
 | `version not higher` | Same `CONTRACT_VERSION` as last publish | Bump it in both `packages/blindfold/src/constants.ts` AND `contract/Cargo.toml` |
 | `InsufficientCredit (account=..., available=0)` | Testnet quota exhausted | Re-claim at the T3 claim page |
-| `HTTP 500: Internal error` on a contract execute | Was caused by the http WIT stub's extra `response.headers` field (fixed 2026-06-25 with canonical WITs). If you still see 500s on *all* executes/seals while `verify` is green, it's a transient T3 testnet outage (recurred 2026-06-25) — save the `request_id`, email devrel@terminal3.io. | Use the release-broker pattern (§3b) meanwhile. |
+| `HTTP 500: Internal error` on *all* seals/executes while `verify` is green | **#1 cause: your key has no provisioned tenant.** A working key authenticates AND passes a read. Run `blindfold doctor` — it now does a live `me()` and tells you if the key is unprovisioned (500), out of credit (403), or has a server-assigned DID different from your `.env` DID. | Switch `.env` to a key that passes `blindfold doctor`, or ask T3 to provision a tenant for the key. |
 | `HTTP 400: Invalid semver format: latest` | A SYSTEM script needs a numeric semver, not "latest" | Use `getScriptVersion(rpcUrl, scriptName)` — handled in `scripts/grant-and-call.ts` |
 | `aborted by user` during `register` | You hit Ctrl+C at the prompt | Re-run |
 | `@terminal3/t3n-sdk not installed` | npm dep missing | `npm install @terminal3/t3n-sdk` |
@@ -298,14 +343,18 @@ Indexed by keyword in the error message.
 
 ---
 
-## 11. Honest status of the two patterns
+## 11. Honest status of the patterns
 
-| Pattern | What's working today | What's gated |
+All three use-patterns are verified live (2026-06-28). The differences are about *where the plaintext briefly exists*, not whether they work.
+
+| Pattern | Status | Where plaintext briefly exists |
 |---|---|---|
-| **A. HTTP/HTTPS base-URL swap** (the dream "one-line adoption") | Wrapper code, proxy, dashboard, ACL grant, egress authorization via `agent-auth-update` — all verified live. **Canonical host WITs landed 2026-06-25**: `host:interfaces/http@2.1.0` now imports and builds cleanly (root cause of the old instantiation 500 was the stub's extra `response.headers` field). | The contract's in-enclave `http::call` itself is now only gated on application code: `forward()` must be wired to build a `request` and call `http::call`, then verified live with `npx tsx scripts/grant-and-call.ts`. (Live verification currently also waiting on a transient T3 testnet outage.) |
-| **B. Release-broker** (works today, any protocol) | End-to-end verified live with both fake test secrets and real production secrets (real Gmail SMTP send to `algsoch@gmail.com`) | Plaintext is briefly in the broker process during one call (vs never even there in Pattern A). For prompt-injection threats — the thing Blindfold exists to fix — this is still fully protected because the broker process is separate from the agent process. |
+| **C. `blindfold use`** (no code, any tool) | ✅ verified live | the child process's env, for one command |
+| **A. Proxy / base-URL swap** (HTTP SDKs) | ✅ verified live | the local broker process, for one call |
+| **B. Release-broker** (`release()` in code, any protocol) | ✅ verified live (real Gmail SMTP send; real GitHub API) | the local broker process, for one call |
+| **D. In-enclave `http::call`** (maximalist) | ✅ verified live (contract → GitHub `200`, see `scripts/test-enclave-egress.ts`) | **never leaves the enclave** |
 
-Use Pattern B today; switch to A once `forward()` is wired to `http::call` (now unblocked at the WIT level) — no code change in your app either way.
+For the threat Blindfold exists to fix — **prompt injection of your agent** — all four are equally strong, because the agent process never holds the key in any of them. Pattern D additionally protects against a compromised *local* machine. Pick C for the fastest adoption, D for zero-trust.
 
 ---
 
