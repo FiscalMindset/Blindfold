@@ -12,6 +12,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv } from "../src/env.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
@@ -48,7 +49,12 @@ function parseArgv(argv: string[]): Argv {
 }
 
 async function main(): Promise<void> {
-  const argv = parseArgv(process.argv.slice(2));
+  // Split on a bare `--` so `blindfold use --name X -- <command...>` keeps the
+  // child command intact (parseArgv would otherwise swallow it).
+  const raw = process.argv.slice(2);
+  const ddIdx = raw.indexOf("--");
+  const cmdArgs = ddIdx >= 0 ? raw.slice(ddIdx + 1) : [];
+  const argv = parseArgv(ddIdx >= 0 ? raw.slice(0, ddIdx) : raw);
   const cmd = argv._[0] ?? "help";
 
   switch (cmd) {
@@ -65,6 +71,50 @@ async function main(): Promise<void> {
       } else {
         console.log(`✓ Registered "${name}" — value lives only in the enclave.`);
       }
+      // The other half: tell the user how to actually USE what they just sealed.
+      const asVar = name.toUpperCase();
+      console.log("");
+      console.log("  Use it (the plaintext never returns to your env):");
+      console.log(`    blindfold use --name ${name} -- <your command>       # injects ${asVar} into that command only`);
+      console.log(`    blindfold use --name ${name} --as ${asVar} -- <cmd>  # custom env-var name`);
+      console.log(`    blindfold use --name ${name} --url <https url>       # quick "does it auth?" check`);
+      console.log(`    proxy/SDK:  set the key to "__BLINDFOLD__" + route via \`blindfold proxy\`, or \`release("${name}")\` in code`);
+      return;
+    }
+
+    case "use": {
+      const name = String(argv.flags.name ?? "");
+      if (!name) {
+        die("usage: blindfold use --name <secret> [--as <ENV_VAR>] -- <command...>\n" +
+            "       blindfold use --name <secret> --url <https url>   (quick auth test)");
+      }
+      const { release } = await import("../src/release.ts");
+      const value = await release(name); // plaintext, kept local; never printed
+
+      // Mode A: quick auth test against an HTTPS endpoint with Bearer auth.
+      if (argv.flags.url) {
+        const url = String(argv.flags.url);
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${value}`, "User-Agent": "blindfold", Accept: "*/*" },
+        });
+        console.log(`✓ released "${name}" (${value.length} B, value not shown) → ${url}`);
+        console.log(`  HTTP ${res.status} ${res.statusText}  ${res.ok ? "✅ accepted" : "✖ rejected"}`);
+        return;
+      }
+
+      // Mode B: run any command with the secret injected as an env var, for
+      // that subprocess only. The parent never persists the plaintext.
+      if (cmdArgs.length === 0) {
+        die("provide a command after `--` (e.g. `-- gh api user`), or pass --url <url> to test auth");
+      }
+      const asVar = String(argv.flags.as ?? name.toUpperCase());
+      console.error(`✓ released "${name}" (${value.length} B) → injecting $${asVar} into: ${cmdArgs.join(" ")}`);
+      const child = spawn(cmdArgs[0]!, cmdArgs.slice(1), {
+        stdio: "inherit",
+        env: { ...process.env, [asVar]: value },
+      });
+      child.on("exit", (code) => process.exit(code ?? 0));
+      child.on("error", (e) => die(`failed to run "${cmdArgs[0]}": ${e.message}`));
       return;
     }
 
@@ -215,6 +265,7 @@ Commands:
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
+  use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it from the enclave and run <cmd> with it injected as $ENV (default: NAME upper-cased) for that command only — never back in your env. Or  --url <https url>  for a quick "does it auth?" check.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
