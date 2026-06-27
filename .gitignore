@@ -1,6 +1,8 @@
 # env files — never commit secrets
 .env
 .env.local
+.env.bak.*
+.env.bak
 
 # node
 node_modules/
@@ -33,3 +35,6 @@ Cargo.lock
 # test / coverage
 coverage/
 .nyc_output/
+
+# T3 dev-team correspondence / working notes (local only)
+response.md

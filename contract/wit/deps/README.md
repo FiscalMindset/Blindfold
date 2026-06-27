@@ -1,27 +1,51 @@
-# Host WIT stubs
+# Host WIT packages (canonical)
 
-The files under `host-tenant/` and `host-interfaces/` are **best-effort
-reconstructions** of the WIT packages T3 imports into a tenant contract:
+The files under `host-tenant-1.0.0/` and `host-interfaces-2.1.0/` are the
+**canonical** WIT packages T3 imports into a tenant contract, provided
+verbatim by the T3 dev team (2026-06-25). They replace the earlier
+best-effort stubs (`host-tenant/`, `host-interfaces/`), which were inferred
+from the public docs and have been deleted.
+
+Packages:
 
 - `host:tenant/tenant-context@1.0.0`
 - `host:interfaces/logging@2.1.0`
 - `host:interfaces/kv-store@2.1.0`
 - `host:interfaces/http@2.1.0`
 
-They were authored from the public T3 docs (the verbatim Rust snippets in
-the "write your TEE contract" walkthrough plus the http-with-placeholders /
-seed-api-key tips). The signatures are inferred from the *usage* shown
-there — they have not been published by T3 as a canonical package.
+`wit/world.wit` imports all four (`tenant-context`, `logging`, `kv-store`,
+`http`) — the "only four capabilities" least-privilege set documented in the
+top-level `README.md`. Unused imports (`http`, `logging` today) are
+tree-shaken out of the compiled component and only materialise once
+`forward.rs` calls them.
 
-**They are good enough to make `cargo build --target wasm32-wasip2 --release`
-succeed locally.** If T3's actual host interface signatures differ from
-these stubs, the on-chain `tenant.contracts.register` call will either
-fail with a type-mismatch error or the published contract will fail at
-execution time with a wit/component-model error.
+## What changed from the stubs
 
-When T3 publishes the canonical host WIT files (or a cargo/npm package
-that vendors them), replace these stubs with the official ones and
-rebuild. The contract's `lib.rs` / `forward.rs` will not need to change.
+- **`http.response` has no headers.** Canonical is `{ code: u16, payload:
+  list<u8> }`. The stub carried a `headers` field, and that mismatch is what
+  caused the contract to fail at instantiation whenever `http` was imported.
+- **`http.call` takes a single `request` record** (not positional args); the
+  error channel is a bare `string`.
+- **`http.verb`** is `{ get, post, put, patch, delete }` (the stub also had
+  `head`, in a different order).
+- **`tenant-context`** gained `contract-id`, `calling-user-did`,
+  `cluster-timestamp-secs`, and `seq-no` alongside `tenant-did`.
+- **`kv-store`** gained `put`, `delete`, `set-claims-digest`, and `scan`
+  alongside `get`.
 
-> If you find the canonical source, please open a PR replacing these
-> stubs and update this README + `explain.md`'s NEEDS VERIFICATION list.
+## Version pin
+
+Pin `@2.1.0` — that's what the live host links. A `@2.2.0` label may appear
+on the canonical file flagging newer additive interfaces; interfaces are
+additive, so a `@2.1.0` import resolves against the running host fine. Don't
+chase `2.2.0`.
+
+## Runtime note
+
+Tenant HTTP egress is gated by the caller's `agent_auth` grant —
+`http.call` returns `Err` unless the target host is authorised for that user
+(see `scripts/grant-and-call.ts` / `scripts/grant-egress.ts`). Build +
+register succeeding does **not** mean an arbitrary host is reachable; that's
+an authorisation outcome, not a stub bug.
+
+`lib.rs` / `forward.rs` did not need to change for this swap.

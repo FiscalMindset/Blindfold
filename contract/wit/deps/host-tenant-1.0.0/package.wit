@@ -1,0 +1,17 @@
+// host:tenant — CANONICAL signatures, provided verbatim by the T3 dev team.
+// (Replaces the earlier best-effort stub. See ../README.md and ../../../../response.md.)
+package host:tenant@1.0.0;
+
+interface tenant-context {
+    /// Tenant DID this contract runs under. 20-byte raw CompactDid.
+    tenant-did: func() -> list<u8>;
+    /// Interned id of the running contract.
+    contract-id: func() -> u32;
+    /// Authenticated session DID, if invoked via the Session API.
+    /// None for /api/dev/exec direct invocations and webhook dispatch.
+    calling-user-did: func() -> option<list<u8>>;
+    /// Cluster-wide monotonic timestamp pinned by the dispatcher.
+    cluster-timestamp-secs: func() -> u64;
+    /// Current store sequence number (audit/replay correlation).
+    seq-no: func() -> u64;
+}
