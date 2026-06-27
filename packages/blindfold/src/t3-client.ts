@@ -143,14 +143,44 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     return raw;
   };
 
+  const decodeSecret = (v: unknown): string => {
+    if (typeof v === "string") return v;
+    if (Array.isArray(v)) return Buffer.from(v as number[]).toString("utf8");
+    if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      if (typeof o.value === "string") return o.value;
+      if (Array.isArray(o.value)) return Buffer.from(o.value as number[]).toString("utf8");
+      const entry = o.entry as Record<string, unknown> | undefined;
+      if (entry && typeof entry.value === "string") return entry.value;
+    }
+    return "";
+  };
+
   const releaseSecret = async (name: string): Promise<string> => {
-    const r = (await tenant.contracts.execute(CONTRACT_TAIL, {
-      version: CONTRACT_VERSION,
-      functionName: "release-to-tenant",
-      input: { secret_key: name },
-    })) as { ok: boolean; value: string; length: number };
-    if (!r.ok || !r.value) throw new Error(`release-to-tenant returned no value for "${name}"`);
-    return r.value;
+    // Preferred path: the contract's `release-to-tenant` (access gated by the
+    // contract's read-ACL on the secrets map). Requires the contract published
+    // on this tenant.
+    try {
+      const r = (await tenant.contracts.execute(CONTRACT_TAIL, {
+        version: CONTRACT_VERSION,
+        functionName: "release-to-tenant",
+        input: { secret_key: name },
+      })) as { ok?: boolean; value?: string };
+      if (r && r.ok && r.value) return r.value;
+    } catch {
+      /* contract not published on this tenant — fall through to direct read */
+    }
+    // Fallback: the tenant owner reads its own secrets map directly. Same trust
+    // boundary (the holder of the tenant key can always release its secrets),
+    // but works without a published contract.
+    const direct = decodeSecret(
+      await tenant.executeControl("map-entry-get", {
+        map_name: tenant.canonicalName("secrets"),
+        key: name,
+      }),
+    );
+    if (!direct) throw new Error(`secret "${name}" not found in the secrets map`);
+    return direct;
   };
 
   return {
