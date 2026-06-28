@@ -4,7 +4,7 @@
 
 **Seal a key once. Then use it from anywhere — your agent, your CLI, your app — without the plaintext ever touching your code again.**
 
-### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; **[Usage Guide](usage.md)** &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; **[Usage Guide](usage.md)** &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 

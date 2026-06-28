@@ -4,7 +4,7 @@
 
 **Run Blindfold across a team: shared secrets, rotation, per-agent access, and an audit trail.**
 
-### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; **[Teams](TEAMS.md)** &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; **[Teams](TEAMS.md)** &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -101,6 +101,7 @@ Before trusting any key, run `blindfold doctor` — it tells you in plain Englis
 | Question | Where to look |
 |---|---|
 | What's sealed, when, how big, real vs mock? | `blindfold sealed` / `blindfold status` (metadata only — never values) |
+| Has the ledger been tampered with? Does it match the enclave? | `blindfold audit` — verifies a tamper-evident hash-chain **and** reconciles against the enclave (the source of truth); flags drift/missing/tampering |
 | Who's calling the proxy, how often, success rate? | `blindfold dashboard` (live HTML) / `blindfold stats` |
 | Did a contract execution happen / fail? | `tenant.contracts.logs("blindfold-proxy", …)` |
 | Did a value actually change after rotation? | the `fp=` fingerprint from `blindfold rotate` |

@@ -22,7 +22,7 @@ import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
 import { runCompat } from "../src/compat.ts";
-import { defaultSealedLogPath, readSealed } from "../src/sealed-ledger.ts";
+import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/sealed-ledger.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -340,6 +340,60 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "audit": {
+      // (1) Tamper-evidence: verify the local ledger's hash-chain.
+      // (2) Reconcile against the enclave — the actual source of truth.
+      console.log("🔍 Blindfold audit\n");
+      const chain = verifyLedgerChain();
+      console.log("  1. Ledger integrity (tamper-evidence)");
+      if (chain.total === 0) {
+        console.log("     (ledger is empty)");
+      } else if (chain.ok) {
+        const chained = chain.total - chain.legacy;
+        console.log(`     ✅ hash-chain intact — ${chained} chained entr${chained === 1 ? "y" : "ies"}${chain.legacy ? `, ${chain.legacy} legacy (pre-chain, unverifiable)` : ""}`);
+      } else {
+        console.log(`     ✖ TAMPERED — the chain breaks at entry #${chain.firstBrokenIndex} (a line was edited or removed after it was written)`);
+        process.exitCode = 1;
+      }
+
+      const env = loadBlindfoldEnv();
+      if (env.mock) {
+        console.log("\n  2. Enclave reconciliation: skipped (MOCK mode)");
+        return;
+      }
+      const realEntries = readSealed().filter((e) => e.mode === "real");
+      const latest = new Map<string, (typeof realEntries)[number]>();
+      for (const e of realEntries) latest.set(e.name, e); // last write wins
+      console.log(`\n  2. Enclave reconciliation — the enclave is the source of truth (${latest.size} secret${latest.size === 1 ? "" : "s"})`);
+      if (latest.size === 0) {
+        console.log("     (nothing sealed)");
+        return;
+      }
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      let okCount = 0, drift = 0, missing = 0;
+      try {
+        for (const e of latest.values()) {
+          const v = await client.verifySecret(e.name);
+          if (!v.present) {
+            missing++;
+            console.log(`     ✖ ${e.name.padEnd(22)} MISSING in enclave  (ledger claims ${e.length} B)`);
+          } else if (v.length !== e.length) {
+            drift++;
+            console.log(`     ⚠ ${e.name.padEnd(22)} length drift: enclave ${v.length} B vs ledger ${e.length} B  fp=${v.fingerprint}`);
+          } else {
+            okCount++;
+            console.log(`     ✅ ${e.name.padEnd(22)} present (${v.length} B, fp=${v.fingerprint})`);
+          }
+        }
+      } finally {
+        await client.close();
+      }
+      console.log(`\n  Summary: ${okCount} verified · ${drift} drift · ${missing} missing · ledger ${chain.ok ? "intact" : "TAMPERED"}`);
+      if (drift > 0 || missing > 0 || !chain.ok) process.exitCode = 1;
+      return;
+    }
+
     case "status": {
       // One-glance overview: health + sealed inventory + what to do next.
       const env = loadBlindfoldEnv();
@@ -467,6 +521,7 @@ Commands:
   migrate  [--dry-run] [--keep]                     Seal EVERY secret in your .env in one shot, then remove the plaintext lines (backup kept). --dry-run previews; --keep comments lines instead of deleting. Skips T3 creds + config.
   status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
+  audit                                              Verify the ledger's tamper-evident hash-chain AND reconcile it against the enclave (the source of truth) — flags drift/missing/tampering.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
   grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com

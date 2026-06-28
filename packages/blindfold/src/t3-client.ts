@@ -11,6 +11,7 @@
  * The SDK is loaded lazily so MOCK mode works on machines that haven't
  * installed it. REAL mode requires `@terminal3/t3n-sdk` (optionalDep).
  */
+import { createHash } from "node:crypto";
 import type { BlindfoldEnv, ForwardRequest, ForwardResponse } from "./types.ts";
 import { CONTRACT_TAIL, CONTRACT_VERSION } from "./constants.ts";
 import { assertRealReady } from "./env.ts";
@@ -78,6 +79,12 @@ export interface T3ClientHandle {
    * proxy + in-enclave http::call path require).
    */
   grantEgress: (hosts: string[]) => Promise<void>;
+  /**
+   * Confirm a sealed secret still exists in the enclave. Returns its byte
+   * length + a non-reversible fingerprint (never the value) so an audit can
+   * reconcile the local ledger against the enclave (the source of truth).
+   */
+  verifySecret: (name: string) => Promise<{ present: boolean; length: number; fingerprint: string }>;
   /** True if a real T3 round-trip happened during construction. */
   isReal: boolean;
 }
@@ -245,6 +252,15 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     });
   };
 
+  const verifySecret = async (name: string): Promise<{ present: boolean; length: number; fingerprint: string }> => {
+    try {
+      const value = await releaseSecret(name); // contract path, or control-plane fallback
+      return { present: true, length: value.length, fingerprint: createHash("sha256").update(value).digest("hex").slice(0, 8) };
+    } catch {
+      return { present: false, length: 0, fingerprint: "" };
+    }
+  };
+
   return {
     close: async () => {
       /* SDK has no close()  */
@@ -255,6 +271,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     releaseSecret,
     me,
     grantEgress,
+    verifySecret,
     isReal: true,
   };
 }
@@ -293,6 +310,9 @@ function openMockClient(): T3ClientHandle {
     },
     async grantEgress(hosts) {
       safeLog("info", { msg: "mock-grant-egress", hosts });
+    },
+    async verifySecret(name) {
+      return { present: true, length: 0, fingerprint: `mock-${name}`.slice(0, 8) };
     },
     isReal: false,
   };

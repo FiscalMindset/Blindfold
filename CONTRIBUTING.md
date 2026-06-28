@@ -4,7 +4,7 @@
 
 **Thanks for helping make API keys un-leakable.** This guide gets you from clone to merged PR.
 
-### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; **[Contributing](CONTRIBUTING.md)**
 
 </div>
 
