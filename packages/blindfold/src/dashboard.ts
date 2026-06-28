@@ -24,7 +24,7 @@ import type { AddressInfo } from "node:net";
 import { CONTRACT_VERSION, DEFAULT_DASHBOARD_PORT } from "./constants.ts";
 import { loadBlindfoldEnv } from "./env.ts";
 import { clearUsage, defaultLogPath, readUsage } from "./usage-log.ts";
-import { defaultSealedLogPath, readSealed } from "./sealed-ledger.ts";
+import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "./sealed-ledger.ts";
 
 export interface DashboardHandle {
   url: string;
@@ -78,8 +78,15 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
           const latest = [...sealed].reverse().find((s) => s.name === name)!;
           return { name, length: latest.length, sealed_at: latest.t };
         });
+      const uniqueSealed = new Set(sealed.map((s) => s.name)).size;
+      const chain = verifyLedgerChain();
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ exposed_in_env: exposed, env_keys: envKeys }));
+      res.end(JSON.stringify({
+        exposed_in_env: exposed,
+        env_keys: envKeys,
+        sealed_count: uniqueSealed,
+        ledger_chain: chain, // { ok, total, legacy, firstBrokenIndex }
+      }));
       return;
     }
     if ((req.method === "POST" || req.method === "DELETE") && url === "/api/clear") {
@@ -228,6 +235,21 @@ const HTML = `<!DOCTYPE html>
   .spark > .b.zero { background: var(--line); opacity: .5; min-height: 1px; }
   .stat-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--dim); margin-top: 6px; }
   .stat-row span { color: var(--fg); }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .controls label { font-size: 12px; color: var(--dim); display: flex; align-items: center; gap: 4px; }
+  select { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
+  .filter { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: 12px; margin-left: auto; min-width: 200px; }
+  .two-col { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  /* horizontal bar chart */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 12px; }
+  .bar-row .name { width: 110px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row .track { flex: 1; background: rgba(255,255,255,.05); border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar-row .fill { height: 100%; border-radius: 4px; background: var(--accent2); }
+  .bar-row .n { width: 64px; text-align: right; color: var(--fg); }
+  .fill.ok { background: var(--ok); } .fill.bad { background: var(--bad); } .fill.warn { background: var(--warn); } .fill.acc { background: var(--accent); }
+  .posture-score { font-size: 28px; font-weight: 700; }
+  .posture-score.good { color: var(--ok); } .posture-score.warn { color: var(--warn); } .posture-score.bad { color: var(--bad); }
   /* Mobile / narrow screens */
   @media (max-width: 720px) {
     body { padding: 14px; }
@@ -255,14 +277,26 @@ const HTML = `<!DOCTYPE html>
   <div class="row">
     <div>
       <h1><span class="logo">🛡️ Blindfold</span> — Dashboard</h1>
-      <div class="sub">Live metadata · auto-refresh 2s · <span id="src"></span></div>
+      <div class="sub">Live metadata · <span id="updated">—</span> · <span id="src"></span></div>
     </div>
-    <div>
-      <button onclick="clearLog()">Clear usage log</button>
+    <div class="controls">
+      <label>refresh
+        <select id="refresh" onchange="setRefresh()">
+          <option value="2000">2s</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+          <option value="0">paused</option>
+        </select>
+      </label>
+      <button onclick="exportJson()">⬇ Export</button>
+      <button onclick="clearLog()">Clear log</button>
     </div>
   </div>
 
   <div id="audit-area"></div>
+
+  <div class="section-title">Security posture</div>
+  <div class="grid" id="posture-cards"></div>
 
   <div class="section-title">System</div>
   <div class="grid" id="status-cards"></div>
@@ -273,6 +307,20 @@ const HTML = `<!DOCTYPE html>
   <div class="section-title">Traffic — counters</div>
   <div class="grid" id="counter-cards"></div>
 
+  <div class="section-title">Latency percentiles</div>
+  <div class="grid" id="latency-cards"></div>
+
+  <div class="two-col">
+    <div>
+      <div class="section-title">Providers</div>
+      <div class="card" id="provider-chart"></div>
+    </div>
+    <div>
+      <div class="section-title">Status codes</div>
+      <div class="card" id="status-chart"></div>
+    </div>
+  </div>
+
   <div class="section-title">Per-secret release / proxy usage</div>
   <div id="per-secret-wrap"></div>
 
@@ -280,7 +328,9 @@ const HTML = `<!DOCTYPE html>
   <div class="spark" id="spark"></div>
   <div class="stat-row" id="spark-stats"></div>
 
-  <div class="section-title">Recent activity (last 50)</div>
+  <div class="section-title">Recent activity (last 50)
+    <input id="filter" class="filter" placeholder="filter: provider / path / status…" oninput="renderTable(window._events||[])" />
+  </div>
   <div id="table-wrap"></div>
 
   <div class="footer">
@@ -320,18 +370,99 @@ async function poll() {
       fetch('/api/events').then(r => r.json()),
       fetch('/api/audit').then(r => r.json()),
     ]);
+    window._events = eventsR.events || [];
     document.getElementById('src').textContent =
       'usage: ' + eventsR.source + ' · sealed: ' + sealedR.source;
+    document.getElementById('updated').textContent = 'updated ' + new Date().toLocaleTimeString();
     renderAudit(auditR);
+    renderPosture(auditR, statusR);
     renderStatus(statusR);
     renderSealed(sealedR.entries || []);
-    renderCounters(eventsR.events || []);
-    renderPerSecret(eventsR.events || []);
-    renderSpark(eventsR.events || []);
-    renderTable(eventsR.events || []);
+    renderCounters(window._events);
+    renderLatency(window._events);
+    renderProviders(window._events);
+    renderStatusCodes(window._events);
+    renderPerSecret(window._events);
+    renderSpark(window._events);
+    renderTable(window._events);
   } catch (e) {
     // ignore transient errors
   }
+}
+
+function pct(arr, p) {
+  if (!arr.length) return 0;
+  const s = arr.slice().sort((a,b) => a-b);
+  return s[Math.min(s.length - 1, Math.floor(p/100 * s.length))];
+}
+
+function renderPosture(a, s) {
+  const exposed = (a.exposed_in_env || []).length;
+  const chain = a.ledger_chain || { ok: true, total: 0, legacy: 0 };
+  const sealedCount = a.sealed_count || 0;
+  // Simple posture score out of 100.
+  let score = 100; const notes = [];
+  if (exposed > 0) { score -= 30; notes.push(exposed + ' key(s) still in .env'); }
+  if (!chain.ok) { score -= 40; notes.push('ledger TAMPERED'); }
+  if (s && s.mode !== 'real') { score -= 10; notes.push('MOCK mode'); }
+  if (s && !s.sdk_installed) { score -= 10; notes.push('SDK missing'); }
+  if (sealedCount === 0) { score -= 10; notes.push('nothing sealed'); }
+  score = Math.max(0, score);
+  const cls = score >= 90 ? 'good' : score >= 60 ? 'warn' : 'bad';
+  const chainTxt = chain.total === 0 ? 'empty' : (chain.ok ? 'intact' : 'TAMPERED');
+  document.getElementById('posture-cards').innerHTML = [
+    '<div class="card"><div class="label">Posture score</div><div class="value posture-score ' + cls + '">' + score + '<span style="font-size:14px;color:var(--dim)">/100</span></div><div class="sub2">' + (notes.length ? esc(notes.join(' · ')) : 'all clear') + '</div></div>',
+    '<div class="card"><div class="label">.env leak surface</div><div class="value">' + (exposed === 0 ? '0 ✅' : exposed + ' ⚠') + '</div><div class="sub2">sealed keys still in .env</div></div>',
+    '<div class="card"><div class="label">Sealed secrets</div><div class="value">' + sealedCount + '</div><div class="sub2">in the enclave</div></div>',
+    '<div class="card"><div class="label">Ledger integrity</div><div class="value">' + (chainTxt === 'TAMPERED' ? '✖ ' : chainTxt === 'intact' ? '✅ ' : '') + chainTxt + '</div><div class="sub2">' + (chain.legacy||0) + ' legacy · run <code>audit</code> to reconcile</div></div>',
+  ].join('');
+}
+
+function renderLatency(events) {
+  const lat = events.map(e => e.latency_ms).filter(n => typeof n === 'number');
+  const cards = [
+    ['p50', pct(lat, 50)], ['p95', pct(lat, 95)], ['p99', pct(lat, 99)], ['max', lat.length ? Math.max(...lat) : 0],
+  ];
+  document.getElementById('latency-cards').innerHTML = cards.map(([l, v]) =>
+    '<div class="card"><div class="label">' + l + ' latency</div><div class="value">' + v + ' ms</div><div class="sub2">' + lat.length + ' samples</div></div>'
+  ).join('');
+}
+
+function bars(rows, colorFn) {
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  return rows.map(([name, n]) =>
+    '<div class="bar-row"><div class="name" title="' + esc(name) + '">' + esc(name) + '</div>'
+    + '<div class="track"><div class="fill ' + (colorFn ? colorFn(name) : 'acc') + '" style="width:' + Math.round(n/max*100) + '%"></div></div>'
+    + '<div class="n">' + n + '</div></div>'
+  ).join('');
+}
+
+function renderProviders(events) {
+  const by = {}; for (const e of events) by[e.provider || '(unknown)'] = (by[e.provider||'(unknown)']||0)+1;
+  const rows = Object.entries(by).sort((a,b) => b[1]-a[1]);
+  document.getElementById('provider-chart').innerHTML = rows.length ? bars(rows) : '<div style="color:var(--dim);font-size:13px">No traffic yet.</div>';
+}
+
+function renderStatusCodes(events) {
+  const buckets = { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 };
+  for (const e of events) { const c = Math.floor((e.status||0)/100); const k = c+'xx'; if (buckets[k] !== undefined) buckets[k]++; }
+  const rows = Object.entries(buckets);
+  const color = (name) => name === '2xx' ? 'ok' : name === '3xx' ? 'warn' : 'bad';
+  document.getElementById('status-chart').innerHTML = events.length ? bars(rows, color) : '<div style="color:var(--dim);font-size:13px">No traffic yet.</div>';
+}
+
+function setRefresh() {
+  const v = Number(document.getElementById('refresh').value);
+  if (window._timer) clearInterval(window._timer);
+  if (v > 0) window._timer = setInterval(poll, v);
+}
+
+function exportJson() {
+  const blob = new Blob([JSON.stringify(window._events || [], null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'blindfold-usage-' + new Date().toISOString().slice(0,19).replace(/[:T]/g,'-') + '.json';
+  a.click();
 }
 
 function renderAudit(a) {
@@ -447,12 +578,20 @@ function renderSpark(events) {
 }
 
 function renderTable(events) {
-  if (events.length === 0) {
+  const q = (document.getElementById('filter')?.value || '').toLowerCase().trim();
+  let list = events;
+  if (q) list = events.filter(e =>
+    (e.provider||'').toLowerCase().includes(q) ||
+    (e.path||'').toLowerCase().includes(q) ||
+    (e.method||'').toLowerCase().includes(q) ||
+    String(e.status||'').includes(q) ||
+    (e.mode||'').toLowerCase().includes(q));
+  if (list.length === 0) {
     document.getElementById('table-wrap').innerHTML =
-      '<div class="empty">No proxy traffic yet. Point an agent at <code>http://127.0.0.1:8787</code>.</div>';
+      '<div class="empty">' + (q ? 'No requests match "' + esc(q) + '".' : 'No proxy traffic yet. Point an agent at <code>http://127.0.0.1:8787</code>.') + '</div>';
     return;
   }
-  const rows = events.slice().reverse().slice(0, 50).map(e =>
+  const rows = list.slice().reverse().slice(0, 50).map(e =>
     '<tr>'
       + '<td>' + timeAgo(e.t) + '</td>'
       + '<td>' + esc(e.provider) + '</td>'
@@ -469,7 +608,7 @@ function renderTable(events) {
 }
 
 poll();
-setInterval(poll, 2000);
+setRefresh(); // start the auto-refresh timer at the selected interval (default 2s)
 </script>
 </body>
 </html>
