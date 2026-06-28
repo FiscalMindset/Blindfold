@@ -6,7 +6,9 @@
  * Flow: publish (idempotent) → grant secrets read-ACL to the contract →
  * authorize egress to api.github.com → execute forward (dry-run, then real).
  *
- *   npx tsx scripts/test-enclave-egress.ts
+ *   npx tsx scripts/test-enclave-egress.ts [contract_id] [secret] [host] [path]
+ *   # e.g. github (defaults):  ... 458
+ *   #      digitalocean:       ... 458 digital_ocean_api_key api.digitalocean.com /v2/account
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -16,7 +18,9 @@ import { CONTRACT_VERSION } from "../packages/blindfold/src/constants.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WASM = path.join(ROOT, "contract", "target", "wasm32-wasip2", "release", "blindfold_proxy.wasm");
-const HOST = "api.github.com";
+const SECRET = process.argv[3] ?? "github_token";
+const HOST = process.argv[4] ?? "api.github.com";
+const REQ_PATH = process.argv[5] ?? "/user";
 
 async function main(): Promise<void> {
   const env = loadBlindfoldEnv();
@@ -61,29 +65,31 @@ async function main(): Promise<void> {
     console.log(`  ✓ egress grant accepted`);
   } catch (e) { console.log(`  ✖ egress grant: ${(e as Error).message.slice(0, 200)}`); }
 
+  const URL = `https://${HOST}${REQ_PATH}`;
+
   // 3a. dry-run: proves in-enclave secret read + substitution, no outbound call.
-  console.log(`\n→ forward dry-run (in-enclave substitution proof)`);
+  console.log(`\n→ forward dry-run (in-enclave substitution proof) for "${SECRET}"`);
   try {
     const r = await tenant.contracts.execute("blindfold-proxy", {
       version: CONTRACT_VERSION, functionName: "forward",
-      input: { method: "GET", url: `https://${HOST}/user`, headers: [["Authorization", "Bearer __BLINDFOLD__"]], secret_key: "github_token", dry_run: true },
+      input: { method: "GET", url: URL, headers: [["Authorization", "Bearer __BLINDFOLD__"]], secret_key: SECRET, dry_run: true },
     }) as Record<string, unknown>;
-    console.log(`  ✓ ${JSON.stringify(r)}  (length = "Bearer "+token = 7+93 = 100)`);
+    console.log(`  ✓ ${JSON.stringify(r)}  (length = "Bearer " (7) + secret length)`);
   } catch (e) { console.log(`  ✖ ${(e as Error).message.slice(0, 200)}`); }
 
-  // 3b. real: the enclave makes the GitHub call itself.
-  console.log(`\n→ forward REAL → https://${HOST}/user (enclave makes the call)`);
+  // 3b. real: the enclave makes the call itself.
+  console.log(`\n→ forward REAL → ${URL} (enclave makes the call)`);
   try {
     const r = await tenant.contracts.execute("blindfold-proxy", {
       version: CONTRACT_VERSION, functionName: "forward",
-      input: { method: "GET", url: `https://${HOST}/user`, headers: [["Authorization", "Bearer __BLINDFOLD__"], ["User-Agent", "blindfold-enclave"], ["Accept", "application/vnd.github+json"]], secret_key: "github_token" },
+      input: { method: "GET", url: URL, headers: [["Authorization", "Bearer __BLINDFOLD__"], ["User-Agent", "blindfold-enclave"], ["Accept", "application/json"]], secret_key: SECRET },
     }) as Record<string, unknown>;
     console.log(`  code=${r.code} length=${r.length}`);
     const body = typeof r.body === "string" ? r.body : JSON.stringify(r.body);
-    const login = (body.match(/"login"\s*:\s*"([^"]+)"/) || [])[1];
+    const id = (body.match(/"(login|email|name|uuid)"\s*:\s*"([^"]+)"/) || [])[2];
     if (Number(r.code) >= 200 && Number(r.code) < 300) {
-      console.log(`  🎉 ENCLAVE-EGRESS WORKS — GitHub authenticated as: ${login ?? "(see body)"}`);
-      console.log(`     The sealed token NEVER left the enclave.`);
+      console.log(`  🎉 ENCLAVE-EGRESS WORKS — ${HOST} authenticated (${id ?? "see body"}).`);
+      console.log(`     The sealed secret NEVER left the enclave.`);
     } else {
       console.log(`  body: ${body.slice(0, 300)}`);
     }

@@ -107,6 +107,7 @@ Runnable versions of this for several stacks live in [`examples/`](examples/):
 | [`examples/langchain-summarizer/`](examples/langchain-summarizer/) | LangChain · Node (with a live injection attack) |
 | [`examples/anthropic-quickstart/`](examples/anthropic-quickstart/) | Anthropic SDK · Node |
 | [`examples/cli-tools/`](examples/cli-tools/) | **No-code `blindfold use` recipes** |
+| [`examples/digital-ocean/`](examples/digital-ocean/) | **DigitalOcean infra — `doctl`/`curl`/enclave (verified)** |
 
 ---
 

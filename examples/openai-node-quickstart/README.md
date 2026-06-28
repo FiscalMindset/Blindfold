@@ -1,13 +1,31 @@
 # OpenAI SDK — Node.js quickstart
 
-The smallest possible Blindfolded OpenAI call.
+A real OpenAI call where **this process never holds the API key** — it lives in the T3 enclave, and the code only ever sees the `__BLINDFOLD__` sentinel.
+
+## Run it
 
 ```bash
+# In the repo root (one-time): seal your key, then delete it from .env
+blindfold register --name openai_api_key --from-env OPENAI_API_KEY
+blindfold proxy                      # leave running → http://127.0.0.1:8787
+
+# In this folder:
 cd examples/openai-node-quickstart
 npm install
 node index.js
 ```
 
-The `openai` package reads `OPENAI_BASE_URL` and `OPENAI_API_KEY` from the environment, so the entire "Blindfold adoption" is two env vars. The `index.js` file sets them explicitly for clarity, but if you set them externally the file would be a *zero-diff* port from your existing code.
+## Expected output
 
-Compare with the "without Blindfold" version: open `index.js` and look at lines 4-7 — there is no other change.
+```
+🔒 This process's apiKey = "__BLINDFOLD__"  (the real key is in the enclave)
+🤖 Blindfold works.
+🕵️  If this agent were tricked into leaking its key, it would send: "__BLINDFOLD__"
+✅ Real completion succeeded with a key this process never held.
+```
+
+## What this proves
+
+- The only Blindfold-specific lines are `baseURL` + `apiKey` in the `OpenAI({…})` constructor — adoption is **one line**.
+- The "key" in this process is a **sentinel**, not a secret. A prompt-injection that exfiltrates `OPENAI_API_KEY` leaks the worthless string `__BLINDFOLD__`.
+- Yet the completion is **real** — the proxy substitutes the sealed key inside the enclave, after the request leaves this process.
