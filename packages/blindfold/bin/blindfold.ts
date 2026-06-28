@@ -61,6 +61,8 @@ const TOOL_ENV: Record<string, string> = {
   aws: "AWS_SECRET_ACCESS_KEY", stripe: "STRIPE_API_KEY",
   vercel: "VERCEL_TOKEN", npm: "NPM_TOKEN", docker: "DOCKER_PASSWORD",
   openai: "OPENAI_API_KEY", anthropic: "ANTHROPIC_API_KEY",
+  doctl: "DIGITALOCEAN_ACCESS_TOKEN", heroku: "HEROKU_API_KEY",
+  cloudflared: "CLOUDFLARE_API_TOKEN", wrangler: "CLOUDFLARE_API_TOKEN",
 };
 
 /** Pick the env-var name for `use`: explicit --as, else infer from the tool, else NAME upper-cased. */

@@ -9,6 +9,7 @@ Runnable, copy-paste examples of using a **sealed** secret — across the three 
 | Example | Stack | Use surface | Code? |
 |---|---|---|---|
 | [`cli-tools/`](cli-tools/) | `gh` · `git` · `curl` · `psql` · `docker` | `blindfold use` | **none** |
+| [`digital-ocean/`](digital-ocean/) | DigitalOcean API · `doctl` · `curl` | `blindfold use` + enclave-egress | **none** |
 | [`openai-node-quickstart/`](openai-node-quickstart/) | OpenAI SDK · Node | proxy + sentinel | one line |
 | [`openai-python-quickstart/`](openai-python-quickstart/) | OpenAI SDK · Python | proxy + sentinel | one line |
 | [`langchain-summarizer/`](langchain-summarizer/) | LangChain · Node | proxy + sentinel | one line · **includes a live prompt-injection attack** |
