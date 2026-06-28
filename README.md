@@ -334,6 +334,8 @@ blindfold use   --name X --url <https>      # quick "does it still auth?" check
 blindfold rotate --name X --from-env X      # replace a secret's value (snapshots the old one for rollback)
 blindfold rollback --name X                 # restore the previous value if a rotation was wrong
 blindfold grant  --host api.openai.com      # authorize the contract to call a host (needed for the proxy/enclave path)
+blindfold share  --to <did> --host <host>   # let a teammate's agent USE your keys (forward only — never the plaintext)
+blindfold revoke --to <did>                 # remove a teammate's access, instantly
 blindfold proxy       # OpenAI/Anthropic-shaped local proxy for SDKs
 blindfold sealed      # metadata-only inventory (never values)
 blindfold audit       # verify ledger hash-chain + reconcile against the enclave (source of truth)

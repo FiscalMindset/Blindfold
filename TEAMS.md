@@ -44,36 +44,21 @@ The `fp=` is a non-reversible SHA-256 fingerprint — it lets you **confirm the 
 
 ---
 
-## 2. Scoped access — grant agents, not keys
+## 2. Scoped access — share with agents, not keys
 
-A teammate's agent gets access by **DID grant**, never by receiving the key. The grant is per-(agent, contract, function, host) — least privilege by construction.
+A teammate's agent gets access by **DID grant**, never by receiving the key. It's one command — and the grant is least-privilege by construction (`forward` only, specific hosts), so the teammate can *use* the key through the enclave but **never receives the plaintext**:
 
-```ts
-// Authorize Alice's agent to call ONLY release-to-tenant, ONLY for api.openai.com:
-await t3n.execute({
-  script_name: "tee:user/contracts",
-  function_name: "agent-auth-update",
-  input: { agents: [{
-    agentDid: "did:t3n:<alice-agent>",
-    scripts: [{
-      scriptName: "z:<tenant>:blindfold-proxy",
-      versionReq: ">=0.5.0",
-      functions: ["release-to-tenant"],   // not "forward" — least privilege
-      allowedHosts: ["api.openai.com"],   // can't exfiltrate elsewhere
-    }],
-  }] },
-});
+```bash
+# Let Alice's agent USE your sealed keys, only for api.openai.com:
+blindfold share --to did:t3n:<alice-agent> --host api.openai.com
+
+# Revoke when she leaves the team — immediate and complete:
+blindfold revoke --to did:t3n:<alice-agent>
 ```
 
-The contract's own read access to the secrets map is a separate ACL grant (auto-wired by `blindfold init` / publish):
+> `share` grants the `forward` function (use-via-enclave) and nothing else — no `release-to-tenant`, so the teammate can't extract the raw key. `revoke` removes all allowed hosts, so nothing routes. Because nobody ever holds a raw copy, revocation is total — there's no leaked key to chase.
 
-```ts
-await tenant.maps.update("secrets", { readers: { only: [<contract_id>] } });
-```
-
-Reference implementation: [`scripts/grant-and-call.ts`](scripts/grant-and-call.ts) (self-grant + call) and [`scripts/test-enclave-egress.ts`](scripts/test-enclave-egress.ts) (publish + ACL + egress + call).
-
-> **Revoking access** = re-run `agent-auth-update` without that agent (or with an empty `scripts` list). Because nobody holds the raw key, revocation is immediate and complete — there's no leaked copy to chase.
+Under the hood this is T3's `agent-auth-update` (per-agent, per-contract, per-function, per-host). The contract's own read access to the secrets map is a separate ACL grant, auto-wired by `blindfold init` / `blindfold publish`. Reference flows: [`scripts/grant-and-call.ts`](scripts/grant-and-call.ts) and [`scripts/test-enclave-egress.ts`](scripts/test-enclave-egress.ts).
 
 ---
 

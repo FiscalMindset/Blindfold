@@ -286,6 +286,46 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "share": {
+      // Authorize a teammate's agent to USE this tenant's sealed keys (via the
+      // in-enclave forward path) for specific hosts — they never receive the key.
+      const to = String(argv.flags.to ?? "");
+      const hosts: string[] = [];
+      if (argv.flags.host) hosts.push(...String(argv.flags.host).split(",").map((h) => h.trim()).filter(Boolean));
+      if (argv.flags.hosts) hosts.push(...String(argv.flags.hosts).split(",").map((h) => h.trim()).filter(Boolean));
+      if (!to || hosts.length === 0) {
+        die("usage: blindfold share --to <agent-did> --host <host>[,host2]   (e.g. --to did:t3n:… --host api.openai.com)");
+      }
+      const env = loadBlindfoldEnv();
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      try {
+        await client.setAgentGrant(to, hosts, ["forward"]); // forward only — least privilege, no plaintext extraction
+        console.log(`✓ Shared access with ${to}`);
+        console.log(`  authorized: forward → ${hosts.join(", ")}  (they can USE the key via the enclave; they never receive the plaintext)`);
+        console.log(`  Revoke any time:  blindfold revoke --to ${to}`);
+      } finally {
+        await client.close();
+      }
+      return;
+    }
+
+    case "revoke": {
+      const to = String(argv.flags.to ?? "");
+      if (!to) die("usage: blindfold revoke --to <agent-did>");
+      const env = loadBlindfoldEnv();
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      try {
+        await client.setAgentGrant(to, [], []); // empty scripts → remove all authorization
+        console.log(`✓ Revoked all contract access for ${to}`);
+        console.log(`  Nobody holds the raw key, so revocation is immediate and complete — there's no leaked copy to chase.`);
+      } finally {
+        await client.close();
+      }
+      return;
+    }
+
     case "proxy": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const secret = argv.flags.secret ? String(argv.flags.secret) : undefined;
@@ -589,6 +629,8 @@ Commands:
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
   grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com
+  share    --to <agent-did> --host <host>[,...]    Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive the plaintext (forward only, least privilege).
+  revoke   --to <agent-did>                         Remove a teammate's access. Immediate and complete — nobody holds a raw key copy.
 
   dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
   stats                                             CLI summary of proxy usage.
