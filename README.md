@@ -13,7 +13,7 @@
 
 <br/>
 
-### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -319,6 +319,23 @@ const r = await openai.chat.completions.create({ /* … */ });
 ```
 
 Useful when you can't easily set environment variables (e.g. inside a managed runtime).
+
+---
+
+## CLI at a glance
+
+```bash
+blindfold doctor      # is my key/tenant healthy? (plain-English diagnosis)
+blindfold status      # one-glance: mode, tenant, and every sealed secret
+blindfold register --name X --from-env X    # seal a secret (then delete the .env line)
+blindfold use   --name X -- <command>       # USE it with any tool, no code (auto-maps gh→GH_TOKEN, …)
+blindfold use   --name X --url <https>      # quick "does it still auth?" check
+blindfold rotate --name X --from-env X      # replace a secret's value everywhere at once
+blindfold proxy       # OpenAI/Anthropic-shaped local proxy for SDKs
+blindfold sealed      # metadata-only inventory (never values)
+```
+
+Full walkthrough in the **[Usage Guide](usage.md)**, copy-paste examples in **[Examples](EXAMPLES.md)**, team setup in **[Teams](TEAMS.md)**.
 
 ---
 

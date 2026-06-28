@@ -461,6 +461,31 @@
   </style>
 </head>
 <body>
+  <style>
+    .docs-nav {
+      position: fixed; top: 12px; right: 14px; z-index: 1000;
+      display: flex; gap: 4px; align-items: center;
+      font-size: 0.72rem; font-family: system-ui, sans-serif;
+      background: rgba(255,255,255,0.82); backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,0.08); border-radius: 999px;
+      padding: 4px 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .docs-nav a {
+      color: #444; text-decoration: none; padding: 3px 9px; border-radius: 999px;
+      transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .docs-nav a:hover { background: #6e44ff; color: #fff; }
+    .docs-nav a.star { font-weight: 600; color: #6e44ff; }
+    .docs-nav a.star:hover { color: #fff; }
+    @media (max-width: 640px) { .docs-nav { font-size: 0.66rem; top: 8px; right: 8px; } .docs-nav a { padding: 3px 7px; } }
+  </style>
+  <nav class="docs-nav" aria-label="Documentation">
+    <a href="https://github.com/FiscalMindset/Blindfold#readme" target="_blank" rel="noopener">Home</a>
+    <a href="https://github.com/FiscalMindset/Blindfold/blob/main/usage.md" target="_blank" rel="noopener">Usage</a>
+    <a href="https://github.com/FiscalMindset/Blindfold/blob/main/EXAMPLES.md" target="_blank" rel="noopener">Examples</a>
+    <a href="https://github.com/FiscalMindset/Blindfold/blob/main/TEAMS.md" target="_blank" rel="noopener">Teams</a>
+    <a href="https://github.com/FiscalMindset/Blindfold" target="_blank" rel="noopener" class="star">GitHub ★</a>
+  </nav>
   <div class="presentation">
     <div class="slides" id="slidesContainer">
 
