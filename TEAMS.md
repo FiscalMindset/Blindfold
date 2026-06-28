@@ -85,7 +85,10 @@ Keep separate tenants for separate blast radii (e.g. `dev`, `staging`, `prod`, o
 T3N_API_KEY=<key>           # the key whose tenant you're operating
 DID=did:t3n:<that-key's-tenant>   # the SERVER-ASSIGNED tenant DID (from `blindfold doctor`)
 BLINDFOLD_T3_ENV=testnet    # or production
+T3_BASE_URL=<node-url>      # optional: pin a specific/healthy node (overrides the SDK default)
 ```
+
+> **Resilience:** the SDK targets one hardcoded node per environment. If that node is unhealthy (e.g. a Raft follower that can't commit writes), every write 500s with no recourse. Set `T3_BASE_URL` to a healthy/leader node to route around it — `blindfold doctor` shows the active node URL.
 
 Before trusting any key, run `blindfold doctor` — it tells you in plain English whether the key has an active, provisioned tenant (the #1 cause of mysterious failures). Use `blindfold status` for a one-glance roster of what's sealed.
 

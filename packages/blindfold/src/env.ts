@@ -43,11 +43,14 @@ export function loadBlindfoldEnv(): BlindfoldEnv {
   const port = Number.parseInt(process.env.BLINDFOLD_PORT ?? "8787", 10);
   const t3EnvRaw = (process.env.BLINDFOLD_T3_ENV ?? "testnet").toLowerCase();
   const t3Env = t3EnvRaw === "production" ? "production" : "testnet";
+  // Optional node-URL override — point at a healthy/leader node when the SDK's
+  // default node is unhealthy (the failure mode behind days of phantom 500s).
+  const t3BaseUrl = (process.env.T3_BASE_URL ?? process.env.BLINDFOLD_BASE_URL ?? "").trim();
   // MOCK is opt-in only — used by the standalone demo and CI tests. The
   // production path is REAL. If T3 creds are missing in REAL mode, callers
   // must surface a clear error (not silently fall back to mock).
   const mock = process.env.BLINDFOLD_MOCK === "1";
-  return { t3nApiKey, did, port, t3Env, mock };
+  return { t3nApiKey, did, port, t3Env, t3BaseUrl, mock };
 }
 
 /** Throw a friendly error if REAL mode is requested but creds are missing. */

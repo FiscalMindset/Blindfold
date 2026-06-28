@@ -102,7 +102,9 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
 
   const sdk = await loadSdk();
   sdk.setEnvironment(env.t3Env);
-  const baseUrl = sdk.NODE_URLS[env.t3Env];
+  // Prefer an explicit override (T3_BASE_URL) so the user can point at a
+  // healthy/leader node when the SDK's default node is an unhealthy follower.
+  const baseUrl = env.t3BaseUrl || sdk.NODE_URLS[env.t3Env];
 
   const wasmComponent = await sdk.loadWasmComponent();
   const address = sdk.eth_get_address(env.t3nApiKey);

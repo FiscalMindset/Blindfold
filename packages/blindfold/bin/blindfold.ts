@@ -345,6 +345,7 @@ async function main(): Promise<void> {
       const env = loadBlindfoldEnv();
       console.log("🛡️  Blindfold status\n");
       console.log(`  mode:    ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL"}   ·   T3 env: ${env.t3Env}`);
+      if (env.t3BaseUrl) console.log(`  node:    ${env.t3BaseUrl}  (override)`);
       if (!env.mock) {
         try {
           const { openT3Client } = await import("../src/t3-client.ts");
@@ -379,6 +380,7 @@ async function main(): Promise<void> {
       console.log(`  T3N_API_KEY set:    ${env.t3nApiKey ? "yes" : "NO ✖"}`);
       console.log(`  DID set:            ${env.did ? "yes" : "NO ✖"}`);
       console.log(`  T3 environment:     ${env.t3Env}`);
+      console.log(`  node URL:           ${env.t3BaseUrl || `(SDK default for ${env.t3Env})`}`);
       console.log(`  default proxy port: ${env.port}`);
       if (!env.mock && (!env.t3nApiKey || !env.did)) {
         console.log("");
@@ -435,7 +437,8 @@ async function main(): Promise<void> {
           console.log(`  ⚠  This key AUTHENTICATES but its tenant is unusable: a read-only me()`);
           console.log(`     returns a server error. Every seal/write with it will also 500.`);
           console.log(`     Fix one of:`);
-          console.log(`       • switch .env to a key whose tenant is active (check with this doctor), or`);
+          console.log(`       • switch .env to a key whose tenant is active (check with this doctor),`);
+          console.log(`       • point at a healthy node:  T3_BASE_URL=<leader-node-url>  (if the node itself is unhealthy), or`);
           console.log(`       • ask Terminal 3 to provision/claim a tenant for this key.`);
         } else {
           console.log(`  ⚠  Could not read the tenant behind this key — seals/writes will likely fail.`);
