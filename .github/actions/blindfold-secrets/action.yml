@@ -1,0 +1,23 @@
+name: "Blindfold secrets"
+description: "Pull Blindfold-sealed secrets from the T3 enclave into the job env (masked). Replaces per-key GitHub secrets with one T3 credential."
+inputs:
+  secrets:
+    description: "Whitespace/newline list of <name> or <name>=<ENV_VAR> to inject (e.g. 'openai_api_key digital_ocean_api_key=DIGITALOCEAN_ACCESS_TOKEN')."
+    required: true
+runs:
+  using: composite
+  steps:
+    # Requires the Blindfold repo checked out, deps installed, and T3N_API_KEY +
+    # DID present in env (the caller wires these from GitHub secrets).
+    - shell: bash
+      env:
+        BF_SECRETS: ${{ inputs.secrets }}
+      run: |
+        set -euo pipefail
+        for spec in $BF_SECRETS; do
+          if [[ "$spec" == *=* ]]; then
+            npm run -s blindfold -- export --name "${spec%%=*}" --as "${spec#*=}"
+          else
+            npm run -s blindfold -- export --name "$spec"
+          fi
+        done
