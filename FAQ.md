@@ -26,6 +26,75 @@ The core security property is proven on real T3 hardware (sealed keys are used f
 
 ---
 
+## Architecture (click any box to jump to the code)
+
+> These diagrams render on GitHub. In the first one, **every box is a link** to the file that implements it — that's the "interactive" part.
+
+```mermaid
+flowchart LR
+  subgraph DEV["🖥️ Your machine — UNTRUSTED (prompt-injection lives here)"]
+    Agent["🤖 AI Agent<br/>holds only __BLINDFOLD__"]
+    Proxy["Blindfold proxy / CLI<br/>(sees only the sentinel)"]
+    Env[".env<br/>no API keys"]
+  end
+  subgraph T3["🔒 Terminal 3 — Intel TDX enclave — TRUSTED"]
+    Contract["blindfold-proxy contract<br/>forward() / release-to-tenant()"]
+    KV[("secrets map<br/>z:&lt;tenant&gt;:secrets")]
+  end
+  API["🌐 Upstream API<br/>OpenAI · Anthropic · GitHub · DigitalOcean · …"]
+
+  Env -. "one-time seal (plaintext, once)" .-> KV
+  Agent -->|"request with __BLINDFOLD__"| Proxy
+  Proxy -->|"forward(request, secret_key)"| Contract
+  Contract -->|"read sealed key"| KV
+  Contract -->|"substitute in headers + http::call"| API
+  API -->|"response"| Contract
+  Contract --> Proxy --> Agent
+
+  click Agent "https://github.com/FiscalMindset/Blindfold/blob/main/demo/agent-b-blindfolded/index.ts" "Agent B — runs with only the sentinel"
+  click Proxy "https://github.com/FiscalMindset/Blindfold/blob/main/packages/blindfold/src/proxy.ts" "proxy.ts"
+  click Contract "https://github.com/FiscalMindset/Blindfold/blob/main/contract/src/forward.rs" "forward.rs — in-enclave substitution + http::call"
+  click KV "https://github.com/FiscalMindset/Blindfold/blob/main/packages/blindfold/src/register.ts" "register.ts — the ONLY plaintext path"
+  click API "https://github.com/FiscalMindset/Blindfold/blob/main/EXAMPLES.md" "Examples"
+
+  classDef trusted fill:#e8f5e9,stroke:#3a3,color:#063
+  classDef untrusted fill:#fff3e0,stroke:#e69138,color:#663
+  class Contract,KV trusted
+  class Agent,Proxy,Env untrusted
+```
+
+**The two lifecycles** — seal once (plaintext touches one function, then is gone), use forever (key never leaves the enclave):
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Dev
+  participant CLI as blindfold CLI
+  participant Enclave as 🔒 T3 enclave
+  participant API as 🌐 Upstream API
+
+  rect rgb(232,245,233)
+  Note over Dev,Enclave: ONE-TIME SEAL
+  Dev->>CLI: register --name openai_api_key --from-env OPENAI_API_KEY
+  CLI->>Enclave: map-entry-set(value)  ·  value read once, then dropped
+  CLI-->>Dev: ✓ sealed — delete the .env line
+  end
+
+  rect rgb(227,242,253)
+  Note over Dev,API: EVERY CALL (the key never comes back to you)
+  Dev->>CLI: use --name openai_api_key -- <cmd>   (or via the proxy)
+  CLI->>Enclave: forward(request containing __BLINDFOLD__)
+  Enclave->>Enclave: read key from KV, substitute in headers
+  Enclave->>API: real request with the real key
+  API-->>Enclave: response
+  Enclave-->>Dev: response — plaintext never left the enclave
+  end
+```
+
+**The one rule that makes it safe:** the only arrow carrying plaintext is the dashed "one-time seal" line (handled by `register.ts`). Every other arrow carries a sentinel or a finished response.
+
+---
+
 ## Security
 
 ### Can Blindfold itself see my key?
@@ -99,6 +168,9 @@ Yes — the proxy makes a *real* call to the provider, so you need a real key fo
 ### How do I rotate a key?
 `blindfold rotate --name X --from-env X`. It shows before/after fingerprints (never the value) so you can confirm it changed; everything that uses that name picks up the new value automatically — no code or config change.
 
+### What if a rotation was a mistake — can I roll back?
+Yes. `rotate` automatically snapshots the previous value (as an enclave-side version), so `blindfold rollback --name X` restores the most recent prior value, and `blindfold versions --name X` lists what's available. Fingerprints let you confirm the revert without ever seeing the value.
+
 ---
 
 ## Teams & operations
@@ -120,6 +192,33 @@ Run `blindfold doctor` first — it does a live check and tells you the actual c
 
 ### Why did my key work on one machine but not another?
 A T3 API key only works if the server has an **active tenant provisioned** for it, and the tenant DID is **server-assigned** (not derived from the key's address). Put the key *and* its real DID (from `blindfold doctor` / `me()`) in `.env`.
+
+---
+
+## Performance, limits & compatibility
+
+### Does Blindfold add latency?
+Yes — one extra hop. Each call goes through the enclave instead of straight to the provider, so expect added round-trip latency per request (the enclave does the substitution and the outbound call). For most agent workloads (already network- and model-bound) it's negligible; for ultra-latency-sensitive paths, measure first.
+
+### Can I protect multiple providers at once?
+Yes. Seal each key under its own name (`openai_api_key`, `anthropic_api_key`, …). The proxy maps paths per provider (`/v1/` → OpenAI, `/anthropic/` → Anthropic, `/x/` → xAI, `/groq/` → Groq), and `blindfold use` works for any tool regardless of provider.
+
+### Does it work with streaming responses (SSE / token streaming)?
+The proxy currently returns the full upstream response (the enclave's `http.response` is a status + payload, no streaming). Token-by-token streaming through the enclave is a known limitation — use the broker path (`release()`) with the provider's native streaming if you need it today.
+
+### What languages and SDKs are supported?
+- **Any tool / language** via `blindfold use` (it just sets an env var).
+- **Any HTTP SDK** via the proxy + `__BLINDFOLD__` sentinel (one-line base-URL swap).
+- **TypeScript/JS** also have `release()` and `wrap()` for in-code use. (A Python `release()` is on the roadmap.)
+
+### Is there a cost?
+T3 runs on credits (testnet credits are free to request). Writes (seal, publish, grant) and contract executes consume credits; reads are cheap. `blindfold doctor` flags an out-of-credit tenant (403) explicitly.
+
+### Where does my key physically live (for compliance)?
+Only inside the Intel TDX enclave on Terminal 3's infrastructure, sealed to your tenant's `secrets` map. It is never written to your disk, your logs, or your git history. You're extending trust to Intel TDX + T3 — the same shape as trusting a KMS/HSM vendor.
+
+### Can I self-host the enclave?
+The enclave is the T3 platform; Blindfold is the client + contract on top of it. Self-hosting the confidential-compute layer is out of scope for this project (it's T3's domain).
 
 ---
 

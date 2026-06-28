@@ -9,6 +9,7 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import http from "node:http";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -148,7 +149,8 @@ async function main(): Promise<void> {
     const r = await run(
       "npx",
       ["tsx", "packages/blindfold/bin/blindfold.ts", "register", "--name", "openai_api_key", "--from-env", "OPENAI_API_KEY"],
-      { env: { BLINDFOLD_MOCK: "1", OPENAI_API_KEY: secret }, timeoutMs: 10000 },
+      // Use a throwaway ledger so the test doesn't pollute the user's real .blindfold/sealed.jsonl.
+      { env: { BLINDFOLD_MOCK: "1", OPENAI_API_KEY: secret, BLINDFOLD_SEALED_LOG: `${os.tmpdir()}/blindfold-test-sealed-${Date.now()}.jsonl` }, timeoutMs: 10000 },
     );
     const valueAppeared = (r.out + r.err).includes(secret);
     return {
