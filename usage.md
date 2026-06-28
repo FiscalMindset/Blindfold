@@ -31,6 +31,19 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 
 ---
 
+## ⚡ Fastest path — seal your whole `.env` in one command
+
+Already have a `.env` full of keys? Move them all into the enclave at once:
+
+```bash
+blindfold migrate --dry-run     # preview: what gets sealed vs. skipped (no changes)
+blindfold migrate               # seal every secret, strip the plaintext lines (backup kept)
+```
+
+It seals every secret-looking var, **removes the plaintext from `.env`** (keeping a backup), and **skips** your T3 creds (`T3N_API_KEY`, `DID`), team keys (`t1_*`/`t2_*`), and config (`*_HOST`, `*_EMAIL`, …). After this, your `.env` holds no API keys — use any of them with `blindfold use --name <x> -- <cmd>` (§3c). Use `--keep` to comment the lines out instead of deleting them.
+
+---
+
 ## 1. Scenario tree — pick yours
 
 | You want to … | Jump to |

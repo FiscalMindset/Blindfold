@@ -164,6 +164,44 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "migrate": {
+      const { planMigration, runMigrate } = await import("../src/migrate.ts");
+      const dryRun = !!argv.flags["dry-run"];
+      const keep = !!argv.flags.keep;
+      const plan = planMigration();
+      const toSeal = plan.filter((p) => p.action === "seal");
+
+      console.log(dryRun ? "🔍 blindfold migrate --dry-run (no changes will be made)\n" : "🚚 blindfold migrate\n");
+      console.log("  Plan:");
+      for (const p of plan) {
+        if (p.action === "seal") console.log(`    SEAL  ${p.envVar.padEnd(26)} → ${p.sealName}  (${p.bytes} B)`);
+        else console.log(`    skip  ${p.envVar.padEnd(26)} — ${p.reason}`);
+      }
+      if (toSeal.length === 0) {
+        console.log("\n  Nothing to seal (no secret-looking vars found).");
+        return;
+      }
+      if (dryRun) {
+        console.log(`\n  Would seal ${toSeal.length} secret(s), then ${keep ? "comment out" : "remove"} their .env lines (a .env backup is kept either way).`);
+        console.log("  Re-run without --dry-run to do it.");
+        return;
+      }
+
+      console.log(`\n  Sealing ${toSeal.length} secret(s) …`);
+      const results = await runMigrate({ keep });
+      console.log("");
+      let ok = 0, fail = 0;
+      for (const r of results) {
+        if (r.action !== "seal") continue;
+        if (r.sealed) { ok++; console.log(`    ✓ ${r.sealName} sealed (${r.bytes} B) — .env line ${keep ? "commented" : "removed"}`); }
+        else { fail++; console.log(`    ✖ ${r.sealName}: ${(r.error ?? "").slice(0, 100)}`); }
+      }
+      console.log(`\n  Done: ${ok} sealed, ${fail} failed.  (.env backup saved alongside .env)`);
+      if (ok > 0) console.log(`  Use any of them with no code:  blindfold use --name <name> -- <command>`);
+      if (fail > 0) { console.log(`  Failed seals kept their .env line. Check \`blindfold doctor\`.`); process.exitCode = 1; }
+      return;
+    }
+
     case "proxy": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const secret = argv.flags.secret ? String(argv.flags.secret) : undefined;
@@ -401,6 +439,7 @@ Commands:
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
   use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it and run <cmd> with it injected as $ENV for that command only — never back in your env. --as is auto-detected for known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Or  --url <https>  for a quick auth check.
   rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (shows before/after fingerprints; never the value). Everything using that name picks up the new value automatically.
+  migrate  [--dry-run] [--keep]                     Seal EVERY secret in your .env in one shot, then remove the plaintext lines (backup kept). --dry-run previews; --keep comments lines instead of deleting. Skips T3 creds + config.
   status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
