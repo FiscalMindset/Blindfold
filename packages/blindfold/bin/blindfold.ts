@@ -148,19 +148,81 @@ async function main(): Promise<void> {
       if (!name) {
         die("usage: blindfold rotate --name <secret> [--from-env <ENV_VAR>]");
       }
-      const { release } = await import("../src/release.ts");
-      // Show the current fingerprint (best-effort) so you can confirm it changed.
+      const env = loadBlindfoldEnv();
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const { recordVersion, versionKeyFor } = await import("../src/versions.ts");
+      const client = await openT3Client(env);
       try {
-        const old = await release(name);
-        console.log(`  before:  "${name}"  ${old.length} B  fp=${fingerprint(old)}`);
-      } catch {
-        console.log(`  before:  (no existing value for "${name}" — sealing fresh)`);
+        // Snapshot the current value into the enclave (for rollback) before overwriting.
+        try {
+          const old = await client.releaseSecret(name);
+          const vKey = versionKeyFor(name, Date.now());
+          await client.seedSecret(vKey, old);
+          recordVersion({ t: new Date().toISOString(), name, versionKey: vKey, length: old.length, fingerprint: fingerprint(old) });
+          console.log(`  before:  "${name}"  ${old.length} B  fp=${fingerprint(old)}  (snapshot saved — rollback available)`);
+        } catch {
+          console.log(`  before:  (no existing value for "${name}" — sealing fresh)`);
+        }
+        await registerSecret({ name, fromEnv }); // overwrites the live entry + records the ledger
+        const now = await client.releaseSecret(name);
+        console.log(`✓ Rotated "${name}"  →  ${now.length} B  fp=${fingerprint(now)}  (mode=real)`);
+        console.log(`  Every place that uses "${name}" now gets the new value — no code/config change.`);
+        console.log(`  Made a mistake? \`blindfold rollback --name ${name}\``);
+        if (fromEnv) console.log(`  You can now DELETE ${fromEnv} from your .env.`);
+      } finally {
+        await client.close();
       }
-      await registerSecret({ name, fromEnv }); // overwrites the same map entry
-      const now = await release(name);
-      console.log(`✓ Rotated "${name}"  →  ${now.length} B  fp=${fingerprint(now)}  (mode=real)`);
-      console.log(`  Every place that uses "${name}" now gets the new value — no code/config change.`);
-      if (fromEnv) console.log(`  You can now DELETE ${fromEnv} from your .env.`);
+      return;
+    }
+
+    case "rollback": {
+      const name = String(argv.flags.name ?? "");
+      if (!name) die("usage: blindfold rollback --name <secret> [--to <iso-ts | fingerprint>]");
+      const { readVersions } = await import("../src/versions.ts");
+      const versions = readVersions(name);
+      if (versions.length === 0) {
+        die(`no saved versions for "${name}". \`blindfold rotate\` creates them; \`blindfold versions --name ${name}\` lists them.`);
+      }
+      const want = argv.flags.to ? String(argv.flags.to) : "";
+      let target = versions[versions.length - 1]!; // most recent snapshot
+      if (want) {
+        const sel = versions.find((v) => v.t === want || v.fingerprint === want || v.fingerprint.startsWith(want));
+        if (!sel) die(`no version of "${name}" matches --to ${want} (see \`blindfold versions --name ${name}\`)`);
+        target = sel;
+      }
+      const env = loadBlindfoldEnv();
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      try {
+        const before = await client.verifySecret(name);
+        const restored = await client.releaseSecret(target.versionKey);
+        await client.seedSecret(name, restored);
+        console.log(`✓ Rolled back "${name}"`);
+        console.log(`  ${before.present ? `fp ${before.fingerprint} (${before.length} B)` : "(no current value)"}  →  fp ${fingerprint(restored)} (${restored.length} B)`);
+        console.log(`  restored the snapshot from ${target.t}.`);
+      } finally {
+        await client.close();
+      }
+      return;
+    }
+
+    case "versions": {
+      const name = argv.flags.name ? String(argv.flags.name) : undefined;
+      const { readVersions } = await import("../src/versions.ts");
+      const list = readVersions(name);
+      if (list.length === 0) {
+        console.log(name ? `No saved versions for "${name}".` : "No saved versions yet. `blindfold rotate` creates them.");
+        return;
+      }
+      console.log(`Saved versions${name ? ` for "${name}"` : ""} (newest last):\n`);
+      console.log("  WHEN                  NAME                   BYTES  FINGERPRINT");
+      console.log("  ────                  ────                   ─────  ───────────");
+      for (const v of list) {
+        const when = v.t.replace("T", " ").slice(0, 19);
+        console.log(`  ${when}   ${v.name.padEnd(22)} ${String(v.length).padStart(5)}  ${v.fingerprint}`);
+      }
+      console.log(`\n  Restore the newest:  blindfold rollback --name <name>`);
+      console.log(`  Restore a specific:  blindfold rollback --name <name> --to <fingerprint>`);
       return;
     }
 
@@ -517,7 +579,9 @@ Commands:
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
   use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it and run <cmd> with it injected as $ENV for that command only — never back in your env. --as is auto-detected for known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Or  --url <https>  for a quick auth check.
-  rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (shows before/after fingerprints; never the value). Everything using that name picks up the new value automatically.
+  rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (snapshots the old value for rollback; shows before/after fingerprints, never the value).
+  rollback --name <secret> [--to <fp|iso-ts>]      Restore a previous value snapshotted by rotate (most recent by default).
+  versions [--name <secret>]                        List the snapshots available to roll back to (metadata only).
   migrate  [--dry-run] [--keep]                     Seal EVERY secret in your .env in one shot, then remove the plaintext lines (backup kept). --dry-run previews; --keep comments lines instead of deleting. Skips T3 creds + config.
   status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
