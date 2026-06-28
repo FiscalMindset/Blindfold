@@ -349,6 +349,7 @@ Indexed by keyword in the error message.
 | `version not higher` | Same `CONTRACT_VERSION` as last publish | Bump it in both `packages/blindfold/src/constants.ts` AND `contract/Cargo.toml` |
 | `InsufficientCredit (account=..., available=0)` | Testnet quota exhausted | Re-claim at the T3 claim page |
 | `HTTP 500: Internal error` on *all* seals/executes while `verify` is green | **#1 cause: your key has no provisioned tenant.** A working key authenticates AND passes a read. Run `blindfold doctor` — it now does a live `me()` and tells you if the key is unprovisioned (500), out of credit (403), or has a server-assigned DID different from your `.env` DID. | Switch `.env` to a key that passes `blindfold doctor`, or ask T3 to provision a tenant for the key. |
+| Everything 500s but a **healthy key on another machine works** — the node itself is unhealthy (e.g. a Raft follower that can't commit) | The SDK targets one hardcoded node. If that node is down/behind, all writes fail with no recourse. | Set `T3_BASE_URL=<healthy-or-leader-node-url>` in `.env` to point Blindfold at a different node. `blindfold doctor` shows which node URL is active. |
 | `HTTP 400: Invalid semver format: latest` | A SYSTEM script needs a numeric semver, not "latest" | Use `getScriptVersion(rpcUrl, scriptName)` — handled in `scripts/grant-and-call.ts` |
 | `aborted by user` during `register` | You hit Ctrl+C at the prompt | Re-run |
 | `@terminal3/t3n-sdk not installed` | npm dep missing | `npm install @terminal3/t3n-sdk` |

@@ -19,6 +19,12 @@ export interface BlindfoldEnv {
   did: string;
   port: number;
   t3Env: "testnet" | "production";
+  /**
+   * Optional override for the T3 node URL (from T3_BASE_URL / BLINDFOLD_BASE_URL).
+   * Lets you point at a healthy/leader node when the SDK's default node is
+   * unhealthy. Empty string = use the SDK's built-in NODE_URLS[t3Env].
+   */
+  t3BaseUrl: string;
   /** When true, all T3 calls are simulated locally. */
   mock: boolean;
 }
