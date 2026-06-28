@@ -34,6 +34,10 @@ export interface UsageEvent {
   agent_supplied_auth: boolean;
   /** True iff the outbound request carries the Blindfold sentinel — proof the proxy did its job */
   sentinel_in_outbound: boolean;
+  /** How the secret was used: "proxy" (HTTP proxy) | "release"/"use"/"export" (broker paths). Optional for back-compat. */
+  via?: string;
+  /** The sealed secret name involved (for the per-secret view). */
+  secret_key?: string;
 }
 
 export function defaultLogPath(): string {

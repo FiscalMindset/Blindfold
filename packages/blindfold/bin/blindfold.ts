@@ -113,7 +113,7 @@ async function main(): Promise<void> {
             "       blindfold use --name <secret> --url <https url>   (quick auth test)");
       }
       const { release } = await import("../src/release.ts");
-      const value = await release(name); // plaintext, kept local; never printed
+      const value = await release(name, { via: "use" }); // plaintext, kept local; never printed
 
       // Mode A: quick auth test against an HTTPS endpoint with Bearer auth.
       if (argv.flags.url) {
@@ -152,7 +152,7 @@ async function main(): Promise<void> {
       if (!ghEnv) die("`export` writes to $GITHUB_ENV (GitHub Actions only). Use `blindfold use` locally.");
       const asVar = resolveEnvVar(argv.flags.as ? String(argv.flags.as) : undefined, undefined, name);
       const { release } = await import("../src/release.ts");
-      const value = await release(name);
+      const value = await release(name, { via: "export" });
       // ::add-mask:: tells the runner to redact this value everywhere in the logs.
       console.log(`::add-mask::${value}`);
       fs.appendFileSync(ghEnv, `${asVar}=${value}\n`);

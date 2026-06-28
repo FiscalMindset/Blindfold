@@ -133,6 +133,8 @@ async function handle(
     latency_ms: latency,
     agent_supplied_auth: agentSuppliedAuth,
     sentinel_in_outbound: forwardReq.headers.some(([k, v]) => k.toLowerCase() === "authorization" && v.includes(SENTINEL)),
+    via: "proxy",
+    secret_key: secretKey,
   });
 
   res.writeHead(result.status, headersFromTuple(result.headers));
