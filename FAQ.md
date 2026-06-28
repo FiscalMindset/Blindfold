@@ -176,7 +176,7 @@ Yes. `rotate` automatically snapshots the previous value (as an enclave-side ver
 ## Teams & operations
 
 ### How do teammates use a sealed key without getting the key?
-By **DID grant**, never by receiving the key. You authorize a teammate's agent (by DID) to call specific contract functions for specific hosts — least privilege by construction. Revoking is immediate because nobody holds a copy. See [TEAMS.md](TEAMS.md).
+One command: `blindfold share --to <their-agent-did> --host api.openai.com`. It authorizes their agent to **use** the key via the enclave (`forward` only — they never receive the plaintext), scoped to the hosts you list. `blindfold revoke --to <their-agent-did>` removes it instantly. Because nobody holds a raw copy, revocation is total — there's no leaked key to chase. See [TEAMS.md](TEAMS.md).
 
 ### How do I audit what's sealed and prove it's intact?
 `blindfold status` for a quick inventory; `blindfold audit` for the integrity + enclave-reconciliation check. Neither ever prints a value.

@@ -80,6 +80,11 @@ export interface T3ClientHandle {
    */
   grantEgress: (hosts: string[]) => Promise<void>;
   /**
+   * Authorize an arbitrary agent DID (a teammate) to call this tenant's
+   * contract functions for the given hosts. Empty hosts+functions revokes.
+   */
+  setAgentGrant: (agentDid: string, hosts: string[], functions: string[]) => Promise<void>;
+  /**
    * Confirm a sealed secret still exists in the enclave. Returns its byte
    * length + a non-reversible fingerprint (never the value) so an audit can
    * reconcile the local ledger against the enclave (the source of truth).
@@ -220,7 +225,10 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     return { tenant: String(info.tenant ?? ""), status: info.status as string | undefined };
   };
 
-  const grantEgress = async (hosts: string[]): Promise<void> => {
+  // Shared agent-auth grant. Authorizes `agentDid` (self or a teammate) to call
+  // this tenant's contract functions for the given hosts. Empty functions+hosts
+  // means revoke (scripts: []).
+  const agentAuthUpdate = async (agentDid: string, hosts: string[], functions: string[]): Promise<void> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const anySdk = sdk as any;
     let ucv = "0.1.0";
@@ -233,24 +241,30 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
       }
     }
     const didHex = env.did.replace(/^did:t3n:/, "");
+    // T3 rejects an empty scripts array, so "revoke" is expressed as a script
+    // entry that authorizes the function with NO allowed hosts → it can't reach
+    // anything, which is an effective revocation.
+    const revoking = functions.length === 0 && hosts.length === 0;
+    const scripts = [{
+      scriptName: `z:${didHex}:${CONTRACT_TAIL}`,
+      versionReq: `>=${CONTRACT_VERSION}`,
+      functions: revoking ? ["forward"] : functions,
+      allowedHosts: revoking ? [] : hosts,
+    }];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (t3n as any).execute({
       script_name: "tee:user/contracts",
       script_version: ucv,
       function_name: "agent-auth-update",
-      input: {
-        agents: [{
-          agentDid: env.did,
-          scripts: [{
-            scriptName: `z:${didHex}:${CONTRACT_TAIL}`,
-            versionReq: `>=${CONTRACT_VERSION}`,
-            functions: ["forward", "release-to-tenant"],
-            allowedHosts: hosts,
-          }],
-        }],
-      },
+      input: { agents: [{ agentDid, scripts }] },
     });
   };
+
+  const grantEgress = (hosts: string[]): Promise<void> =>
+    agentAuthUpdate(env.did, hosts, ["forward", "release-to-tenant"]);
+
+  const setAgentGrant = (agentDid: string, hosts: string[], functions: string[]): Promise<void> =>
+    agentAuthUpdate(agentDid, hosts, functions);
 
   const verifySecret = async (name: string): Promise<{ present: boolean; length: number; fingerprint: string }> => {
     try {
@@ -271,6 +285,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     releaseSecret,
     me,
     grantEgress,
+    setAgentGrant,
     verifySecret,
     isReal: true,
   };
@@ -310,6 +325,9 @@ function openMockClient(): T3ClientHandle {
     },
     async grantEgress(hosts) {
       safeLog("info", { msg: "mock-grant-egress", hosts });
+    },
+    async setAgentGrant(agentDid, hosts, functions) {
+      safeLog("info", { msg: "mock-set-agent-grant", agentDid, hosts, functions });
     },
     async verifySecret(name) {
       return { present: true, length: 0, fingerprint: `mock-${name}`.slice(0, 8) };
