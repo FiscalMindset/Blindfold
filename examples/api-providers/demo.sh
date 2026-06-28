@@ -13,8 +13,8 @@ npm run -s blindfold -- use --name blogger_api_key --as K -- bash -c \
   'curl -s "https://www.googleapis.com/blogger/v3/blogs/2399953?key=$K" | python3 -c "import sys,json;d=json.load(sys.stdin);print(\"  \",d[\"name\"],\"·\",d[\"posts\"][\"totalItems\"],\"posts ·\",d[\"url\"])" 2>/dev/null || echo "  (set a valid Blogger blog id / enable the Blogger API)"'
 echo
 
-echo "▶ Hostinger (Authorization: Bearer):"
+echo "▶ Hostinger (Authorization: Bearer) — domains on the account:"
 npm run -s blindfold -- use --name hostinger_api_key --as TOK -- bash -c \
-  'curl -s -w "  HTTP %{http_code}\n" -H "Authorization: Bearer $TOK" https://developers.hostinger.com/api/vps/v1/virtual-machines | head -c 200; echo'
+  'curl -s -H "Authorization: Bearer $TOK" https://developers.hostinger.com/api/domains/v1/portfolio | python3 -c "import sys,json;[print(\"  \",d[\"domain\"],\"(\"+d[\"status\"]+\")\") for d in json.load(sys.stdin)]" 2>/dev/null || echo "  (no domains / check API)"'
 echo
 echo "✓ Done. None of these tokens were ever in your shell, history, or .env."

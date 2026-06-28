@@ -7,6 +7,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "openai": "^4.77.0"
+    "openai": "^5.0.0"
   }
 }
