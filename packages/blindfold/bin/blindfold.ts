@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv } from "../src/env.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
@@ -46,6 +47,27 @@ function parseArgv(argv: string[]): Argv {
     }
   }
   return out;
+}
+
+/** Non-reversible fingerprint of a secret — for verification without exposure. */
+function fingerprint(s: string): string {
+  return createHash("sha256").update(s).digest("hex").slice(0, 8);
+}
+
+/** Known CLI tools → the env var they read their credential from. */
+const TOOL_ENV: Record<string, string> = {
+  gh: "GH_TOKEN", git: "GH_TOKEN", glab: "GITLAB_TOKEN",
+  psql: "PGPASSWORD", pg_dump: "PGPASSWORD", mysql: "MYSQL_PWD",
+  aws: "AWS_SECRET_ACCESS_KEY", stripe: "STRIPE_API_KEY",
+  vercel: "VERCEL_TOKEN", npm: "NPM_TOKEN", docker: "DOCKER_PASSWORD",
+  openai: "OPENAI_API_KEY", anthropic: "ANTHROPIC_API_KEY",
+};
+
+/** Pick the env-var name for `use`: explicit --as, else infer from the tool, else NAME upper-cased. */
+function resolveEnvVar(asFlag: string | undefined, command: string | undefined, name: string): string {
+  if (asFlag) return asFlag;
+  if (command && TOOL_ENV[command]) return TOOL_ENV[command];
+  return name.toUpperCase();
 }
 
 async function main(): Promise<void> {
@@ -107,7 +129,7 @@ async function main(): Promise<void> {
       if (cmdArgs.length === 0) {
         die("provide a command after `--` (e.g. `-- gh api user`), or pass --url <url> to test auth");
       }
-      const asVar = String(argv.flags.as ?? name.toUpperCase());
+      const asVar = resolveEnvVar(argv.flags.as ? String(argv.flags.as) : undefined, cmdArgs[0], name);
       console.error(`✓ released "${name}" (${value.length} B) → injecting $${asVar} into: ${cmdArgs.join(" ")}`);
       const child = spawn(cmdArgs[0]!, cmdArgs.slice(1), {
         stdio: "inherit",
@@ -115,6 +137,28 @@ async function main(): Promise<void> {
       });
       child.on("exit", (code) => process.exit(code ?? 0));
       child.on("error", (e) => die(`failed to run "${cmdArgs[0]}": ${e.message}`));
+      return;
+    }
+
+    case "rotate": {
+      const name = String(argv.flags.name ?? "");
+      const fromEnv = argv.flags["from-env"] ? String(argv.flags["from-env"]) : undefined;
+      if (!name) {
+        die("usage: blindfold rotate --name <secret> [--from-env <ENV_VAR>]");
+      }
+      const { release } = await import("../src/release.ts");
+      // Show the current fingerprint (best-effort) so you can confirm it changed.
+      try {
+        const old = await release(name);
+        console.log(`  before:  "${name}"  ${old.length} B  fp=${fingerprint(old)}`);
+      } catch {
+        console.log(`  before:  (no existing value for "${name}" — sealing fresh)`);
+      }
+      await registerSecret({ name, fromEnv }); // overwrites the same map entry
+      const now = await release(name);
+      console.log(`✓ Rotated "${name}"  →  ${now.length} B  fp=${fingerprint(now)}  (mode=real)`);
+      console.log(`  Every place that uses "${name}" now gets the new value — no code/config change.`);
+      if (fromEnv) console.log(`  You can now DELETE ${fromEnv} from your .env.`);
       return;
     }
 
@@ -234,6 +278,38 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "status": {
+      // One-glance overview: health + sealed inventory + what to do next.
+      const env = loadBlindfoldEnv();
+      console.log("🛡️  Blindfold status\n");
+      console.log(`  mode:    ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL"}   ·   T3 env: ${env.t3Env}`);
+      if (!env.mock) {
+        try {
+          const { openT3Client } = await import("../src/t3-client.ts");
+          const client = await openT3Client(env);
+          const info = await client.me();
+          console.log(`  tenant:  ✅ ${info.tenant}  (status=${info.status ?? "?"})`);
+        } catch (e) {
+          console.log(`  tenant:  ✖ ${(e as Error).message.slice(0, 90)}`);
+          console.log(`           → run \`blindfold doctor\` for a full diagnosis.`);
+          process.exitCode = 1;
+        }
+      }
+      const entries = readSealed();
+      const latest = new Map<string, (typeof entries)[number]>();
+      for (const e of entries) latest.set(e.name, e); // last write wins
+      console.log(`\n  Sealed secrets (${latest.size}):`);
+      if (latest.size === 0) {
+        console.log(`    (none yet)   seal one:  blindfold register --name <X> --from-env <X>`);
+      } else {
+        for (const e of latest.values()) {
+          console.log(`    • ${e.name.padEnd(22)} ${String(e.length).padStart(4)} B   ${e.mode}`);
+        }
+      }
+      console.log(`\n  Next:  blindfold use --name <secret> -- <command>     (use it, no code)`);
+      return;
+    }
+
     case "doctor": {
       const env = loadBlindfoldEnv();
       console.log("Blindfold doctor:");
@@ -321,7 +397,9 @@ Commands:
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
-  use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it from the enclave and run <cmd> with it injected as $ENV (default: NAME upper-cased) for that command only — never back in your env. Or  --url <https url>  for a quick "does it auth?" check.
+  use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it and run <cmd> with it injected as $ENV for that command only — never back in your env. --as is auto-detected for known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Or  --url <https>  for a quick auth check.
+  rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (shows before/after fingerprints; never the value). Everything using that name picks up the new value automatically.
+  status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
