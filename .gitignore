@@ -38,3 +38,4 @@ coverage/
 
 # T3 dev-team correspondence / working notes (local only)
 response.md
+.gstack/
