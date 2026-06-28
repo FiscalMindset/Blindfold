@@ -13,7 +13,7 @@
 
 <br/>
 
-### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -335,6 +335,7 @@ blindfold rotate --name X --from-env X      # replace a secret's value everywher
 blindfold grant  --host api.openai.com      # authorize the contract to call a host (needed for the proxy/enclave path)
 blindfold proxy       # OpenAI/Anthropic-shaped local proxy for SDKs
 blindfold sealed      # metadata-only inventory (never values)
+blindfold audit       # verify ledger hash-chain + reconcile against the enclave (source of truth)
 ```
 
 Full walkthrough in the **[Usage Guide](usage.md)**, copy-paste examples in **[Examples](EXAMPLES.md)**, team setup in **[Teams](TEAMS.md)**.
