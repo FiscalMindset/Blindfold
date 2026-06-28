@@ -51,17 +51,23 @@ Official Blogger Blog · 540 posts · http://blogger.googleblog.com/
 
 ## 3. Hostinger — `Authorization: Bearer <key>`
 
+List the domains on the account (`/api/domains/v1/portfolio`):
+
 ```bash
 blindfold use --name hostinger_api_key --as TOK -- \
-  bash -c 'curl -s -H "Authorization: Bearer $TOK" https://developers.hostinger.com/api/vps/v1/virtual-machines'
+  bash -c 'curl -s -H "Authorization: Bearer $TOK" https://developers.hostinger.com/api/domains/v1/portfolio'
 ```
 
-Real output (account has no VPS yet):
+Real output (live domains on the account):
 
 ```json
-[]
+[
+  {"id":23681259,"domain":"polybazar.com","type":"domain","status":"active","expires_at":"2027-06-30T12:00:54Z"},
+  {"id":23800007,"domain":"algsoch.com","type":"free_domain","status":"active","expires_at":null},
+  {"id":32124943,"domain":"algsoch.com","type":"domain","status":"active","expires_at":"2027-06-17T15:26:13Z"}
+]
 ```
-`HTTP 200` ✅
+`HTTP 200` ✅  (VPS list is at `/api/vps/v1/virtual-machines`)
 
 ---
 
