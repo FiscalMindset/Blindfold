@@ -68,6 +68,22 @@ The script lives at `scripts/run-tests.ts` and exits non-zero if any check fails
 ## Test runs
 
 <!-- TEST_RUNS_BELOW -->
+### Run 2026-06-28 03:43:49 UTC
+
+**✅ ALL PASS** — 9/9 tests passed.
+
+| # | Test | Status | Detail |
+|---|------|--------|--------|
+| T1 | Side-by-side demo (A leaks real key, B leaks only sentinel) | ✅ | exit=0; A_leaked_real=true; B_sentinel_only=true |
+| T2 | CLI doctor runs and reports mode + credential status | ✅ | Blindfold doctor: \|   mode:               MOCK (BLINDFOLD_MOCK=1) |
+| T3 | register never logs the plaintext secret | ✅ | value never appeared in stdout/stderr |
+| T4 | proxy /health responds | ✅ | status=200 body={"ok":true,"mock":true} |
+| T5 | proxy forwards and returns a response | ✅ | status=200 body~={"mock":true,"note":"Blindfold mock mode — no real call made.","echo":{"url":"ht |
+| T6 | proxy logs do NOT contain agent-supplied Authorization | ✅ | no bearer in 402 log bytes |
+| T7 | wrap() mutates client: real key → sentinel | ✅ | output={"ok":true,"baseURL":"http://127.0.0.1:8787/v1","apiKey":"__BLINDFOLD__"} |
+| T8 | redact() strips authorization / x-api-key / cookie | ✅ | output={"ok":true,"sample":"{\"a\":{\"headers\":{\"authorization\":\"[redacted]\"}},\"b\":{\"headers\":[[\"Authorization\",\"[redacted]\"],[\"X-API-Key\",\"[red |
+| T9 | usage log records the request (metadata only) | ✅ | event={"t":"2026-06-28T03:43:48.911Z","mode":"mock","provider":"openai","method":"POST","path":"/v1/chat/completions","upstream":"https://api.openai.com/v1/chat |
+
 ### Run 2026-06-28 03:21:58 UTC
 
 **✅ ALL PASS** — 9/9 tests passed.
