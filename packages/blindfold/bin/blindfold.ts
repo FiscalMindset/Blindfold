@@ -142,6 +142,24 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "export": {
+      // CI-only: release a sealed secret into $GITHUB_ENV for later steps, and
+      // mask it in the logs. Lets a GitHub Action pull keys from the enclave
+      // instead of storing them as GitHub secrets.
+      const name = String(argv.flags.name ?? "");
+      if (!name) die("usage: blindfold export --name <secret> [--as <ENV_VAR>]   (for GitHub Actions / CI)");
+      const ghEnv = process.env.GITHUB_ENV;
+      if (!ghEnv) die("`export` writes to $GITHUB_ENV (GitHub Actions only). Use `blindfold use` locally.");
+      const asVar = resolveEnvVar(argv.flags.as ? String(argv.flags.as) : undefined, undefined, name);
+      const { release } = await import("../src/release.ts");
+      const value = await release(name);
+      // ::add-mask:: tells the runner to redact this value everywhere in the logs.
+      console.log(`::add-mask::${value}`);
+      fs.appendFileSync(ghEnv, `${asVar}=${value}\n`);
+      console.error(`✓ exported $${asVar} from sealed "${name}" (${value.length} B, masked in logs)`);
+      return;
+    }
+
     case "rotate": {
       const name = String(argv.flags.name ?? "");
       const fromEnv = argv.flags["from-env"] ? String(argv.flags["from-env"]) : undefined;
@@ -620,6 +638,7 @@ Commands:
   register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
   use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it and run <cmd> with it injected as $ENV for that command only — never back in your env. --as is auto-detected for known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Or  --url <https>  for a quick auth check.
   rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (snapshots the old value for rollback; shows before/after fingerprints, never the value).
+  export   --name <secret> [--as <ENV_VAR>]         CI-only: release a sealed secret into $GITHUB_ENV for later steps (masked in logs). Used by the Blindfold GitHub Action.
   rollback --name <secret> [--to <fp|iso-ts>]      Restore a previous value snapshotted by rotate (most recent by default).
   versions [--name <secret>]                        List the snapshots available to roll back to (metadata only).
   migrate  [--dry-run] [--keep]                     Seal EVERY secret in your .env in one shot, then remove the plaintext lines (backup kept). --dry-run previews; --keep comments lines instead of deleting. Skips T3 creds + config.

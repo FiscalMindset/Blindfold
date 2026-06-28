@@ -1,0 +1,46 @@
+name: Real T3 (secrets smoke test)
+
+# Proves the GitHub-stored T3 credentials work: authenticate to T3, then pull a
+# SEALED secret from the enclave and use it — with no provider key in GitHub.
+# Manual (workflow_dispatch) so it only runs when you ask, and on changes to the
+# action/workflow itself. Requires repo secrets T3N_API_KEY + DID.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/real-t3.yml"
+      - ".github/actions/blindfold-secrets/**"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      T3N_API_KEY: ${{ secrets.T3N_API_KEY }}
+      DID: ${{ secrets.DID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+
+      - name: doctor — authenticate to T3 with the GitHub secrets
+        run: npm run blindfold -- doctor
+
+      - name: use a sealed secret directly (no provider key in GitHub)
+        run: npm run blindfold -- use --name digital_ocean_api_key --url https://api.digitalocean.com/v2/account
+
+      - name: inject a sealed secret into the job env (reusable action)
+        uses: ./.github/actions/blindfold-secrets
+        with:
+          secrets: digital_ocean_api_key=DIGITALOCEAN_ACCESS_TOKEN
+
+      - name: use the injected secret in a later step (value is masked)
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
+            https://api.digitalocean.com/v2/account)
+          echo "DigitalOcean API returned HTTP $code (key came from the enclave, never from GitHub secrets)"
+          test "$code" = "200"
