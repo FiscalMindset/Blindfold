@@ -35,25 +35,85 @@ export interface DashboardHandle {
 export async function startDashboard(opts: { port?: number } = {}): Promise<DashboardHandle> {
   const port = opts.port ?? DEFAULT_DASHBOARD_PORT;
 
-  const server = http.createServer((req, res) => {
-    const url = req.url ?? "/";
+  // Optional access token (BLINDFOLD_DASHBOARD_TOKEN). The server binds to
+  // 127.0.0.1 regardless; this adds a guard if you tunnel/forward the port.
+  const TOKEN = process.env.BLINDFOLD_DASHBOARD_TOKEN || "";
+  const authed = (req: http.IncomingMessage, url: string): boolean => {
+    if (!TOKEN) return true;
+    try {
+      const t = new URL(url, "http://x").searchParams.get("token");
+      if (t === TOKEN) return true;
+    } catch { /* ignore */ }
+    return (req.headers.authorization || "") === `Bearer ${TOKEN}`;
+  };
 
-    if (req.method === "GET" && (url === "/" || url === "/index.html")) {
+  const server = http.createServer(async (req, res) => {
+    const url = req.url ?? "/";
+    const pathname = url.split("?")[0];
+
+    if (!authed(req, url)) {
+      res.writeHead(401, { "content-type": "text/plain" });
+      res.end("unauthorized — append ?token=<BLINDFOLD_DASHBOARD_TOKEN>");
+      return;
+    }
+
+    if (req.method === "GET" && (pathname === "/" || pathname === "/index.html")) {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
       res.end(HTML);
       return;
     }
-    if (req.method === "GET" && url === "/api/events") {
+    if (req.method === "GET" && pathname === "/api/events") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ events: readUsage(), source: defaultLogPath() }));
       return;
     }
-    if (req.method === "GET" && url === "/api/sealed") {
+    if (req.method === "GET" && pathname === "/api/sealed") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ entries: readSealed(), source: defaultSealedLogPath() }));
       return;
     }
-    if (req.method === "GET" && url === "/api/status") {
+    if (req.method === "GET" && pathname === "/api/stream") {
+      // Server-Sent Events: push a "change" whenever the logs change, so the
+      // UI updates near-instantly instead of only on the poll interval.
+      res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" });
+      res.write(": connected\n\n");
+      const send = () => { try { res.write("event: change\ndata: {}\n\n"); } catch { /* closed */ } };
+      const watchers: fs.FSWatcher[] = [];
+      for (const p of [defaultLogPath(), defaultSealedLogPath()]) {
+        try { watchers.push(fs.watch(path.dirname(p), () => send())); } catch { /* dir missing */ }
+      }
+      const hb = setInterval(() => { try { res.write(": ping\n\n"); } catch { /* closed */ } }, 15000);
+      req.on("close", () => { clearInterval(hb); for (const w of watchers) { try { w.close(); } catch { /* ignore */ } } });
+      return;
+    }
+    if (req.method === "GET" && pathname === "/api/audit/full") {
+      // Slow path (live T3 calls) — only hit on demand from the UI button.
+      const env = loadBlindfoldEnv();
+      const sealed = readSealed();
+      const latest = new Map<string, (typeof sealed)[number]>();
+      for (const s of sealed) latest.set(s.name, s);
+      const results: Array<Record<string, unknown>> = [];
+      if (!env.mock) {
+        try {
+          const { openT3Client } = await import("./t3-client.ts");
+          const client = await openT3Client(env);
+          try {
+            for (const e of latest.values()) {
+              const v = await client.verifySecret(e.name);
+              results.push({ name: e.name, present: v.present, enclave_len: v.length, ledger_len: e.length, fingerprint: v.fingerprint, ok: v.present && v.length === e.length });
+            }
+          } finally { await client.close(); }
+        } catch (err) {
+          res.writeHead(200, { "content-type": "application/json" });
+          res.end(JSON.stringify({ mock: env.mock, error: (err as Error).message, results: [] }));
+          return;
+        }
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ mock: env.mock, results }));
+      return;
+    }
+    if (req.method === "GET" && pathname === "/api/status") {
       const env = loadBlindfoldEnv();
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({
@@ -67,7 +127,7 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       }));
       return;
     }
-    if (req.method === "GET" && url === "/api/audit") {
+    if (req.method === "GET" && pathname === "/api/audit") {
       const sealed = readSealed();
       const envKeys = readEnvKeyNames();
       const exposed = sealed
@@ -89,7 +149,7 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       }));
       return;
     }
-    if ((req.method === "POST" || req.method === "DELETE") && url === "/api/clear") {
+    if ((req.method === "POST" || req.method === "DELETE") && pathname === "/api/clear") {
       clearUsage();
       res.writeHead(204).end();
       return;
@@ -293,10 +353,14 @@ const HTML = `<!DOCTYPE html>
     </div>
   </div>
 
+  <div id="alert-banner"></div>
   <div id="audit-area"></div>
 
-  <div class="section-title">Security posture</div>
+  <div class="section-title">Security posture
+    <button style="margin-left:auto" onclick="runFullAudit()">🔎 Run full audit (live)</button>
+  </div>
   <div class="grid" id="posture-cards"></div>
+  <div id="full-audit"></div>
 
   <div class="section-title">System</div>
   <div class="grid" id="status-cards"></div>
@@ -328,6 +392,17 @@ const HTML = `<!DOCTYPE html>
   <div class="spark" id="spark"></div>
   <div class="stat-row" id="spark-stats"></div>
 
+  <div class="two-col">
+    <div>
+      <div class="section-title">p95 latency over the last hour</div>
+      <div class="card" id="trend-latency"></div>
+    </div>
+    <div>
+      <div class="section-title">Success rate over the last hour</div>
+      <div class="card" id="trend-success"></div>
+    </div>
+  </div>
+
   <div class="section-title">Recent activity (last 50)
     <input id="filter" class="filter" placeholder="filter: provider / path / status…" oninput="renderTable(window._events||[])" />
   </div>
@@ -357,23 +432,27 @@ function pillStatus(s) {
 function pillMode(m) { return '<span class="pill pill-' + m + '">' + m + '</span>'; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+const TOK = new URLSearchParams(location.search).get('token');
+function api(p) { return TOK ? p + (p.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(TOK) : p; }
+
 async function clearLog() {
-  await fetch('/api/clear', { method: 'POST' });
+  await fetch(api('/api/clear'), { method: 'POST' });
   poll();
 }
 
 async function poll() {
   try {
     const [statusR, sealedR, eventsR, auditR] = await Promise.all([
-      fetch('/api/status').then(r => r.json()),
-      fetch('/api/sealed').then(r => r.json()),
-      fetch('/api/events').then(r => r.json()),
-      fetch('/api/audit').then(r => r.json()),
+      fetch(api('/api/status')).then(r => r.json()),
+      fetch(api('/api/sealed')).then(r => r.json()),
+      fetch(api('/api/events')).then(r => r.json()),
+      fetch(api('/api/audit')).then(r => r.json()),
     ]);
     window._events = eventsR.events || [];
     document.getElementById('src').textContent =
       'usage: ' + eventsR.source + ' · sealed: ' + sealedR.source;
     document.getElementById('updated').textContent = 'updated ' + new Date().toLocaleTimeString();
+    renderAlert(auditR, window._events);
     renderAudit(auditR);
     renderPosture(auditR, statusR);
     renderStatus(statusR);
@@ -384,10 +463,81 @@ async function poll() {
     renderStatusCodes(window._events);
     renderPerSecret(window._events);
     renderSpark(window._events);
+    renderTrends(window._events);
     renderTable(window._events);
   } catch (e) {
     // ignore transient errors
   }
+}
+
+function renderAlert(a, events) {
+  events = events || [];
+  const msgs = [];
+  if (a.ledger_chain && a.ledger_chain.total > 0 && !a.ledger_chain.ok) msgs.push('🔴 Ledger TAMPERED — a sealed-keys line was edited or removed');
+  if ((a.exposed_in_env || []).length > 0) msgs.push('🟠 ' + a.exposed_in_env.length + ' sealed key(s) still in .env — delete them');
+  const recent = events.filter(e => Date.now() - new Date(e.t).getTime() < 300000);
+  const errs = recent.filter(e => (e.status||0) >= 400).length;
+  if (recent.length >= 5 && errs / recent.length > 0.3) msgs.push('🟠 ' + Math.round(errs/recent.length*100) + '% errors in the last 5 min (' + errs + '/' + recent.length + ')');
+  const el = document.getElementById('alert-banner');
+  if (!msgs.length) { el.innerHTML = ''; return; }
+  const bad = msgs.some(m => m.startsWith('🔴'));
+  el.innerHTML = '<div class="alert" style="background:' + (bad?'rgba(248,81,73,.10)':'rgba(210,153,34,.10)') + ';border-color:' + (bad?'rgba(248,81,73,.4)':'rgba(210,153,34,.4)') + ';color:' + (bad?'var(--bad)':'var(--warn)') + '"><div class="head">⚠ Attention</div>' + msgs.map(esc).join('<br/>') + '</div>';
+}
+
+// Minimal inline-SVG line chart over 60 one-minute buckets.
+function svgLine(values, opts) {
+  opts = opts || {}; const w = 100, h = 36, n = values.length;
+  const max = Math.max(opts.max || 0, ...values, 1);
+  const pts = values.map((v, i) => (i/(n-1)*w).toFixed(1) + ',' + (h - (v/max)*h).toFixed(1)).join(' ');
+  const area = '0,' + h + ' ' + pts + ' ' + w + ',' + h;
+  const col = opts.color || 'var(--accent2)';
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" style="width:100%;height:60px;display:block">'
+    + '<polygon points="' + area + '" fill="' + col + '" opacity="0.12"/>'
+    + '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>';
+}
+
+function renderTrends(events) {
+  const now = Date.now();
+  const lat = Array.from({length:60}, () => []);
+  const ok = new Array(60).fill(0), tot = new Array(60).fill(0);
+  for (const e of events) {
+    const ageMin = Math.floor((now - new Date(e.t).getTime())/60000);
+    if (ageMin >= 0 && ageMin < 60) { const idx = 59-ageMin; lat[idx].push(e.latency_ms||0); tot[idx]++; if ((e.status||0)>=200 && (e.status||0)<300) ok[idx]++; }
+  }
+  const p95 = lat.map(arr => arr.length ? pct(arr, 95) : 0);
+  const succ = tot.map((t,i) => t ? Math.round(ok[i]/t*100) : 0);
+  document.getElementById('trend-latency').innerHTML = svgLine(p95, { color: 'var(--accent)' })
+    + '<div class="stat-row">peak p95: <span>' + Math.max(0,...p95) + ' ms</span></div>';
+  document.getElementById('trend-success').innerHTML = svgLine(succ, { color: 'var(--ok)', max: 100 })
+    + '<div class="stat-row">now: <span>' + (succ[59]||0) + '%</span></div>';
+}
+
+async function runFullAudit() {
+  const el = document.getElementById('full-audit');
+  el.innerHTML = '<div class="empty">Running live enclave reconciliation…</div>';
+  try {
+    const r = await fetch(api('/api/audit/full')).then(r => r.json());
+    if (r.mock) { el.innerHTML = '<div class="alert ok"><div class="head">MOCK mode</div>Enclave reconciliation only runs in REAL mode.</div>'; return; }
+    if (r.error) { el.innerHTML = '<div class="alert"><div class="head">Audit error</div>' + esc(r.error) + '</div>'; return; }
+    const rows = (r.results||[]).map(x =>
+      '<tr><td><code>' + esc(x.name) + '</code></td>'
+      + '<td>' + (x.present ? '<span class="pill pill-ok">present</span>' : '<span class="pill pill-bad">MISSING</span>') + '</td>'
+      + '<td>' + x.enclave_len + ' B</td><td>' + x.ledger_len + ' B</td>'
+      + '<td>' + (x.ok ? '<span class="pill pill-ok">ok</span>' : '<span class="pill pill-warn">drift</span>') + '</td>'
+      + '<td><code>' + esc(x.fingerprint||'') + '</code></td></tr>'
+    ).join('');
+    const okN = (r.results||[]).filter(x => x.ok).length;
+    el.innerHTML = '<div class="scroll"><table><thead><tr><th>Secret</th><th>Enclave</th><th>Enclave bytes</th><th>Ledger bytes</th><th>Match</th><th>Fingerprint</th></tr></thead><tbody>'
+      + rows + '</tbody></table></div><div class="stat-row" style="margin:8px 4px">' + okN + '/' + (r.results||[]).length + ' verified against the enclave</div>';
+  } catch (e) { el.innerHTML = '<div class="alert"><div class="head">Audit failed</div>' + esc(String(e)) + '</div>'; }
+}
+
+function startStream() {
+  try {
+    const es = new EventSource(api('/api/stream'));
+    es.addEventListener('change', () => poll());
+    es.onerror = () => {}; // poll interval remains the fallback
+  } catch (e) { /* SSE unsupported — interval poll covers it */ }
 }
 
 function pct(arr, p) {
@@ -608,7 +758,8 @@ function renderTable(events) {
 }
 
 poll();
-setRefresh(); // start the auto-refresh timer at the selected interval (default 2s)
+setRefresh();  // interval poll (fallback + the selected cadence)
+startStream(); // SSE: refresh immediately when the logs change
 </script>
 </body>
 </html>
