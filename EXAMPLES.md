@@ -88,9 +88,11 @@ blindfold use --name github_token --url https://api.github.com/user
 For anything that speaks the OpenAI/Anthropic HTTP wire format. Start the proxy once, then point your SDK at it with the `__BLINDFOLD__` sentinel as the "key". The proxy forwards to the enclave, which substitutes the real value.
 
 ```bash
-# Terminal 1 — seal + run the proxy
+# Terminal 1 — one-time setup, then run the proxy
 blindfold register --name openai_api_key --from-env OPENAI_API_KEY
-blindfold proxy            # → http://127.0.0.1:8787
+npm run blindfold -- init                 # publish contract + grant secrets ACL (one-time)
+blindfold grant --host api.openai.com     # authorize the contract to call OpenAI (required for the proxy)
+blindfold proxy                           # → http://127.0.0.1:8787
 ```
 
 ```js

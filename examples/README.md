@@ -30,10 +30,12 @@ blindfold register --name openai_api_key --from-env OPENAI_API_KEY
 
 ## The two patterns these examples use
 
-**Proxy + sentinel (HTTP SDKs)** — start the proxy once, then point the SDK at it:
+**Proxy + sentinel (HTTP SDKs)** — one-time setup, then point the SDK at the proxy:
 
 ```bash
-blindfold proxy            # → http://127.0.0.1:8787, leave running
+npm run blindfold -- init                 # publish contract + grant secrets ACL (one-time)
+blindfold grant --host api.openai.com     # authorize the contract to call the provider (required)
+blindfold proxy                           # → http://127.0.0.1:8787, leave running
 ```
 ```js
 new OpenAI({ baseURL: "http://127.0.0.1:8787/v1", apiKey: "__BLINDFOLD__" });
