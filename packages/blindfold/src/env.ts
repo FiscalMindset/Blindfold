@@ -14,6 +14,11 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 // HERE = <repo>/packages/blindfold/src   →   3 ".." up to repo root
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
 
+/** Absolute path to the project's .env file (repo root). */
+export function defaultEnvPath(): string {
+  return path.join(REPO_ROOT, ".env");
+}
+
 export function loadEnvFromFile(envPath = path.join(REPO_ROOT, ".env")): void {
   if (!fs.existsSync(envPath)) return;
   const text = fs.readFileSync(envPath, "utf8");

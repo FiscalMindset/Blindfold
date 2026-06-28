@@ -327,7 +327,8 @@ Useful when you can't easily set environment variables (e.g. inside a managed ru
 ```bash
 blindfold doctor      # is my key/tenant healthy? (plain-English diagnosis)
 blindfold status      # one-glance: mode, tenant, and every sealed secret
-blindfold register --name X --from-env X    # seal a secret (then delete the .env line)
+blindfold migrate     # seal EVERY secret in .env at once + strip the plaintext (backup kept)
+blindfold register --name X --from-env X    # seal a single secret (then delete the .env line)
 blindfold use   --name X -- <command>       # USE it with any tool, no code (auto-maps gh→GH_TOKEN, …)
 blindfold use   --name X --url <https>      # quick "does it still auth?" check
 blindfold rotate --name X --from-env X      # replace a secret's value everywhere at once

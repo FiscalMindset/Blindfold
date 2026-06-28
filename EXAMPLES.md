@@ -30,6 +30,10 @@ Every example below is **real and runnable**. They are grouped by the *three way
 blindfold register --name github_token --from-env GITHUB_TOKEN
 # ✓ Registered "github_token" (value read from GITHUB_TOKEN once, then dropped).
 #   You can now DELETE GITHUB_TOKEN from your .env.
+
+# …or seal your ENTIRE .env in one shot (skips T3 creds + config, keeps a backup):
+blindfold migrate --dry-run    # preview
+blindfold migrate              # seal all + strip plaintext
 ```
 
 Confirm it's live and your tenant is healthy:
