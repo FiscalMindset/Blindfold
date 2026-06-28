@@ -202,6 +202,28 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "grant": {
+      // Authorize the contract to make outbound calls to one or more hosts.
+      const hosts: string[] = [];
+      if (argv.flags.host) hosts.push(...String(argv.flags.host).split(",").map((h) => h.trim()).filter(Boolean));
+      if (argv.flags.hosts) hosts.push(...String(argv.flags.hosts).split(",").map((h) => h.trim()).filter(Boolean));
+      if (hosts.length === 0) {
+        die("usage: blindfold grant --host <host>[,<host2>...]   (e.g. --host api.openai.com)");
+      }
+      const env = loadBlindfoldEnv();
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      try {
+        await client.grantEgress(hosts);
+        console.log(`✓ Egress granted for: ${hosts.join(", ")}`);
+        console.log(`  The blindfold-proxy contract (forward / release-to-tenant) may now call these hosts.`);
+        console.log(`  Run \`blindfold publish\` first if you haven't — the grant targets the published contract.`);
+      } finally {
+        await client.close();
+      }
+      return;
+    }
+
     case "proxy": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const secret = argv.flags.secret ? String(argv.flags.secret) : undefined;
@@ -444,6 +466,8 @@ Commands:
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
+  grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com
+
   dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
   stats                                             CLI summary of proxy usage.
   stats:clear                                       Wipe the usage log.

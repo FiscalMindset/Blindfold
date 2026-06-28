@@ -72,6 +72,12 @@ export interface T3ClientHandle {
    * has no provisioned tenant (the failure mode that surfaces as a bare 500).
    */
   me: () => Promise<{ tenant: string; status?: string }>;
+  /**
+   * Authorize the blindfold-proxy contract's forward/release-to-tenant
+   * functions to make outbound calls to the given hosts (the egress grant the
+   * proxy + in-enclave http::call path require).
+   */
+  grantEgress: (hosts: string[]) => Promise<void>;
   /** True if a real T3 round-trip happened during construction. */
   isReal: boolean;
 }
@@ -140,12 +146,23 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
   };
 
   const invokeForward = async (req: ForwardRequest): Promise<ForwardResponse> => {
+    // The contract's forward() returns { ok, code, body, length } — the
+    // canonical T3 http.response has a status code + payload but NO response
+    // headers. Adapt that to the proxy's ForwardResponse shape.
     const raw = (await tenant.contracts.execute(CONTRACT_TAIL, {
       version: CONTRACT_VERSION,
       functionName: "forward",
       input: req,
-    })) as ForwardResponse;
-    return raw;
+    })) as { ok?: boolean; code?: number; body?: string; status?: number; headers?: Array<[string, string]> };
+    // Tolerate both the new shape (code/body) and any legacy shape (status/headers).
+    if (typeof raw.status === "number" && Array.isArray(raw.headers)) {
+      return { status: raw.status, headers: raw.headers, body: raw.body ?? "" };
+    }
+    return {
+      status: raw.code ?? 502,
+      headers: [["content-type", "application/json"]],
+      body: raw.body ?? "",
+    };
   };
 
   const decodeSecret = (v: unknown): string => {
@@ -194,6 +211,38 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     return { tenant: String(info.tenant ?? ""), status: info.status as string | undefined };
   };
 
+  const grantEgress = async (hosts: string[]): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anySdk = sdk as any;
+    let ucv = "0.1.0";
+    if (typeof anySdk.getScriptVersion === "function") {
+      try {
+        const v = await anySdk.getScriptVersion(baseUrl, "tee:user/contracts");
+        if (typeof v === "string" && /^\d/.test(v)) ucv = v;
+      } catch {
+        /* fall back to 0.1.0 */
+      }
+    }
+    const didHex = env.did.replace(/^did:t3n:/, "");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (t3n as any).execute({
+      script_name: "tee:user/contracts",
+      script_version: ucv,
+      function_name: "agent-auth-update",
+      input: {
+        agents: [{
+          agentDid: env.did,
+          scripts: [{
+            scriptName: `z:${didHex}:${CONTRACT_TAIL}`,
+            versionReq: `>=${CONTRACT_VERSION}`,
+            functions: ["forward", "release-to-tenant"],
+            allowedHosts: hosts,
+          }],
+        }],
+      },
+    });
+  };
+
   return {
     close: async () => {
       /* SDK has no close()  */
@@ -203,6 +252,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     registerContract,
     releaseSecret,
     me,
+    grantEgress,
     isReal: true,
   };
 }
@@ -238,6 +288,9 @@ function openMockClient(): T3ClientHandle {
     },
     async me() {
       return { tenant: "did:t3n:mock", status: "active" };
+    },
+    async grantEgress(hosts) {
+      safeLog("info", { msg: "mock-grant-egress", hosts });
     },
     isReal: false,
   };

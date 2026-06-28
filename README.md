@@ -332,6 +332,7 @@ blindfold register --name X --from-env X    # seal a single secret (then delete 
 blindfold use   --name X -- <command>       # USE it with any tool, no code (auto-maps gh→GH_TOKEN, …)
 blindfold use   --name X --url <https>      # quick "does it still auth?" check
 blindfold rotate --name X --from-env X      # replace a secret's value everywhere at once
+blindfold grant  --host api.openai.com      # authorize the contract to call a host (needed for the proxy/enclave path)
 blindfold proxy       # OpenAI/Anthropic-shaped local proxy for SDKs
 blindfold sealed      # metadata-only inventory (never values)
 ```
