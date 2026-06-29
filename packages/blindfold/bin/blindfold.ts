@@ -630,6 +630,69 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "skill": {
+      const sub = argv._[1] ?? "help";
+      const skillSource = path.join(REPO_ROOT, ".claude", "skills", "blindfold", "SKILL.md");
+      if (!fs.existsSync(skillSource)) {
+        die(`skill source not found at ${skillSource} — are you in the Blindfold repo?`);
+      }
+      const skillContent = fs.readFileSync(skillSource, "utf-8");
+
+      if (sub === "install") {
+        const targets: { label: string; dir: string }[] = [];
+        const global = !!argv.flags.global;
+        const cursor = !!argv.flags.cursor;
+        const opencode = !!argv.flags.opencode;
+        const cline = !!argv.flags.cline;
+        const all = !!argv.flags.all;
+
+        if (global || all) targets.push({ label: "global (all Claude Code sessions)", dir: path.join(process.env.HOME ?? "~", ".claude", "skills", "blindfold") });
+        if (cursor || all) targets.push({ label: "Cursor", dir: path.resolve(".cursor", "rules") });
+        if (opencode || all) targets.push({ label: "OpenCode", dir: path.resolve(".opencode", "skills", "blindfold") });
+        if (cline || all) targets.push({ label: "Cline", dir: path.resolve(".cline", "rules") });
+        if (!global && !cursor && !opencode && !cline && !all) {
+          targets.push({ label: "this project (Claude Code)", dir: path.resolve(".claude", "skills", "blindfold") });
+        }
+
+        for (const t of targets) {
+          fs.mkdirSync(t.dir, { recursive: true });
+          const dest = path.join(t.dir, t.dir.includes("rules") ? "blindfold.md" : "SKILL.md");
+          fs.writeFileSync(dest, skillContent);
+          console.log(`  ✓ ${t.label} → ${dest}`);
+        }
+        console.log(`\n✓ Blindfold skill installed (${targets.length} target${targets.length > 1 ? "s" : ""})`);
+        console.log(`  Your coding agent will now handle secrets safely — try asking it to "seal my API key".`);
+      } else if (sub === "uninstall") {
+        const locations = [
+          path.resolve(".claude", "skills", "blindfold", "SKILL.md"),
+          path.join(process.env.HOME ?? "~", ".claude", "skills", "blindfold", "SKILL.md"),
+          path.resolve(".cursor", "rules", "blindfold.md"),
+          path.resolve(".opencode", "skills", "blindfold", "SKILL.md"),
+          path.resolve(".cline", "rules", "blindfold.md"),
+        ];
+        let removed = 0;
+        for (const loc of locations) {
+          if (fs.existsSync(loc)) { fs.unlinkSync(loc); console.log(`  ✓ removed ${loc}`); removed++; }
+        }
+        console.log(removed ? `\n✓ Removed ${removed} skill file(s).` : "  No skill files found to remove.");
+      } else {
+        console.log(`blindfold skill — install the Blindfold agent skill for your coding agent.
+
+  blindfold skill install                   Install for this project (Claude Code auto-discovers it)
+  blindfold skill install --global          Install globally (~/.claude/skills/, all sessions)
+  blindfold skill install --cursor          Install for Cursor (.cursor/rules/)
+  blindfold skill install --opencode        Install for OpenCode (.opencode/skills/)
+  blindfold skill install --cline           Install for Cline (.cline/rules/)
+  blindfold skill install --all             Install for all of the above at once
+
+  blindfold skill uninstall                 Remove all installed skill files
+
+What it does: teaches your coding agent to seal keys safely — no pasting secrets
+into chat, release-broker pattern in generated code, fingerprint-only verification.`);
+      }
+      return;
+    }
+
     default:
       printHelp();
   }
@@ -657,6 +720,9 @@ Commands:
   grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com
   share    --to <agent-did> --host <host>[,...]    Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive the plaintext (forward only, least privilege).
   revoke   --to <agent-did>                         Remove a teammate's access. Immediate and complete — nobody holds a raw key copy.
+
+  skill    install [--global|--cursor|--opencode|--cline|--all]   Install the Blindfold agent skill so your coding agent handles secrets safely. Default: this project.
+  skill    uninstall                                Remove all installed skill files.
 
   dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
   stats                                             CLI summary of proxy usage.

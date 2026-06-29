@@ -214,43 +214,35 @@ Blindfold ships a **built-in skill** that teaches your coding agent to handle se
 
 #### Install the skill
 
-**Already cloned this repo?** It just works — Claude Code auto-discovers `.claude/skills/blindfold/SKILL.md`. Nothing to install.
-
-**Add to your own project** (so the skill activates when agents edit your app):
+**One command** (from inside the Blindfold repo):
 
 ```bash
-# From inside your project directory:
+blindfold skill install              # this project (Claude Code auto-discovers it)
+blindfold skill install --global     # every Claude Code session on your machine
+blindfold skill install --cursor     # Cursor (.cursor/rules/)
+blindfold skill install --opencode   # OpenCode (.opencode/skills/)
+blindfold skill install --cline      # Cline / Continue.dev (.cline/rules/)
+blindfold skill install --all        # all of the above at once
+```
+
+**npx** (from any directory, no clone needed):
+
+```bash
+npx blindfold skill install           # current project
+npx blindfold skill install --global  # global
+```
+
+**Already cloned this repo?** It already works — Claude Code auto-discovers `.claude/skills/blindfold/SKILL.md`. Nothing to install.
+
+**Without cloning** (curl one-liner for any project):
+
+```bash
 mkdir -p .claude/skills/blindfold
 curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
   -o .claude/skills/blindfold/SKILL.md
 ```
 
-**Install globally** (available in every Claude Code session on your machine):
-
-```bash
-mkdir -p ~/.claude/skills/blindfold
-curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
-  -o ~/.claude/skills/blindfold/SKILL.md
-```
-
-**Other agents:**
-
-```bash
-# Cursor — add as a rule file
-mkdir -p .cursor/rules
-curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
-  -o .cursor/rules/blindfold.md
-
-# OpenCode — add as a skill
-mkdir -p .opencode/skills/blindfold
-curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
-  -o .opencode/skills/blindfold/SKILL.md
-
-# Cline / Continue.dev — add to project rules
-mkdir -p .cline/rules
-curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
-  -o .cline/rules/blindfold.md
-```
+**Uninstall:** `blindfold skill uninstall` removes all installed skill files.
 
 #### Verify it's loaded
 
