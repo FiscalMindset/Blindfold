@@ -251,7 +251,7 @@ const HTML = `<!DOCTYPE html>
     border:1px solid var(--line-strong); border-radius:16px; padding:16px 20px;
     background:linear-gradient(180deg,var(--card),var(--card2)); box-shadow:var(--shadow); }
   .brandwrap { display:flex; align-items:center; gap:16px; min-width:0; }
-  .logo-img { width:clamp(64px,9vw,88px); height:clamp(64px,9vw,88px); border-radius:18px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:8px; box-shadow:var(--shadow); flex:none; animation:logoIn .6s cubic-bezier(.2,.8,.2,1) both; }
+  .logo-img { width:clamp(76px,11vw,104px); height:clamp(76px,11vw,104px); border-radius:18px; object-fit:cover; background:var(--card); border:1px solid var(--line-strong); padding:0; box-shadow:var(--shadow); flex:none; animation:logoIn .6s cubic-bezier(.2,.8,.2,1) both; }
   @keyframes logoIn { from{transform:scale(.7) rotate(-8deg);opacity:0;} to{transform:scale(1) rotate(0);opacity:1;} }
   h1 { margin:0; font-size:clamp(24px,4.5vw,34px); font-weight:800; letter-spacing:-.5px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
   /* wordmark: a "sealing" stamp-in, a one-time shine sweep, and the orange underline drawing like a seal stroke */
@@ -286,6 +286,8 @@ const HTML = `<!DOCTYPE html>
   .copybtn.err { color:var(--bad); border-color:var(--bad); }
   .copybtn.ref { color:var(--orange); border-color:rgba(255,140,43,.4); }
   .copybtn.ref:hover { background:rgba(255,140,43,.08); }
+  code.sentinel { color:var(--orange); background:rgba(255,140,43,.10); border:1px solid rgba(255,140,43,.22); font-weight:600; }
+  .cmdname { color:var(--accent2); font-weight:600; }
   @media (max-width:620px){
     .topbar { flex-direction:column; align-items:stretch; }
     .controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -430,6 +432,9 @@ const HTML = `<!DOCTYPE html>
 
   <div class="section-title" onclick="toggleSection(this)"><span class="chev">▼</span>Per-secret usage</div>
   <div id="per-secret-wrap"></div>
+
+  <div class="section-title" onclick="toggleSection(this)"><span class="chev">▼</span>Blindfold commands</div>
+  <div id="commands-wrap"></div>
 
   <div class="section-title" onclick="toggleSection(this)"><span class="chev">▼</span>Recent activity
     <input id="filter" class="filter" placeholder="filter…" oninput="renderTable(rangeFiltered())" onclick="event.stopPropagation()" />
@@ -610,13 +615,13 @@ function renderSpark(ev){
 function renderSealed(entries){
   if(!entries.length){document.getElementById('sealed-table-wrap').innerHTML='<div class="empty">No keys sealed yet. <code>blindfold register --name &lt;K&gt;</code></div>';return;}
   var latest={};entries.forEach(function(e){latest[e.name]=e;});
-  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){var ref=(e.map_name||'')+'/'+e.name;return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td style="white-space:nowrap"><button class="copybtn cmd" data-name="'+esc(e.name)+'" title="Copy a ready-to-run command">⧉ cmd</button> <button class="copybtn ref" data-ref="'+esc(ref)+'" title="Copy the sealed reference (enclave address — NOT the secret value)">⧉ sealed token</button></td></tr>';}).join('');
-  document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Source</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><code class="sentinel">__BLINDFOLD__</code></td><td style="white-space:nowrap"><button class="copybtn cmd" data-name="'+esc(e.name)+'" title="Copy a ready-to-run verify command">⧉ cmd</button> <button class="copybtn ref" data-name="'+esc(e.name)+'" title="Copy the Blindfold sentinel — put this where the real key would go; the enclave substitutes the sealed value at call time">⧉ sealed token</button></td></tr>';}).join('');
+  document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Sealed token</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   function flash(b,txt,cls){var o=b.textContent;b.textContent=txt;b.classList.add(cls||'done');setTimeout(function(){b.textContent=o;b.classList.remove('done','err');},1400);}
   var cmds=document.querySelectorAll('#sealed-table-wrap .copybtn.cmd');
   for(var i=0;i<cmds.length;i++){(function(b){b.onclick=function(){var cmd='npm run blindfold -- use --name '+b.getAttribute('data-name')+' --check';try{navigator.clipboard.writeText(cmd);}catch(e){}flash(b,'✓ copied');};})(cmds[i]);}
   var refs=document.querySelectorAll('#sealed-table-wrap .copybtn.ref');
-  for(var j=0;j<refs.length;j++){(function(b){b.onclick=function(){try{navigator.clipboard.writeText(b.getAttribute('data-ref'));}catch(e){}flash(b,'✓ sealed ref copied');};})(refs[j]);}
+  for(var j=0;j<refs.length;j++){(function(b){b.onclick=function(){try{navigator.clipboard.writeText('__BLINDFOLD__');}catch(e){}flash(b,'✓ sentinel copied');};})(refs[j]);}
 }
 
 function renderPerSecret(ev){
@@ -655,7 +660,35 @@ async function runFullAudit(){
 
 function startStream(){try{var es=new EventSource(api('/api/stream'));es.addEventListener('change',function(){poll();});es.onerror=function(){};}catch(e){}}
 
+function renderCommands(){
+  var C=[
+    ['doctor','doctor','Check your key + tenant are healthy'],
+    ['status','status','Mode, tenant, and every sealed secret'],
+    ['audit','audit','Verify the ledger + reconcile against the enclave'],
+    ['migrate','migrate','Seal every secret in .env in one shot'],
+    ['register','register --name NAME --from-env NAME','Seal a secret into the enclave'],
+    ['use','use --name NAME -- COMMAND','Run any tool with a sealed secret injected'],
+    ['use --check','use --name NAME --check','Confirm a sealed secret is usable'],
+    ['rotate','rotate --name NAME --from-env NAME','Replace a secret value (rollback-safe)'],
+    ['rollback','rollback --name NAME','Restore the previous value'],
+    ['versions','versions --name NAME','List rollback snapshots'],
+    ['grant','grant --host api.openai.com','Authorize the contract to call a host'],
+    ['share','share --to DID --host HOST','Let a teammate agent use your keys'],
+    ['revoke','revoke --to DID','Remove a teammate access'],
+    ['proxy','proxy','Run the local OpenAI/Anthropic proxy'],
+    ['publish','publish','Publish the contract to T3'],
+    ['sealed','sealed','List sealed keys (metadata only)'],
+    ['dashboard','dashboard','Launch this dashboard'],
+    ['export','export --name NAME','CI: inject a sealed secret into the job env']
+  ];
+  var rows=C.map(function(c){return '<tr><td><span class="cmdname">'+esc(c[0])+'</span></td><td><code>npm run blindfold -- '+esc(c[1])+'</code></td><td>'+esc(c[2])+'</td><td><button class="copybtn" data-cmd="npm run blindfold -- '+esc(c[1])+'">⧉ copy</button></td></tr>';}).join('');
+  document.getElementById('commands-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Command</th><th>Run</th><th>What it does</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var btns=document.querySelectorAll('#commands-wrap .copybtn');
+  for(var i=0;i<btns.length;i++){(function(b){b.onclick=function(){try{navigator.clipboard.writeText(b.getAttribute('data-cmd'));}catch(e){}var o=b.textContent;b.textContent='✓ copied';b.classList.add('done');setTimeout(function(){b.textContent=o;b.classList.remove('done');},1300);};})(btns[i]);}
+}
+
 document.getElementById('logo').src=api('/logo.png');
+renderCommands();
 poll();setRefresh();startStream();
 </script>
 </body>
