@@ -98,6 +98,24 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       req.on("close", () => { clearInterval(hb); for (const w of watchers) { try { w.close(); } catch { /* ignore */ } } });
       return;
     }
+    if (req.method === "GET" && pathname === "/api/release") {
+      // Release a sealed secret's plaintext to the (localhost) browser so the
+      // owner can copy it. Deliberate owner action — same as `blindfold use`.
+      // Subject to the dashboard auth guard above; logs the release for audit.
+      const env = loadBlindfoldEnv();
+      const name = (() => { try { return new URL(url, "http://x").searchParams.get("name") || ""; } catch { return ""; } })();
+      if (!name) { res.writeHead(400, { "content-type": "application/json" }).end(JSON.stringify({ error: "name required" })); return; }
+      if (env.mock) { res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ error: "mock mode" })); return; }
+      try {
+        const { release } = await import("./release.ts");
+        const value = await release(name, { via: "dashboard" });
+        res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
+        res.end(JSON.stringify({ value }));
+      } catch (err) {
+        res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ error: (err as Error).message }));
+      }
+      return;
+    }
     if (req.method === "GET" && pathname === "/api/audit/full") {
       // Slow path (live T3 calls) — only hit on demand from the UI button.
       const env = loadBlindfoldEnv();
@@ -247,16 +265,25 @@ const HTML = `<!DOCTYPE html>
     color:var(--fg); line-height:1.5; transition:background .2s,color .2s;
   }
   a { color:var(--accent2); }
-  .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
-  .brandwrap { display:flex; align-items:center; gap:14px; min-width:0; }
-  .logo-img { width:60px; height:60px; border-radius:15px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:7px; box-shadow:var(--shadow); flex:none; }
-  h1 { margin:0; font-size:clamp(22px,4vw,30px); font-weight:800; letter-spacing:-.5px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
-  .brand { position:relative; color:var(--fg); padding-bottom:5px; }
-  .brand::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:3px; transform-origin:left; animation:underline .55s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes underline { from{transform:scaleX(0);opacity:.4;} to{transform:scaleX(1);opacity:1;} }
-  .eyebrow { font-size:.5em; font-weight:600; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; }
-  .tagline { font-size:12px; color:var(--dim); margin-top:6px; display:flex; align-items:center; gap:6px; }
-  .tagline .lock { color:var(--orange); }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px;
+    border:1px solid var(--line-strong); border-radius:16px; padding:16px 20px;
+    background:linear-gradient(180deg,var(--card),var(--card2)); box-shadow:var(--shadow); }
+  .brandwrap { display:flex; align-items:center; gap:16px; min-width:0; }
+  .logo-img { width:clamp(64px,9vw,88px); height:clamp(64px,9vw,88px); border-radius:18px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:8px; box-shadow:var(--shadow); flex:none; animation:logoIn .6s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes logoIn { from{transform:scale(.7) rotate(-8deg);opacity:0;} to{transform:scale(1) rotate(0);opacity:1;} }
+  h1 { margin:0; font-size:clamp(24px,4.5vw,34px); font-weight:800; letter-spacing:-.5px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  /* wordmark: a "sealing" stamp-in, a one-time shine sweep, and the orange underline drawing like a seal stroke */
+  .brand { position:relative; color:var(--fg); padding-bottom:6px; display:inline-block; animation:stampIn .5s cubic-bezier(.2,1.3,.4,1) both; overflow:hidden; }
+  .brand::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:3px; transform-origin:left; animation:underline .6s .25s cubic-bezier(.2,.8,.2,1) both; }
+  .brand::before { content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent); transform:skewX(-18deg); animation:shine 1.1s .5s ease-out both; pointer-events:none; }
+  @keyframes underline { from{transform:scaleX(0);opacity:.3;} to{transform:scaleX(1);opacity:1;} }
+  @keyframes stampIn { from{transform:scale(1.12);opacity:0;letter-spacing:1px;} 60%{opacity:1;} to{transform:scale(1);opacity:1;letter-spacing:-.5px;} }
+  @keyframes shine { from{left:-60%;} to{left:130%;} }
+  .eyebrow { font-size:.42em; font-weight:600; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; }
+  .tagline { font-size:12px; color:var(--dim); margin-top:7px; display:flex; align-items:center; gap:6px; }
+  .tagline .lock { color:var(--orange); display:inline-block; animation:clack .5s .45s cubic-bezier(.3,1.4,.5,1) both; }
+  @keyframes clack { from{transform:rotate(-35deg) translateY(-2px);opacity:0;} to{transform:rotate(0) translateY(0);opacity:1;} }
+  @media (prefers-reduced-motion:reduce){ .logo-img,.brand,.brand::after,.brand::before,.tagline .lock{ animation:none; } }
   .tagline b { color:var(--fg); font-weight:600; }
   .tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center; }
   .tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px 10px; max-width:100%; }
@@ -274,6 +301,9 @@ const HTML = `<!DOCTYPE html>
   .copybtn { background:transparent; border:1px solid var(--line); border-radius:6px; padding:2px 9px; font-size:11px; cursor:pointer; color:var(--dim); transition:border-color .15s,color .15s; }
   .copybtn:hover { border-color:var(--orange); color:var(--orange); }
   .copybtn.done { color:var(--ok); border-color:var(--ok); }
+  .copybtn.err { color:var(--bad); border-color:var(--bad); }
+  .copybtn.val { color:var(--orange); border-color:rgba(255,140,43,.4); }
+  .copybtn.val:hover { background:rgba(255,140,43,.08); }
   @media (max-width:620px){
     .topbar { flex-direction:column; align-items:stretch; }
     .controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -598,10 +628,13 @@ function renderSpark(ev){
 function renderSealed(entries){
   if(!entries.length){document.getElementById('sealed-table-wrap').innerHTML='<div class="empty">No keys sealed yet. <code>blindfold register --name &lt;K&gt;</code></div>';return;}
   var latest={};entries.forEach(function(e){latest[e.name]=e;});
-  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td><button class="copybtn" data-name="'+esc(e.name)+'" data-addr="'+esc((e.map_name||'')+'/'+e.name)+'" title="Copy the ready-to-run command">⧉ use</button></td></tr>';}).join('');
+  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td style="white-space:nowrap"><button class="copybtn cmd" data-name="'+esc(e.name)+'" title="Copy a ready-to-run use command">⧉ cmd</button> <button class="copybtn val" data-name="'+esc(e.name)+'" title="Release the value from the enclave and copy it to clipboard (not shown)">🔑 value</button></td></tr>';}).join('');
   document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Source</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  var btns=document.querySelectorAll('#sealed-table-wrap .copybtn');
-  for(var i=0;i<btns.length;i++){(function(b){b.onclick=function(){var cmd='blindfold use --name '+b.getAttribute('data-name')+' -- <command>';try{navigator.clipboard.writeText(cmd);}catch(e){}var o=b.textContent;b.textContent='✓ copied';b.classList.add('done');setTimeout(function(){b.textContent=o;b.classList.remove('done');},1300);};})(btns[i]);}
+  function flash(b,txt,cls){var o=b.textContent;b.textContent=txt;b.classList.add(cls||'done');setTimeout(function(){b.textContent=o;b.classList.remove('done','err');},1400);}
+  var cmds=document.querySelectorAll('#sealed-table-wrap .copybtn.cmd');
+  for(var i=0;i<cmds.length;i++){(function(b){b.onclick=function(){var cmd='blindfold use --name '+b.getAttribute('data-name')+' --url https://api.example.com';try{navigator.clipboard.writeText(cmd);}catch(e){}flash(b,'✓ copied');};})(cmds[i]);}
+  var vals=document.querySelectorAll('#sealed-table-wrap .copybtn.val');
+  for(var j=0;j<vals.length;j++){(function(b){b.onclick=async function(){var nm=b.getAttribute('data-name');flash(b,'…');try{var r=await fetch(api('/api/release?name='+encodeURIComponent(nm))).then(function(x){return x.json();});if(r.error){flash(b,'✖ '+r.error.slice(0,18),'err');return;}await navigator.clipboard.writeText(r.value);flash(b,'✓ copied (hidden)');}catch(e){flash(b,'✖ failed','err');}};})(vals[j]);}
 }
 
 function renderPerSecret(ev){
