@@ -248,12 +248,17 @@ const HTML = `<!DOCTYPE html>
   }
   a { color:var(--accent2); }
   .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
-  .brandwrap { display:flex; align-items:center; gap:12px; min-width:0; }
-  .logo-img { width:42px; height:42px; border-radius:11px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:4px; box-shadow:var(--shadow); flex:none; }
-  h1 { margin:0; font-size:clamp(17px,3vw,21px); font-weight:700; letter-spacing:-.2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .brand { color:#fff; background:linear-gradient(95deg,var(--orange),var(--orange2)); padding:2px 11px; border-radius:9px; box-shadow:0 2px 10px rgba(255,140,43,.35); letter-spacing:.2px; }
-  .dash { color:var(--fg); font-weight:600; }
-  .tags { display:flex; gap:6px; margin-top:7px; flex-wrap:wrap; align-items:center; }
+  .brandwrap { display:flex; align-items:center; gap:14px; min-width:0; }
+  .logo-img { width:60px; height:60px; border-radius:15px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:7px; box-shadow:var(--shadow); flex:none; }
+  h1 { margin:0; font-size:clamp(22px,4vw,30px); font-weight:800; letter-spacing:-.5px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .brand { position:relative; color:var(--fg); padding-bottom:5px; }
+  .brand::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:3px; transform-origin:left; animation:underline .55s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes underline { from{transform:scaleX(0);opacity:.4;} to{transform:scaleX(1);opacity:1;} }
+  .eyebrow { font-size:.5em; font-weight:600; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; }
+  .tagline { font-size:12px; color:var(--dim); margin-top:6px; display:flex; align-items:center; gap:6px; }
+  .tagline .lock { color:var(--orange); }
+  .tagline b { color:var(--fg); font-weight:600; }
+  .tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center; }
   .tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px 10px; max-width:100%; }
   .tag.live { color:var(--ok); border-color:rgba(63,185,80,.45); background:rgba(63,185,80,.08); font-weight:600; }
   .tag.orange { color:var(--orange); border-color:rgba(255,140,43,.45); background:rgba(255,140,43,.08); }
@@ -266,7 +271,16 @@ const HTML = `<!DOCTYPE html>
   select,button { background:var(--card); color:var(--fg); border:1px solid var(--line-strong); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; transition:border-color .15s,background .15s,transform .05s; }
   button:hover,select:hover { border-color:var(--orange); color:var(--orange); }
   button:active { transform:translateY(1px); }
-  @media (max-width:620px){ .topbar{ flex-direction:column; align-items:stretch; } .controls{ justify-content:space-between; } .controls label{ flex:1; } .controls select{ flex:1; } }
+  .copybtn { background:transparent; border:1px solid var(--line); border-radius:6px; padding:2px 9px; font-size:11px; cursor:pointer; color:var(--dim); transition:border-color .15s,color .15s; }
+  .copybtn:hover { border-color:var(--orange); color:var(--orange); }
+  .copybtn.done { color:var(--ok); border-color:var(--ok); }
+  @media (max-width:620px){
+    .topbar { flex-direction:column; align-items:stretch; }
+    .controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .controls label { width:100%; }
+    .controls label select { flex:1; width:100%; }
+    .controls > button { width:100%; }
+  }
   .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); margin-bottom:14px; }
   .two-col { display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-bottom:4px; }
   @media (max-width:860px){ .two-col{ grid-template-columns:1fr; } }
@@ -336,7 +350,8 @@ const HTML = `<!DOCTYPE html>
     <div class="brandwrap">
       <img id="logo" class="logo-img" alt="Blindfold" />
       <div>
-        <h1><span class="brand">Blindfold</span><span class="dash">Dashboard</span></h1>
+        <h1><span class="brand">Blindfold</span><span class="eyebrow">Dashboard</span></h1>
+        <div class="tagline"><span class="lock">🔒</span> Secrets sealed in a <b>TEE</b> — keys you can't leak</div>
         <div class="tags" id="tags"></div>
       </div>
     </div>
@@ -583,8 +598,10 @@ function renderSpark(ev){
 function renderSealed(entries){
   if(!entries.length){document.getElementById('sealed-table-wrap').innerHTML='<div class="empty">No keys sealed yet. <code>blindfold register --name &lt;K&gt;</code></div>';return;}
   var latest={};entries.forEach(function(e){latest[e.name]=e;});
-  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td></tr>';}).join('');
-  document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td><button class="copybtn" data-name="'+esc(e.name)+'" data-addr="'+esc((e.map_name||'')+'/'+e.name)+'" title="Copy the ready-to-run command">⧉ use</button></td></tr>';}).join('');
+  document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Source</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var btns=document.querySelectorAll('#sealed-table-wrap .copybtn');
+  for(var i=0;i<btns.length;i++){(function(b){b.onclick=function(){var cmd='blindfold use --name '+b.getAttribute('data-name')+' -- <command>';try{navigator.clipboard.writeText(cmd);}catch(e){}var o=b.textContent;b.textContent='✓ copied';b.classList.add('done');setTimeout(function(){b.textContent=o;b.classList.remove('done');},1300);};})(btns[i]);}
 }
 
 function renderPerSecret(ev){
