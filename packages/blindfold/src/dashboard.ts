@@ -57,6 +57,18 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       return;
     }
 
+    if (req.method === "GET" && pathname === "/logo.png") {
+      try {
+        const HERE = path.dirname(fileURLToPath(import.meta.url));
+        const logo = path.resolve(HERE, "..", "..", "..", "assets", "logo.png");
+        const buf = fs.readFileSync(logo);
+        res.writeHead(200, { "content-type": "image/png", "cache-control": "max-age=3600" });
+        res.end(buf);
+      } catch {
+        res.writeHead(404, { "content-type": "text/plain" }).end("logo not found");
+      }
+      return;
+    }
     if (req.method === "GET" && (pathname === "/" || pathname === "/index.html")) {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
       res.end(HTML);
@@ -216,11 +228,13 @@ const HTML = `<!DOCTYPE html>
     --fg:#e6edf3; --dim:#8b949e; --dim2:#6b7280;
     --ok:#3fb950; --warn:#d29922; --bad:#f85149; --info:#58a6ff;
     --accent:#8b5cf6; --accent2:#58a6ff;
-    --c1:#8b5cf6; --c2:#58a6ff; --c3:#3fb950; --c4:#d29922; --c5:#f85149; --c6:#ff7b72; --c7:#39c5cf; --c8:#f778ba;
+    --orange:#ff8c2b; --orange2:#ff6a3d; --brand:#ff8c2b;
+    --c1:#8b5cf6; --c2:#58a6ff; --c3:#3fb950; --c4:#ff8c2b; --c5:#f85149; --c6:#ff7b72; --c7:#39c5cf; --c8:#f778ba;
+    --line:#333b47; --line-strong:#465061;
     --shadow:0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.18);
   }
   [data-theme="light"] {
-    --bg:#f6f8fa; --bg2:#fff; --card:#fff; --card2:#f3f4f6; --line:#e2e6ea;
+    --bg:#f6f8fa; --bg2:#fff; --card:#fff; --card2:#f3f4f6; --line:#d8dee4; --line-strong:#c2cad3;
     --fg:#1f2328; --dim:#57606a; --dim2:#8b949e;
     --shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
   }
@@ -233,17 +247,26 @@ const HTML = `<!DOCTYPE html>
     color:var(--fg); line-height:1.5; transition:background .2s,color .2s;
   }
   a { color:var(--accent2); }
-  h1 { margin:0; font-size:clamp(18px,3vw,22px); font-weight:700; letter-spacing:-.2px; }
-  h1 .logo { background:linear-gradient(90deg,var(--c1),var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .sub { color:var(--dim); font-size:12.5px; margin-top:2px; overflow-wrap:anywhere; }
-  .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
-  .live { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--ok); margin-right:5px; box-shadow:0 0 0 0 rgba(63,185,80,.6); animation:pulse 2s infinite; vertical-align:middle; }
-  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,185,80,.5);} 70%{box-shadow:0 0 0 7px rgba(63,185,80,0);} 100%{box-shadow:0 0 0 0 rgba(63,185,80,0);} }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+  .brandwrap { display:flex; align-items:center; gap:12px; min-width:0; }
+  .logo-img { width:42px; height:42px; border-radius:11px; object-fit:contain; background:var(--card); border:1px solid var(--line-strong); padding:4px; box-shadow:var(--shadow); flex:none; }
+  h1 { margin:0; font-size:clamp(17px,3vw,21px); font-weight:700; letter-spacing:-.2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .brand { color:#fff; background:linear-gradient(95deg,var(--orange),var(--orange2)); padding:2px 11px; border-radius:9px; box-shadow:0 2px 10px rgba(255,140,43,.35); letter-spacing:.2px; }
+  .dash { color:var(--fg); font-weight:600; }
+  .tags { display:flex; gap:6px; margin-top:7px; flex-wrap:wrap; align-items:center; }
+  .tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px 10px; max-width:100%; }
+  .tag.live { color:var(--ok); border-color:rgba(63,185,80,.45); background:rgba(63,185,80,.08); font-weight:600; }
+  .tag.orange { color:var(--orange); border-color:rgba(255,140,43,.45); background:rgba(255,140,43,.08); }
+  .tag.path { color:var(--dim); }
+  .tag.path code { background:none; padding:0; max-width:min(52vw,420px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; vertical-align:bottom; }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 rgba(63,185,80,.6); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,185,80,.5);} 70%{box-shadow:0 0 0 6px rgba(63,185,80,0);} 100%{box-shadow:0 0 0 0 rgba(63,185,80,0);} }
   .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .controls label { font-size:12px; color:var(--dim); display:flex; align-items:center; gap:4px; }
-  select,button { background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; transition:border-color .15s,background .15s,transform .05s; }
-  button:hover,select:hover { border-color:var(--accent); }
+  select,button { background:var(--card); color:var(--fg); border:1px solid var(--line-strong); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; transition:border-color .15s,background .15s,transform .05s; }
+  button:hover,select:hover { border-color:var(--orange); color:var(--orange); }
   button:active { transform:translateY(1px); }
+  @media (max-width:620px){ .topbar{ flex-direction:column; align-items:stretch; } .controls{ justify-content:space-between; } .controls label{ flex:1; } .controls select{ flex:1; } }
   .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); margin-bottom:14px; }
   .two-col { display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-bottom:4px; }
   @media (max-width:860px){ .two-col{ grid-template-columns:1fr; } }
@@ -310,9 +333,12 @@ const HTML = `<!DOCTYPE html>
 </head>
 <body>
   <div class="topbar">
-    <div>
-      <h1><span class="logo">🛡 Blindfold</span> Dashboard</h1>
-      <div class="sub"><span class="live"></span><span id="updated">connecting…</span> · <span id="src"></span></div>
+    <div class="brandwrap">
+      <img id="logo" class="logo-img" alt="Blindfold" />
+      <div>
+        <h1><span class="brand">Blindfold</span><span class="dash">Dashboard</span></h1>
+        <div class="tags" id="tags"></div>
+      </div>
     </div>
     <div class="controls">
       <label>range
@@ -422,8 +448,11 @@ async function poll(){
     var statusR=r[0],sealedR=r[1],eventsR=r[2],auditR=r[3];
     window._events=eventsR.events||[];
     var ev=rangeFiltered();
-    document.getElementById('src').textContent='usage: '+eventsR.source;
-    document.getElementById('updated').textContent='live · '+new Date().toLocaleTimeString();
+    document.getElementById('tags').innerHTML=
+      '<span class="tag live"><span class="live-dot"></span>live</span>'
+      +'<span class="tag orange">'+new Date().toLocaleTimeString()+'</span>'
+      +'<span class="tag">'+(statusR.mode==='real'?'REAL · '+esc(statusR.t3_env||''):'MOCK')+'</span>'
+      +'<span class="tag path">usage <code title="'+esc(eventsR.source)+'">'+esc(eventsR.source)+'</code></span>';
     renderAlert(auditR,ev);
     renderKpis(ev,auditR,statusR);
     renderPosture(auditR,statusR);
@@ -594,6 +623,7 @@ async function runFullAudit(){
 
 function startStream(){try{var es=new EventSource(api('/api/stream'));es.addEventListener('change',function(){poll();});es.onerror=function(){};}catch(e){}}
 
+document.getElementById('logo').src=api('/logo.png');
 poll();setRefresh();startStream();
 </script>
 </body>
