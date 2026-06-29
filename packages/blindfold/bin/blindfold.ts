@@ -115,6 +115,13 @@ async function main(): Promise<void> {
       const { release } = await import("../src/release.ts");
       const value = await release(name, { via: "use" }); // plaintext, kept local; never printed
 
+      // Mode 0: --check just confirms the secret is sealed + usable (no URL, no
+      // command, no value printed). The dashboard's "copy command" uses this.
+      if (argv.flags.check) {
+        console.log(`✓ "${name}" is sealed and usable — ${value.length} bytes (value never shown)`);
+        return;
+      }
+
       // Mode A: quick auth test against an HTTPS endpoint with Bearer auth.
       if (argv.flags.url) {
         const url = String(argv.flags.url);

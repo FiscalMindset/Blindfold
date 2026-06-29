@@ -98,24 +98,6 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       req.on("close", () => { clearInterval(hb); for (const w of watchers) { try { w.close(); } catch { /* ignore */ } } });
       return;
     }
-    if (req.method === "GET" && pathname === "/api/release") {
-      // Release a sealed secret's plaintext to the (localhost) browser so the
-      // owner can copy it. Deliberate owner action — same as `blindfold use`.
-      // Subject to the dashboard auth guard above; logs the release for audit.
-      const env = loadBlindfoldEnv();
-      const name = (() => { try { return new URL(url, "http://x").searchParams.get("name") || ""; } catch { return ""; } })();
-      if (!name) { res.writeHead(400, { "content-type": "application/json" }).end(JSON.stringify({ error: "name required" })); return; }
-      if (env.mock) { res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ error: "mock mode" })); return; }
-      try {
-        const { release } = await import("./release.ts");
-        const value = await release(name, { via: "dashboard" });
-        res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
-        res.end(JSON.stringify({ value }));
-      } catch (err) {
-        res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ error: (err as Error).message }));
-      }
-      return;
-    }
     if (req.method === "GET" && pathname === "/api/audit/full") {
       // Slow path (live T3 calls) — only hit on demand from the UI button.
       const env = loadBlindfoldEnv();
@@ -302,8 +284,8 @@ const HTML = `<!DOCTYPE html>
   .copybtn:hover { border-color:var(--orange); color:var(--orange); }
   .copybtn.done { color:var(--ok); border-color:var(--ok); }
   .copybtn.err { color:var(--bad); border-color:var(--bad); }
-  .copybtn.val { color:var(--orange); border-color:rgba(255,140,43,.4); }
-  .copybtn.val:hover { background:rgba(255,140,43,.08); }
+  .copybtn.ref { color:var(--orange); border-color:rgba(255,140,43,.4); }
+  .copybtn.ref:hover { background:rgba(255,140,43,.08); }
   @media (max-width:620px){
     .topbar { flex-direction:column; align-items:stretch; }
     .controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -628,13 +610,13 @@ function renderSpark(ev){
 function renderSealed(entries){
   if(!entries.length){document.getElementById('sealed-table-wrap').innerHTML='<div class="empty">No keys sealed yet. <code>blindfold register --name &lt;K&gt;</code></div>';return;}
   var latest={};entries.forEach(function(e){latest[e.name]=e;});
-  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td style="white-space:nowrap"><button class="copybtn cmd" data-name="'+esc(e.name)+'" title="Copy a ready-to-run use command">⧉ cmd</button> <button class="copybtn val" data-name="'+esc(e.name)+'" title="Release the value from the enclave and copy it to clipboard (not shown)">🔑 value</button></td></tr>';}).join('');
+  var rows=Object.keys(latest).map(function(k){return latest[k];}).sort(function(a,b){return a.t<b.t?1:-1;}).map(function(e){var ref=(e.map_name||'')+'/'+e.name;return '<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:'+colorFor(e.name)+'"></span><code>'+esc(e.name)+'</code></td><td>'+e.length+' B</td><td>'+pillMode(e.mode)+'</td><td title="'+esc(e.t)+'">'+timeAgo(e.t)+'</td><td><span class="pill pill-dim">'+esc(e.source)+'</span></td><td style="white-space:nowrap"><button class="copybtn cmd" data-name="'+esc(e.name)+'" title="Copy a ready-to-run command">⧉ cmd</button> <button class="copybtn ref" data-ref="'+esc(ref)+'" title="Copy the sealed reference (enclave address — NOT the secret value)">⧉ sealed token</button></td></tr>';}).join('');
   document.getElementById('sealed-table-wrap').innerHTML='<div class="scroll"><table><thead><tr><th>Name</th><th>Bytes</th><th>Mode</th><th>Sealed</th><th>Source</th><th>Copy</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   function flash(b,txt,cls){var o=b.textContent;b.textContent=txt;b.classList.add(cls||'done');setTimeout(function(){b.textContent=o;b.classList.remove('done','err');},1400);}
   var cmds=document.querySelectorAll('#sealed-table-wrap .copybtn.cmd');
-  for(var i=0;i<cmds.length;i++){(function(b){b.onclick=function(){var cmd='blindfold use --name '+b.getAttribute('data-name')+' --url https://api.example.com';try{navigator.clipboard.writeText(cmd);}catch(e){}flash(b,'✓ copied');};})(cmds[i]);}
-  var vals=document.querySelectorAll('#sealed-table-wrap .copybtn.val');
-  for(var j=0;j<vals.length;j++){(function(b){b.onclick=async function(){var nm=b.getAttribute('data-name');flash(b,'…');try{var r=await fetch(api('/api/release?name='+encodeURIComponent(nm))).then(function(x){return x.json();});if(r.error){flash(b,'✖ '+r.error.slice(0,18),'err');return;}await navigator.clipboard.writeText(r.value);flash(b,'✓ copied (hidden)');}catch(e){flash(b,'✖ failed','err');}};})(vals[j]);}
+  for(var i=0;i<cmds.length;i++){(function(b){b.onclick=function(){var cmd='npm run blindfold -- use --name '+b.getAttribute('data-name')+' --check';try{navigator.clipboard.writeText(cmd);}catch(e){}flash(b,'✓ copied');};})(cmds[i]);}
+  var refs=document.querySelectorAll('#sealed-table-wrap .copybtn.ref');
+  for(var j=0;j<refs.length;j++){(function(b){b.onclick=function(){try{navigator.clipboard.writeText(b.getAttribute('data-ref'));}catch(e){}flash(b,'✓ sealed ref copied');};})(refs[j]);}
 }
 
 function renderPerSecret(ev){
