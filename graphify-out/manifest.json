@@ -1,0 +1,346 @@
+{
+  "/Volumes/algsoch/terminal 3/scripts/smtp-with-blindfold.ts": {
+    "mtime": 1782136031.78,
+    "hash": "8e1fa7598c43f78e10b983de15bc0574"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/run-tests.ts": {
+    "mtime": 1782621237.32,
+    "hash": "44d60df53687906aead7dc017096a58d"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/real-e2e-test.ts": {
+    "mtime": 1781898403.29,
+    "hash": "d2ff36621cb2b25bf5d3fc799dc2ade1"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/diagnose-execute.ts": {
+    "mtime": 1781896310.14,
+    "hash": "8919a038a4fed386173d7a9abd30a152"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/grant-egress.ts": {
+    "mtime": 1781896136.73,
+    "hash": "9da207e56556800e64d1e81fb7896496"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/init-tenant.ts": {
+    "mtime": 1781898203.25,
+    "hash": "0bb905c4aa85193683ca401cf736d692"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/probe-map-get.ts": {
+    "mtime": 1781905197.7,
+    "hash": "b0b5ad9c8c6817df5d546833b919eec9"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/probe-egress-map.ts": {
+    "mtime": 1781905315.84,
+    "hash": "34e11a9d397d959aca637c96c2cae0f1"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/real-fullcall.ts": {
+    "mtime": 1781905397.43,
+    "hash": "ad0f7dced685919f31badb58f4c7a7b2"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/demo-smtp.ts": {
+    "mtime": 1781906390.28,
+    "hash": "4cd3945a6f7e260d6f0b2bd65b5aa372"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/seal-via-working-key.ts": {
+    "mtime": 1782600253.13,
+    "hash": "3809fbcd68a74994df2ef9783ca43d94"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/probe-funcs.ts": {
+    "mtime": 1781908251.01,
+    "hash": "2a18214e8fcaf056dcb6665524ad68fa"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/grant-and-call.ts": {
+    "mtime": 1781947229.99,
+    "hash": "4593af2703612d504f5c633d45e168d3"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/test-v5-release.ts": {
+    "mtime": 1781947239.62,
+    "hash": "68031e7fe3880c45c9cc1b026af6243c"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/seal-blogger-key.ts": {
+    "mtime": 1782135171.32,
+    "hash": "d1e5ca59d406d25b7dffd64b9108a4a8"
+  },
+  "/Volumes/algsoch/terminal 3/scripts/test-enclave-egress.ts": {
+    "mtime": 1782607106.52,
+    "hash": "586a3b71f17aeef7d5f758b9280a38d4"
+  },
+  "/Volumes/algsoch/terminal 3/demo/run-demo.ts": {
+    "mtime": 1781868725.31,
+    "hash": "87b5dcf78efc5dba52b9e4ba4e360e83"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/types.ts": {
+    "mtime": 1781866765.39,
+    "hash": "e06594275b4c2c68d517d0c2a82340da"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/tools.ts": {
+    "mtime": 1781866780.12,
+    "hash": "2f96e9f6856718b61c3ec50282a7edb2"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/injection-page.ts": {
+    "mtime": 1782133634.87,
+    "hash": "bbe60b079adea8eb7f72c5c416127bad"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/attacker-server.ts": {
+    "mtime": 1781866816.56,
+    "hash": "e3bf4008d44dc7703358e20a402226db"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/mock-openai-server.ts": {
+    "mtime": 1782133571.96,
+    "hash": "a908ad3ff6bf270bc2d11fa4ea98e9e5"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/demo-proxy.ts": {
+    "mtime": 1782133804.3,
+    "hash": "6988692e9bbf85037ffc938355e1f30a"
+  },
+  "/Volumes/algsoch/terminal 3/demo/shared/openai-agent.ts": {
+    "mtime": 1782133616.95,
+    "hash": "ff640a73bee6ee010655cda7559b64ad"
+  },
+  "/Volumes/algsoch/terminal 3/demo/agent-a-leaks/index.ts": {
+    "mtime": 1782133658.55,
+    "hash": "51347f81941da0f803a3d73415ca8261"
+  },
+  "/Volumes/algsoch/terminal 3/demo/agent-b-blindfolded/index.ts": {
+    "mtime": 1782133676.85,
+    "hash": "998ad4dedaed3aa3547a8a7abe52e637"
+  },
+  "/Volumes/algsoch/terminal 3/contract/src/forward.rs": {
+    "mtime": 1782602646.55,
+    "hash": "9e5f5f7f3145a52312afd97b935d53a1"
+  },
+  "/Volumes/algsoch/terminal 3/contract/src/lib.rs": {
+    "mtime": 1781907802.51,
+    "hash": "1d7bc944ff538a8612e9261316733127"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/t3-client.ts": {
+    "mtime": 1782636773.43,
+    "hash": "3c219b8b90819ab6e808a43b7d4be1b6"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/constants.ts": {
+    "mtime": 1782602655.81,
+    "hash": "41a35256815ce48d93a75428b61335d9"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/types.ts": {
+    "mtime": 1782618500.56,
+    "hash": "6ab1379786d05b2d7270d80e1704e3a0"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/log.ts": {
+    "mtime": 1781867806.64,
+    "hash": "521f763b2280005861983b77e88c02e4"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/env.ts": {
+    "mtime": 1782618511.05,
+    "hash": "ad561f536238212bfac4995a720bd4d9"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/register.ts": {
+    "mtime": 1782135802.41,
+    "hash": "65f9f4cb93d860c8ffc89a4847b507e0"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/init.ts": {
+    "mtime": 1781958693.98,
+    "hash": "c36aad0f173ffdcaf14f87fcf673a5d9"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/proxy.ts": {
+    "mtime": 1782646888.68,
+    "hash": "5f5fc55b8cb02848c3e25887f88580b2"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/wrap.ts": {
+    "mtime": 1781867892.51,
+    "hash": "8bd545c0067ddd943fc998ba5618b3f0"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/index.ts": {
+    "mtime": 1782135792.76,
+    "hash": "dce550b4dd4d647b581f61f818a0c8bc"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/usage-log.ts": {
+    "mtime": 1782646827.48,
+    "hash": "44fb889707fc07198ec4220532ca2b0f"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/dashboard.ts": {
+    "mtime": 1782707564.66,
+    "hash": "5c2cb4313c46067b49ba32d98e188858"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/release.ts": {
+    "mtime": 1782646857.38,
+    "hash": "20a22ba8111ff25734f2d9b4ec24402e"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/compat.ts": {
+    "mtime": 1781893911.57,
+    "hash": "87d703945280c5d0108917cefd0aace1"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/prompt.ts": {
+    "mtime": 1781903975.57,
+    "hash": "d3745dbd4150c1915893fff5d091aa85"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/sealed-ledger.ts": {
+    "mtime": 1782620179.87,
+    "hash": "4ebc01350f79297a1106e2a9019e5f49"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/migrate.ts": {
+    "mtime": 1782609754.5,
+    "hash": "1b8c70ddfac8e817f53916008d5b38a3"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/src/versions.ts": {
+    "mtime": 1782621002.49,
+    "hash": "572ea6b79881f024c6fdf790ef5d838a"
+  },
+  "/Volumes/algsoch/terminal 3/packages/blindfold/bin/blindfold.ts": {
+    "mtime": 1782706720.11,
+    "hash": "a51cad9867a070fac199bfe88d0da07e"
+  },
+  "/Volumes/algsoch/terminal 3/examples/grok-via-blindfold.ts": {
+    "mtime": 1782135994.84,
+    "hash": "9f827794d9a20c95097890ae9c400823"
+  },
+  "/Volumes/algsoch/terminal 3/examples/openai-node-quickstart/index.js": {
+    "mtime": 1782607503.54,
+    "hash": "ddaeac559100c7343e9e46a58c480b61"
+  },
+  "/Volumes/algsoch/terminal 3/examples/openai-python-quickstart/main.py": {
+    "mtime": 1782607577.6,
+    "hash": "c0ac33a1fd014155d43ad85cb6241211"
+  },
+  "/Volumes/algsoch/terminal 3/examples/langchain-summarizer/summarize.ts": {
+    "mtime": 1782617203.52,
+    "hash": "04cbb3c6cde42edf30bf0c02a350188b"
+  },
+  "/Volumes/algsoch/terminal 3/examples/anthropic-quickstart/index.js": {
+    "mtime": 1782607560.35,
+    "hash": "0a1619644a21bd4a363cf3be48abd553"
+  },
+  "/Volumes/algsoch/terminal 3/explain.md": {
+    "mtime": 1782603310.13,
+    "hash": "8c2971fd0f4151826cc2367fedeca3a2"
+  },
+  "/Volumes/algsoch/terminal 3/README.md": {
+    "mtime": 1782636864.86,
+    "hash": "45a66bf098613da57d9ced8ee6e3d422"
+  },
+  "/Volumes/algsoch/terminal 3/vicky.md": {
+    "mtime": 1781959105.0,
+    "hash": "59911120047c48f8446b90e9ab866ba2"
+  },
+  "/Volumes/algsoch/terminal 3/output_analysis.md": {
+    "mtime": 1782703167.3,
+    "hash": "2903794b562957e393e4cd13592655d0"
+  },
+  "/Volumes/algsoch/terminal 3/INTEGRATION-AURORA.md": {
+    "mtime": 1781907547.82,
+    "hash": "f1ae0a97acbd36d0b2c8a7451117b47a"
+  },
+  "/Volumes/algsoch/terminal 3/current_status.md": {
+    "mtime": 1782601304.23,
+    "hash": "f439795e6e8601f9bf9665777a5759b6"
+  },
+  "/Volumes/algsoch/terminal 3/usage.md": {
+    "mtime": 1782620419.41,
+    "hash": "89c4252e509fca4678711d242395c885"
+  },
+  "/Volumes/algsoch/terminal 3/process.md": {
+    "mtime": 1781960071.5,
+    "hash": "49c25d718d343587c1bab93a5e1dc03f"
+  },
+  "/Volumes/algsoch/terminal 3/usage_by_claude.md": {
+    "mtime": 1781961542.16,
+    "hash": "2e472b2762c35445355d51a76e0f65ca"
+  },
+  "/Volumes/algsoch/terminal 3/response.md": {
+    "mtime": 1782600374.42,
+    "hash": "ad4932351438b0cf33ce8afa3bd6383b"
+  },
+  "/Volumes/algsoch/terminal 3/TEAMS.md": {
+    "mtime": 1782636834.85,
+    "hash": "d3954c0cb7a0976289ba1c1e8da9f641"
+  },
+  "/Volumes/algsoch/terminal 3/EXAMPLES.md": {
+    "mtime": 1782620422.76,
+    "hash": "b887c4d2d89f2681b52a85512316060a"
+  },
+  "/Volumes/algsoch/terminal 3/CONTRIBUTING.md": {
+    "mtime": 1782620445.37,
+    "hash": "bbb731072d155124c8336c9e9fc939b8"
+  },
+  "/Volumes/algsoch/terminal 3/FAQ.md": {
+    "mtime": 1782636884.15,
+    "hash": "8f71c55b697140fb7fe4ff10648cc931"
+  },
+  "/Volumes/algsoch/terminal 3/docs/index.html": {
+    "mtime": 1782620476.45,
+    "hash": "c4adbe1d704b6286945e557dc5f001ae"
+  },
+  "/Volumes/algsoch/terminal 3/docs/01-problem-analysis.md": {
+    "mtime": 1781865499.14,
+    "hash": "2f7b3e4237f4c355d3aefa21aaf7857a"
+  },
+  "/Volumes/algsoch/terminal 3/docs/02-terminal3-analysis.md": {
+    "mtime": 1781866207.17,
+    "hash": "ac5a9dd7a872dbb05a401f892b74b7fb"
+  },
+  "/Volumes/algsoch/terminal 3/docs/03-architecture.md": {
+    "mtime": 1781866421.5,
+    "hash": "20ebdb3f8a564f0b421556e41c0d544a"
+  },
+  "/Volumes/algsoch/terminal 3/docs/AGENTS.md": {
+    "mtime": 1781908603.04,
+    "hash": "cc4cfaec71fa52d4c9dd3d7fa6f3cb88"
+  },
+  "/Volumes/algsoch/terminal 3/docs/04-usage.md": {
+    "mtime": 1781880828.11,
+    "hash": "04c9c677e541dd5bc42ae03b659d6842"
+  },
+  "/Volumes/algsoch/terminal 3/docs/05-compatibility.md": {
+    "mtime": 1781893958.39,
+    "hash": "d099a18350be453e3b976c0f9a76304a"
+  },
+  "/Volumes/algsoch/terminal 3/contract/wit/deps/README.md": {
+    "mtime": 1782407124.89,
+    "hash": "c11ea80ab5964afbfa2ede64f946017e"
+  },
+  "/Volumes/algsoch/terminal 3/examples/README.md": {
+    "mtime": 1782616848.12,
+    "hash": "88924a79ac21d2ce833f2bccdb037605"
+  },
+  "/Volumes/algsoch/terminal 3/examples/openai-node-quickstart/README.md": {
+    "mtime": 1782616788.77,
+    "hash": "368385f457fe0b349d5194a71e86a0b4"
+  },
+  "/Volumes/algsoch/terminal 3/examples/openai-python-quickstart/README.md": {
+    "mtime": 1782616807.98,
+    "hash": "bd350c9fa7bdacf265e87b3985749f16"
+  },
+  "/Volumes/algsoch/terminal 3/examples/openai-python-quickstart/requirements.txt": {
+    "mtime": 1782611537.71,
+    "hash": "30f6cb626ff353e714a7b603b995fddb"
+  },
+  "/Volumes/algsoch/terminal 3/examples/langchain-summarizer/README.md": {
+    "mtime": 1782617228.78,
+    "hash": "21c4a4286a3d6de95e5d20ae9120713d"
+  },
+  "/Volumes/algsoch/terminal 3/examples/anthropic-quickstart/README.md": {
+    "mtime": 1782616826.58,
+    "hash": "5caad5aca0966095fc28b8acb4adcf58"
+  },
+  "/Volumes/algsoch/terminal 3/examples/cli-tools/README.md": {
+    "mtime": 1782604048.23,
+    "hash": "4cd247c2f3c32e4419adc3712ca9f6af"
+  },
+  "/Volumes/algsoch/terminal 3/examples/digital-ocean/README.md": {
+    "mtime": 1782607219.81,
+    "hash": "d77c829c2c6984fcbdf30ad170b24b2b"
+  },
+  "/Volumes/algsoch/terminal 3/examples/api-providers/README.md": {
+    "mtime": 1782611551.14,
+    "hash": "47558b30ccb6aea3a3e638f89ea9bf3c"
+  },
+  "/Volumes/algsoch/terminal 3/tests/smtp-demo.md": {
+    "mtime": 1781906521.19,
+    "hash": "d2149016d39e2025ecde88f1abd45fe7"
+  },
+  "/Volumes/algsoch/terminal 3/docs/assets/logo.png": {
+    "mtime": 1782144231.8,
+    "hash": "80edee88968fd11757a0fc5f0b09d6d4"
+  },
+  "/Volumes/algsoch/terminal 3/assets/logo.png": {
+    "mtime": 1782704558.66,
+    "hash": "097957586987e7e329df91288d19e97e"
+  }
+}

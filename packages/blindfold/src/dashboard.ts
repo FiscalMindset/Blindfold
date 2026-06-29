@@ -222,6 +222,7 @@ const HTML = `<!DOCTYPE html>
 <meta charset="utf-8" />
 <title>Blindfold — Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="/logo.png" />
 <style>
   :root {
     --bg:#0b0e14; --bg2:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a313c;
@@ -254,18 +255,30 @@ const HTML = `<!DOCTYPE html>
   .logo-img { width:clamp(76px,11vw,104px); height:clamp(76px,11vw,104px); border-radius:18px; object-fit:cover; background:var(--card); border:1px solid var(--line-strong); padding:0; box-shadow:var(--shadow); flex:none; animation:logoIn .6s cubic-bezier(.2,.8,.2,1) both; }
   @keyframes logoIn { from{transform:scale(.7) rotate(-8deg);opacity:0;} to{transform:scale(1) rotate(0);opacity:1;} }
   h1 { margin:0; font-size:clamp(24px,4.5vw,34px); font-weight:800; letter-spacing:-.5px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
-  /* wordmark: a "sealing" stamp-in, a one-time shine sweep, and the orange underline drawing like a seal stroke */
-  .brand { position:relative; color:var(--fg); padding-bottom:6px; display:inline-block; animation:stampIn .5s cubic-bezier(.2,1.3,.4,1) both; overflow:hidden; }
-  .brand::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:3px; transform-origin:left; animation:underline .6s .25s cubic-bezier(.2,.8,.2,1) both; }
-  .brand::before { content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent); transform:skewX(-18deg); animation:shine 1.1s .5s ease-out both; pointer-events:none; }
-  @keyframes underline { from{transform:scaleX(0);opacity:.3;} to{transform:scaleX(1);opacity:1;} }
-  @keyframes stampIn { from{transform:scale(1.12);opacity:0;letter-spacing:1px;} 60%{opacity:1;} to{transform:scale(1);opacity:1;letter-spacing:-.5px;} }
-  @keyframes shine { from{left:-60%;} to{left:130%;} }
+  /* wordmark: ribbon-wrap animation — pure CSS, no runtime deps */
+  .brand { position:relative; display:inline-block; padding-bottom:6px; overflow:hidden; }
+  .brand::after { content:""; position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:3px; transform-origin:left; transform:scaleX(0); opacity:0; animation:underlineIn .5s 2.2s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes underlineIn { from{transform:scaleX(0);opacity:.3;} to{transform:scaleX(1);opacity:1;} }
+  .letter { display:inline-block; position:relative; z-index:1; color:var(--fg); text-shadow:none; animation:protectLetter .35s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes protectLetter { to{ color:#bdc7d4; text-shadow:0 1px 4px rgba(139,92,246,.12); transform:translateY(-0.5px); } }
+  [data-theme="light"] .letter { animation:protectLetterLight .35s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes protectLetterLight { to{ color:#5a6478; text-shadow:0 1px 4px rgba(139,92,246,.10); transform:translateY(-0.5px); } }
+  .brand > .letter:nth-of-type(5) { animation-delay:0.90s; } .brand > .letter:nth-of-type(4) { animation-delay:0.94s; }
+  .brand > .letter:nth-of-type(6) { animation-delay:0.98s; } .brand > .letter:nth-of-type(3) { animation-delay:1.02s; }
+  .brand > .letter:nth-of-type(7) { animation-delay:1.06s; } .brand > .letter:nth-of-type(2) { animation-delay:1.10s; }
+  .brand > .letter:nth-of-type(8) { animation-delay:1.14s; } .brand > .letter:nth-of-type(1) { animation-delay:1.18s; }
+  .brand > .letter:nth-of-type(9) { animation-delay:1.22s; }
+  .ribbon { position:absolute; top:-25%; height:150%; width:55%; background:linear-gradient(180deg, rgba(50,54,62,0) 0%, rgba(38,42,50,.6) 12%, rgba(28,30,38,.92) 32%, rgba(22,24,30,1) 48%, rgba(28,30,38,.92) 64%, rgba(38,42,50,.6) 84%, rgba(50,54,62,0) 100%); border-radius:4px; z-index:2; pointer-events:none; will-change:transform; transform-origin:left center; animation:ribbonSweep 1.0s .5s cubic-bezier(.65,0,.35,1) both, ribbonSettle .7s 1.5s cubic-bezier(.34,1.56,.64,1) both, ribbonBreeze 3s 2.2s ease-in-out infinite; }
+  @keyframes ribbonSweep { 0%{ transform:translateX(100%) scaleX(.01); } 100%{ transform:translateX(22%) scaleX(1); } }
+  @keyframes ribbonSettle { 0%{ transform:translateX(22%) scaleX(1); } 100%{ transform:translateX(-6%) scaleX(.65) rotate(-1.5deg); } }
+  @keyframes ribbonBreeze { 0%,100%{ transform:translateX(-6%) scaleX(.65) rotate(-1.5deg); } 50%{ transform:translateX(-4%) scaleX(.68) rotate(.8deg); } }
+  @keyframes logoSeal { 0%{ filter:brightness(1) saturate(1); } 25%{ filter:brightness(1.06) saturate(1.1); box-shadow:0 0 0 1px rgba(139,92,246,.15); } 60%{ filter:brightness(1.03) saturate(1.05); } 100%{ filter:brightness(1) saturate(1); } }
+  .logo-img { animation:logoIn .6s cubic-bezier(.2,.8,.2,1) both, logoSeal 2.2s .6s ease both; }
   .eyebrow { font-size:.42em; font-weight:600; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; }
   .tagline { font-size:12px; color:var(--dim); margin-top:7px; display:flex; align-items:center; gap:6px; }
   .tagline .lock { color:var(--orange); display:inline-block; animation:clack .5s .45s cubic-bezier(.3,1.4,.5,1) both; }
   @keyframes clack { from{transform:rotate(-35deg) translateY(-2px);opacity:0;} to{transform:rotate(0) translateY(0);opacity:1;} }
-  @media (prefers-reduced-motion:reduce){ .logo-img,.brand,.brand::after,.brand::before,.tagline .lock{ animation:none; } }
+  @media (prefers-reduced-motion:reduce){ .logo-img,.letter,.ribbon,.brand::after,.tagline .lock{ animation:none!important; } .ribbon{ display:none; } .letter{ color:var(--fg)!important; transform:none!important; text-shadow:none!important; } .brand::after{ transform:scaleX(1)!important; opacity:1!important; } }
   .tagline b { color:var(--fg); font-weight:600; }
   .tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center; }
   .tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px 10px; max-width:100%; }
@@ -364,7 +377,7 @@ const HTML = `<!DOCTYPE html>
     <div class="brandwrap">
       <img id="logo" class="logo-img" alt="Blindfold" />
       <div>
-        <h1><span class="brand">Blindfold</span><span class="eyebrow">Dashboard</span></h1>
+        <h1><span class="brand"><span class="letter">B</span><span class="letter">l</span><span class="letter">i</span><span class="letter">n</span><span class="letter">d</span><span class="letter">f</span><span class="letter">o</span><span class="letter">l</span><span class="letter">d</span><div class="ribbon" id="brand-ribbon"></div></span><span class="eyebrow">Dashboard</span></h1>
         <div class="tagline"><span class="lock">🔒</span> Secrets sealed in a <b>TEE</b> — keys you can't leak</div>
         <div class="tags" id="tags"></div>
       </div>
