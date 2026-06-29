@@ -210,26 +210,62 @@ Long-form writeup: [`docs/05-compatibility.md`](docs/05-compatibility.md).
 
 ### 4a. Load Blindfold as an agent skill (Claude Code / OpenCode / any skill-aware agent)
 
-Blindfold ships a **built-in skill** at `.claude/skills/blindfold/SKILL.md` that teaches your coding agent to handle secrets safely — automatically. When loaded, the agent:
+Blindfold ships a **built-in skill** that teaches your coding agent to handle secrets safely — automatically. When loaded, the agent proposes safe terminal commands instead of asking for keys, writes release-broker code instead of `process.env`, and verifies by fingerprint instead of reading `.env`.
 
-- Proposes `blindfold register --name <X>` in your terminal instead of asking you to paste keys into chat.
-- Writes code using the **release-broker pattern** (`release()` / `tenant.contracts.execute`) — never `process.env.PROVIDER_API_KEY`.
-- Verifies sealed keys by fingerprint (`blindfold sealed`, `env:fingerprint`) — never reads `.env` directly.
-- Proposes `.env` cleanup after every successful seal.
+#### Install the skill
 
-**Claude Code** — the skill loads automatically in any session inside this repo. Just mention sealing a key, ask about protecting credentials, or say "use Blindfold":
+**Already cloned this repo?** It just works — Claude Code auto-discovers `.claude/skills/blindfold/SKILL.md`. Nothing to install.
+
+**Add to your own project** (so the skill activates when agents edit your app):
 
 ```bash
-# Any of these activate the skill automatically:
-> "seal my Stripe key"
-> "how do I protect my API key"
-> "write code that calls OpenAI"
-> "what's in my .env?"
+# From inside your project directory:
+mkdir -p .claude/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .claude/skills/blindfold/SKILL.md
 ```
 
-**Other agents** (Cursor rules, OpenCode, custom agent configs) — copy `.claude/skills/blindfold/SKILL.md` into your agent's skill/rules directory. The skill is self-contained and references only files in this repo.
+**Install globally** (available in every Claude Code session on your machine):
 
-**What the skill enforces (the four rules):**
+```bash
+mkdir -p ~/.claude/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o ~/.claude/skills/blindfold/SKILL.md
+```
+
+**Other agents:**
+
+```bash
+# Cursor — add as a rule file
+mkdir -p .cursor/rules
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .cursor/rules/blindfold.md
+
+# OpenCode — add as a skill
+mkdir -p .opencode/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .opencode/skills/blindfold/SKILL.md
+
+# Cline / Continue.dev — add to project rules
+mkdir -p .cline/rules
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .cline/rules/blindfold.md
+```
+
+#### Verify it's loaded
+
+In Claude Code, type any of these — if the skill is active, the agent will respond with Blindfold-specific commands (not generic advice):
+
+```
+> "seal my Stripe key"                → proposes: blindfold register --name stripe_api_key
+> "how do I protect my API key"       → walks you through the register + sealed workflow
+> "write code that calls OpenAI"      → generates release-broker pattern, not process.env
+> "what's in my .env?"                → runs env:fingerprint, never cat .env
+```
+
+If the agent gives generic "put it in .env" advice instead, the skill isn't loaded — re-check the path.
+
+#### What the skill enforces (the four rules)
 
 | Rule | What it means |
 |---|---|

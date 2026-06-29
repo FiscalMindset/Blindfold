@@ -349,22 +349,58 @@ Full walkthrough in the **[Usage Guide](usage.md)**, copy-paste examples in **[E
 
 If you use **Claude Code**, **OpenCode**, or any agent that supports skills, Blindfold ships a built-in skill that teaches the agent how to handle secrets safely. The agent will:
 
-- **Auto-trigger** when you mention sealing a key, paste a credential, ask "how do I protect my API key", or ask about `.env` secrets in this project.
 - **Never ask you to paste a key into chat** — it proposes `blindfold register --name <X>` for you to run in your own terminal.
 - **Write code using the release-broker pattern** instead of `process.env.PROVIDER_API_KEY`.
 - **Verify by fingerprint** (`blindfold sealed`, `env:fingerprint`) — never by reading plaintext.
+- **Auto-trigger** when you mention sealing a key, paste a credential, ask "how do I protect my API key", or work with `.env` secrets.
 
-The skill is at `.claude/skills/blindfold/SKILL.md` and loads automatically in any Claude Code session inside this repo. No setup needed — just start talking about keys.
+### Install the skill
+
+**If you cloned this repo** — it already works. Claude Code auto-discovers `.claude/skills/blindfold/SKILL.md` when you open a session in this directory. Nothing to install.
+
+**Add to your own project** (so the skill works when agents edit your app):
 
 ```bash
-# In Claude Code, any of these will activate the Blindfold skill:
-> "seal my Stripe key"
-> "how do I protect my API key"
-> "write code that calls OpenAI"     # → agent uses release-broker, not process.env
-> "what's in my .env?"               # → agent runs env:fingerprint, never reads .env directly
+# From inside your project directory:
+mkdir -p .claude/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .claude/skills/blindfold/SKILL.md
 ```
 
-For other agents: copy `.claude/skills/blindfold/SKILL.md` into your agent's skill directory, or point your agent config at it. The skill is self-contained — it references only files already in this repo.
+**Install globally** (available in every Claude Code session on your machine):
+
+```bash
+mkdir -p ~/.claude/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o ~/.claude/skills/blindfold/SKILL.md
+```
+
+**Other agents** (Cursor, OpenCode, Cline, Aider):
+
+```bash
+# Cursor — add as a rule file
+mkdir -p .cursor/rules
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .cursor/rules/blindfold.md
+
+# OpenCode — add as a skill
+mkdir -p .opencode/skills/blindfold
+curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/skills/blindfold/SKILL.md \
+  -o .opencode/skills/blindfold/SKILL.md
+```
+
+### How it works
+
+Once installed, just talk to your agent — the skill activates automatically:
+
+```
+> "seal my Stripe key"                → agent proposes terminal command, never asks for the value
+> "how do I protect my API key"       → walks you through blindfold register
+> "write code that calls OpenAI"      → generates release-broker pattern, not process.env
+> "what's in my .env?"                → runs env:fingerprint, never reads .env directly
+```
+
+The skill file is self-contained and references only files in this repo. Full details in the **[Usage Guide §4a](usage.md#4a-load-blindfold-as-an-agent-skill-claude-code--opencode--any-skill-aware-agent)**.
 
 ---
 
