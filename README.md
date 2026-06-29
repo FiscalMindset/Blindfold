@@ -345,6 +345,29 @@ Full walkthrough in the **[Usage Guide](usage.md)**, copy-paste examples in **[E
 
 ---
 
+## Agent skill — let your coding agent seal keys for you
+
+If you use **Claude Code**, **OpenCode**, or any agent that supports skills, Blindfold ships a built-in skill that teaches the agent how to handle secrets safely. The agent will:
+
+- **Auto-trigger** when you mention sealing a key, paste a credential, ask "how do I protect my API key", or ask about `.env` secrets in this project.
+- **Never ask you to paste a key into chat** — it proposes `blindfold register --name <X>` for you to run in your own terminal.
+- **Write code using the release-broker pattern** instead of `process.env.PROVIDER_API_KEY`.
+- **Verify by fingerprint** (`blindfold sealed`, `env:fingerprint`) — never by reading plaintext.
+
+The skill is at `.claude/skills/blindfold/SKILL.md` and loads automatically in any Claude Code session inside this repo. No setup needed — just start talking about keys.
+
+```bash
+# In Claude Code, any of these will activate the Blindfold skill:
+> "seal my Stripe key"
+> "how do I protect my API key"
+> "write code that calls OpenAI"     # → agent uses release-broker, not process.env
+> "what's in my .env?"               # → agent runs env:fingerprint, never reads .env directly
+```
+
+For other agents: copy `.claude/skills/blindfold/SKILL.md` into your agent's skill directory, or point your agent config at it. The skill is self-contained — it references only files already in this repo.
+
+---
+
 ## Recipes & runnable examples
 
 The exact one-line snippet for the stack you use:

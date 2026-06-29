@@ -52,6 +52,7 @@ It seals every secret-looking var, **removes the plaintext from `.env`** (keepin
 | **Use a sealed secret with ANY command-line tool (no code)** | **§3c** |
 | Protect the key your own agent uses (Node/Python/whatever) | §3 |
 | Protect the key Claude Code / OpenCode / Aider / Codex CLI uses | §4 |
+| **Load Blindfold as an agent skill** (auto-safe key handling in Claude Code / OpenCode) | **§4a** |
 | Protect the key your custom chatbot / FastAPI / Next.js app uses | §5 |
 | Protect an SMTP password / IMAP password / non-HTTP credential | §6 |
 | Integrate into an existing app that already has a Fernet/local vault (Aurora-style) | §7 |
@@ -206,6 +207,36 @@ Run `npm run blindfold -- compat` — it scans your machine and prints the exact
 | Ollama (local models) | ❌ doesn't apply — no remote key to protect |
 
 Long-form writeup: [`docs/05-compatibility.md`](docs/05-compatibility.md).
+
+### 4a. Load Blindfold as an agent skill (Claude Code / OpenCode / any skill-aware agent)
+
+Blindfold ships a **built-in skill** at `.claude/skills/blindfold/SKILL.md` that teaches your coding agent to handle secrets safely — automatically. When loaded, the agent:
+
+- Proposes `blindfold register --name <X>` in your terminal instead of asking you to paste keys into chat.
+- Writes code using the **release-broker pattern** (`release()` / `tenant.contracts.execute`) — never `process.env.PROVIDER_API_KEY`.
+- Verifies sealed keys by fingerprint (`blindfold sealed`, `env:fingerprint`) — never reads `.env` directly.
+- Proposes `.env` cleanup after every successful seal.
+
+**Claude Code** — the skill loads automatically in any session inside this repo. Just mention sealing a key, ask about protecting credentials, or say "use Blindfold":
+
+```bash
+# Any of these activate the skill automatically:
+> "seal my Stripe key"
+> "how do I protect my API key"
+> "write code that calls OpenAI"
+> "what's in my .env?"
+```
+
+**Other agents** (Cursor rules, OpenCode, custom agent configs) — copy `.claude/skills/blindfold/SKILL.md` into your agent's skill/rules directory. The skill is self-contained and references only files in this repo.
+
+**What the skill enforces (the four rules):**
+
+| Rule | What it means |
+|---|---|
+| R1 — no paste into chat | Agent never asks for the secret value; proposes terminal commands instead |
+| R2 — verify by fingerprint | `blindfold sealed` and `env:fingerprint` only — never reads raw `.env` |
+| R3 — release-broker in code | All generated code fetches secrets from T3 just-in-time via `release()` |
+| R4 — cleanup after seal | Agent proposes deleting the `.env` copy once the enclave copy is confirmed |
 
 ---
 
