@@ -43,6 +43,11 @@ export interface ResolvedProvider {
   auth: ForwardAuth;
   /** Bearer-only: header to plant the sentinel in. Defaults to Authorization. */
   sentinelHeader?: SentinelHeader;
+  /** Provider-specific headers this API actually requires (version pins,
+   *  Accept, User-Agent, …). Injected only when the agent didn't set them, so
+   *  the integration knows the provider's conventions and the agent doesn't
+   *  have to. This is what makes each entry a real integration, not a host. */
+  defaultHeaders?: Record<string, string>;
 }
 
 interface ProviderDef {
@@ -56,6 +61,8 @@ interface ProviderDef {
   auth: () => ForwardAuth;
   /** Bearer-only override for where the sentinel goes. */
   sentinelHeader?: SentinelHeader;
+  /** Provider-specific required headers (see ResolvedProvider.defaultHeaders). */
+  defaultHeaders?: Record<string, string>;
 }
 
 /** AWS-style timestamp `YYYYMMDDTHHMMSSZ` (UTC). Not a secret — the enclave has
@@ -81,7 +88,8 @@ const PROVIDERS: ProviderDef[] = [
   // ---- LLM providers (OpenAI-shaped, bearer). Back-compatible. --------------
   { id: "openai", prefix: "/v1/", upstream: (p) => `https://api.openai.com${p}`, auth: () => ({ scheme: "bearer" }) },
   { id: "openai", prefix: "/openai/", upstream: (p) => `https://api.openai.com${stripPrefix(p, "/openai/")}`, auth: () => ({ scheme: "bearer" }) },
-  { id: "anthropic", prefix: "/anthropic/", upstream: (p) => `https://api.anthropic.com${stripPrefix(p, "/anthropic/")}`, auth: () => ({ scheme: "bearer" }) },
+  // Anthropic REQUIRES the anthropic-version header on the raw REST API.
+  { id: "anthropic", prefix: "/anthropic/", upstream: (p) => `https://api.anthropic.com${stripPrefix(p, "/anthropic/")}`, auth: () => ({ scheme: "bearer" }), defaultHeaders: { "anthropic-version": "2023-06-01" } },
   { id: "xai", prefix: "/x/", upstream: (p) => `https://api.x.ai${stripPrefix(p, "/x/")}`, auth: () => ({ scheme: "bearer" }) },
   { id: "groq", prefix: "/groq/", upstream: (p) => `https://api.groq.com/openai${stripPrefix(p, "/groq/")}`, auth: () => ({ scheme: "bearer" }) },
 
@@ -99,40 +107,49 @@ const PROVIDERS: ProviderDef[] = [
     sentinelHeader: { name: "x-goog-api-key", prefix: "" },
   },
 
-  // ---- Payments: Stripe (bearer, restricted keys, form-encoded bodies). -----
+  // ---- Payments: Stripe (bearer; pins the API version so behaviour is stable). -----
   {
     id: "stripe",
     prefix: "/stripe/",
     upstream: (p) => `https://api.stripe.com${stripPrefix(p, "/stripe/")}`,
     secretKey: "stripe_secret_key",
     auth: () => ({ scheme: "bearer" }),
+    defaultHeaders: { "stripe-version": "2024-06-20" },
   },
 
-  // ---- Dev infra: GitHub (bearer token). ------------------------------------
+  // ---- Dev infra: GitHub. GitHub REJECTS requests with no User-Agent (403),
+  //      and best practice is to pin the REST API version + set the Accept type.
   {
     id: "github",
     prefix: "/github/",
     upstream: (p) => `https://api.github.com${stripPrefix(p, "/github/")}`,
     secretKey: "github_token",
     auth: () => ({ scheme: "bearer" }),
+    defaultHeaders: {
+      accept: "application/vnd.github+json",
+      "x-github-api-version": "2022-11-28",
+      "user-agent": "blindfold",
+    },
   },
 
-  // ---- Email: SendGrid (bearer). --------------------------------------------
+  // ---- Email: SendGrid (bearer; JSON v3 API). -------------------------------
   {
     id: "sendgrid",
     prefix: "/sendgrid/",
     upstream: (p) => `https://api.sendgrid.com${stripPrefix(p, "/sendgrid/")}`,
     secretKey: "sendgrid_api_key",
     auth: () => ({ scheme: "bearer" }),
+    defaultHeaders: { "content-type": "application/json" },
   },
 
-  // ---- Comms: Slack (bearer bot token). -------------------------------------
+  // ---- Comms: Slack (bearer bot token; Web API wants JSON+charset on POST). --
   {
     id: "slack",
     prefix: "/slack/",
     upstream: (p) => `https://slack.com/api${stripPrefix(p, "/slack/")}`,
     secretKey: "slack_bot_token",
     auth: () => ({ scheme: "bearer" }),
+    defaultHeaders: { "content-type": "application/json; charset=utf-8" },
   },
 
   // ---- Telephony: Twilio (HTTP Basic — base64 computed IN the enclave). -----
@@ -175,7 +192,14 @@ export function resolveProvider(path: string): ResolvedProvider | null {
     .filter((d) => path.startsWith(d.prefix))
     .sort((a, b) => b.prefix.length - a.prefix.length)[0];
   if (!def) return null;
-  return { id: def.id, upstream: def.upstream(path), secretKey: def.secretKey, auth: def.auth(), sentinelHeader: def.sentinelHeader };
+  return {
+    id: def.id,
+    upstream: def.upstream(path),
+    secretKey: def.secretKey,
+    auth: def.auth(),
+    sentinelHeader: def.sentinelHeader,
+    defaultHeaders: def.defaultHeaders,
+  };
 }
 
 /** Names of the providers Blindfold ships first-class support for. */
