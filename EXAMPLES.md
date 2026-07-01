@@ -115,6 +115,11 @@ Runnable versions of this for several stacks live in [`examples/`](examples/):
 | [`examples/cli-tools/`](examples/cli-tools/) | **No-code `blindfold use` recipes** |
 | [`examples/digital-ocean/`](examples/digital-ocean/) | **DigitalOcean infra — `doctl`/`curl`/enclave (verified)** |
 | [`examples/api-providers/`](examples/api-providers/) | **Deepgram / Blogger / Hostinger — 3 auth styles, real output** |
+| [`examples/gemini/`](examples/gemini/) | **Google Gemini — real live call, non-Bearer `x-goog-api-key` auth** |
+| [`examples/stripe/`](examples/stripe/) | **Stripe — real test-mode read+write; injection can't steal the key** |
+| [`examples/prompt-injection/`](examples/prompt-injection/) | **Live credential-theft attack on GitHub, defeated structurally** |
+
+See [`integration-stack.md`](integration-stack.md) for the full provider list (12 across 6 industries, 3 in-enclave auth schemes).
 
 ---
 

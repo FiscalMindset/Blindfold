@@ -19,9 +19,10 @@
  * The "one line" the developer changes is:
  *   OPENAI_BASE_URL=http://127.0.0.1:<port>/v1
  *
- * The path the agent uses (e.g. /v1/chat/completions) is mapped 1:1
- * onto api.openai.com. Other providers can be added by extending the
- * `upstreamForPath` switch below.
+ * Routing + per-provider auth live in `providers.ts`. Each concrete provider
+ * declares its upstream host, sealed-secret name, and auth scheme (bearer /
+ * basic / sigv4). For basic and sigv4 the enclave *computes* the Authorization
+ * from the sealed secret — the raw secret never appears in a header on its own.
  */
 import http from "node:http";
 import type { AddressInfo } from "node:net";
@@ -31,6 +32,7 @@ import { safeLog } from "./log.ts";
 import { openT3Client, type T3ClientHandle } from "./t3-client.ts";
 import type { ForwardRequest } from "./types.ts";
 import { logUsage, providerForUpstream } from "./usage-log.ts";
+import { resolveProvider } from "./providers.ts";
 
 export interface ProxyOpts {
   port?: number;
@@ -88,27 +90,45 @@ async function handle(
     return;
   }
 
-  const upstream = upstreamForPath(req.url ?? "/");
-  if (!upstream) {
+  const provider = resolveProvider(req.url ?? "/");
+  if (!provider) {
     res.writeHead(404, { "content-type": "text/plain" });
     res.end(`no upstream mapping for ${req.url}`);
     return;
   }
+  const upstream = provider.upstream;
+  // Per-provider sealed secret. LLM providers fall back to the proxy default
+  // (preserves the original single-key behaviour); Stripe/Twilio/AWS/etc. each
+  // name their own sealed secret.
+  const providerSecretKey = provider.secretKey ?? secretKey;
 
   const body = await readBody(req);
-  // Build the headers we'll send to the contract. Any Authorization the
-  // agent sent is replaced with the sentinel — the agent's bearer value
-  // is never forwarded.
+  // Build the headers we'll send to the contract. Any Authorization the agent
+  // sent is discarded. For bearer providers we plant the sentinel for the
+  // enclave to swap; for basic/sigv4 the enclave BUILDS the Authorization from
+  // the sealed secret, so we send no auth header at all.
   const agentSuppliedAuth = Object.keys(req.headers).some((k) => k.toLowerCase() === "authorization");
   const headers = forwardableHeaders(req.headers);
-  ensureHeader(headers, "authorization", `Bearer ${SENTINEL}`);
+  if (provider.auth.scheme === "bearer") {
+    // Discard whatever the agent sent; plant the sentinel where this provider
+    // expects its key (Authorization: Bearer … by default, or e.g. Gemini's
+    // x-goog-api-key). The enclave swaps the sentinel for the real secret.
+    const sh = provider.sentinelHeader ?? { name: "authorization", prefix: "Bearer " };
+    removeHeader(headers, "authorization");
+    ensureHeader(headers, sh.name, `${sh.prefix}${SENTINEL}`);
+  } else {
+    // basic/sigv4: the enclave computes the whole Authorization from the sealed
+    // secret; strip any agent-sent one so nothing stale rides along.
+    removeHeader(headers, "authorization");
+  }
 
   const forwardReq: ForwardRequest = {
     method: req.method ?? "GET",
     url: upstream,
     headers,
     body: body.length ? body.toString("utf8") : undefined,
-    secret_key: secretKey,
+    secret_key: providerSecretKey,
+    auth: provider.auth,
   };
 
   safeLog("info", {
@@ -125,16 +145,17 @@ async function handle(
   logUsage({
     t: new Date().toISOString(),
     mode: loadBlindfoldEnv().mock ? "mock" : "real",
-    provider: providerForUpstream(upstream),
+    provider: provider.id || providerForUpstream(upstream),
     method: forwardReq.method,
     path: req.url ?? "/",
     upstream: upstream.replace(/\?.*$/, ""),
     status: result.status,
     latency_ms: latency,
     agent_supplied_auth: agentSuppliedAuth,
+    auth_scheme: provider.auth.scheme,
     sentinel_in_outbound: forwardReq.headers.some(([k, v]) => k.toLowerCase() === "authorization" && v.includes(SENTINEL)),
     via: "proxy",
-    secret_key: secretKey,
+    secret_key: providerSecretKey,
   });
 
   res.writeHead(result.status, headersFromTuple(result.headers));
@@ -170,26 +191,15 @@ function ensureHeader(h: Array<[string, string]>, name: string, value: string): 
   else h.push([name, value]);
 }
 
+function removeHeader(h: Array<[string, string]>, name: string): void {
+  const lower = name.toLowerCase();
+  for (let i = h.length - 1; i >= 0; i--) {
+    if (h[i]![0].toLowerCase() === lower) h.splice(i, 1);
+  }
+}
+
 function headersFromTuple(t: Array<[string, string]>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of t) out[k] = v;
   return out;
-}
-
-/**
- * Map a proxy path to a real upstream URL. The path the agent sends is
- * preserved verbatim; only the scheme+host changes.
- *
- * Add more providers by extending this switch. The contract is generic;
- * no contract-side change is required.
- */
-function upstreamForPath(path: string): string | null {
-  if (path.startsWith("/v1/")) return `https://api.openai.com${path}`;
-  if (path.startsWith("/openai/")) return `https://api.openai.com${path.replace("/openai", "")}`;
-  if (path.startsWith("/anthropic/")) return `https://api.anthropic.com${path.replace("/anthropic", "")}`;
-  // xAI / Grok (OpenAI-compatible API).
-  if (path.startsWith("/x/")) return `https://api.x.ai${path.replace("/x", "")}`;
-  // Groq (also OpenAI-compatible).
-  if (path.startsWith("/groq/")) return `https://api.groq.com/openai${path.replace("/groq", "")}`;
-  return null;
 }

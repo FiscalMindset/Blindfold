@@ -34,6 +34,8 @@ export interface UsageEvent {
   agent_supplied_auth: boolean;
   /** True iff the outbound request carries the Blindfold sentinel — proof the proxy did its job */
   sentinel_in_outbound: boolean;
+  /** Auth scheme the enclave applied: "bearer" | "basic" | "sigv4". Optional for back-compat. */
+  auth_scheme?: string;
   /** How the secret was used: "proxy" (HTTP proxy) | "release"/"use"/"export" (broker paths). Optional for back-compat. */
   via?: string;
   /** The sealed secret name involved (for the per-secret view). */

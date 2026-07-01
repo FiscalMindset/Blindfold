@@ -322,6 +322,32 @@ Useful when you can't easily set environment variables (e.g. inside a managed ru
 
 ---
 
+## Supported integrations
+
+Blindfold isn't just an LLM-key proxy. The enclave applies each provider's **real**
+auth scheme — including ones a generic "swap the token" proxy structurally cannot
+do, because the secret is *consumed by a computation* (Basic-auth base64, AWS
+SigV4 signing) inside TDX rather than pasted into a header.
+
+| Provider | Industry | Auth scheme (computed in-enclave) |
+|---|---|---|
+| OpenAI · Anthropic · xAI · Groq | LLM | Bearer |
+| **Google Gemini** | LLM | Bearer via `x-goog-api-key` (not `Authorization`) |
+| **Stripe** | Payments | Bearer |
+| **GitHub** | Dev infra | Bearer |
+| **SendGrid** | Email | Bearer |
+| **Slack** | Comms | Bearer |
+| **Twilio** | Telephony | **HTTP Basic** — `base64(SID:secret)` built in the enclave |
+| **AWS S3 · SES** | Cloud | **SigV4** — the secret *signs* the request; it's never transmitted |
+
+12 providers across 6 industries and 3 auth schemes. The AWS SigV4 signing is
+verified against AWS's published test vectors. Live end-to-end demos:
+[`examples/gemini/`](examples/gemini/), [`examples/stripe/`](examples/stripe/),
+[`examples/prompt-injection/`](examples/prompt-injection/). Full architecture and
+impact writeup: [`integration-stack.md`](integration-stack.md).
+
+---
+
 ## CLI at a glance
 
 ```bash
