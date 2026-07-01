@@ -297,13 +297,16 @@ async function main(): Promise<void> {
       if (hosts.length === 0) {
         die("usage: blindfold grant --host <host>[,<host2>...]   (e.g. --host api.openai.com)");
       }
+      const replace = !!argv.flags.replace;
       const env = loadBlindfoldEnv();
       const { openT3Client } = await import("../src/t3-client.ts");
       const client = await openT3Client(env);
       try {
-        await client.grantEgress(hosts);
-        console.log(`✓ Egress granted for: ${hosts.join(", ")}`);
-        console.log(`  The blindfold-proxy contract (forward / release-to-tenant) may now call these hosts.`);
+        // T3 replaces the allowlist on every update, so grant is additive by
+        // default (merges with previously-granted hosts). Use --replace to reset.
+        const authorized = await client.grantEgress(hosts, { replace });
+        console.log(`✓ Egress granted for: ${hosts.join(", ")}${replace ? "  (replaced allowlist)" : ""}`);
+        console.log(`  Contract is now authorized to call ALL of: ${authorized.join(", ")}`);
         console.log(`  Run \`blindfold publish\` first if you haven't — the grant targets the published contract.`);
       } finally {
         await client.close();

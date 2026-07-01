@@ -148,7 +148,18 @@ async function handle(
   });
 
   const startedAt = Date.now();
-  const result = await t3.invokeForward(forwardReq);
+  let result;
+  try {
+    result = await t3.invokeForward(forwardReq);
+  } catch (e) {
+    // Surface the REAL enclave/host error (egress denied, rate limit, secrets
+    // ACL, payload parse) with an actionable hint — not a generic 500.
+    const { status, body } = explainForwardError(e as Error);
+    safeLog("error", { msg: "proxy_forward_failed", status, provider: provider.id, error: (e as Error).message });
+    if (!res.headersSent) res.writeHead(status, { "content-type": "application/json" });
+    res.end(body);
+    return;
+  }
   const latency = Date.now() - startedAt;
 
   // Record non-sensitive telemetry. Never the body, never the header values.
@@ -212,4 +223,57 @@ function headersFromTuple(t: Array<[string, string]>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of t) out[k] = v;
   return out;
+}
+
+/**
+ * Turn a raw T3 forward error into a real HTTP status + a JSON body that names
+ * the cause and how to fix it. The enclave/host errors look like:
+ *   HTTP 400: Invalid params ({"code":"bad_request","detail":"…","request_id":"…"})
+ * These are the exact failures that cost real diagnosis time when hidden behind
+ * a generic "internal proxy error".
+ */
+function explainForwardError(err: Error): { status: number; body: string } {
+  const msg = err?.message ?? String(err);
+  let status = Number(msg.match(/HTTP (\d{3})/)?.[1]) || 502;
+  let code = "";
+  let detail = msg;
+  let requestId = "";
+  const jsonM = msg.match(/\((\{.*\})\)\s*$/);
+  if (jsonM) {
+    try {
+      const o = JSON.parse(jsonM[1]) as Record<string, string>;
+      code = o.code ?? "";
+      detail = o.detail ?? detail;
+      requestId = o.request_id ?? "";
+    } catch {
+      /* keep the raw message */
+    }
+  }
+
+  let hint = "";
+  if (/egress_denied|authorised_hosts|allowlist/i.test(detail)) {
+    const host = detail.match(/host '([^']+)'/)?.[1];
+    hint = `Egress is not authorized${host ? ` for '${host}'` : ""}. Run: blindfold grant --host ${host ?? "<host>"} — list every host you use in ONE command (grant replaces the allowlist unless merged).`;
+    if (status < 400) status = 403;
+  } else if (/fuel_per_minute|too_many_requests|rate limit/i.test(detail)) {
+    hint = "Rate limited by the testnet per-minute compute quota (fuel_per_minute). Retry in ~60s and space calls out — this is not an outage.";
+    status = 429;
+  } else if (/cannot read map|:secrets/i.test(detail)) {
+    hint = "The contract isn't authorized to read your secrets map (common right after publishing a new contract id). Run: blindfold init (re-grants the secrets read ACL).";
+  } else if (/parse_payload|expected value at line/i.test(detail)) {
+    hint = "The T3 host egress parses request bodies as JSON. For form-encoded APIs (Stripe/Twilio), send params in the query string with an empty body.";
+    if (status < 400) status = 400;
+  } else if (/secret .* not found|not found in the secrets map/i.test(detail)) {
+    hint = "That sealed secret name doesn't exist. Seal it: blindfold register --name <name> --from-env <ENV_VAR>.";
+  }
+
+  const payload = {
+    error: "blindfold_forward_failed",
+    status,
+    code: code || undefined,
+    detail,
+    request_id: requestId || undefined,
+    hint: hint || undefined,
+  };
+  return { status, body: JSON.stringify(payload, null, 2) };
 }
