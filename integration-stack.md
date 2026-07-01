@@ -88,6 +88,25 @@ its exact upstream host, its own sealed-secret name, and its auth scheme:
 cloud) and all three auth schemes. Longest-prefix routing; non-secret config
 (Twilio Account SID, AWS access-key-id / region) comes from env, never sealed.
 
+**Closed and curated by design — no generic passthrough, and no generic-*feeling*
+entries.** There is no catch-all route and no user-config/wildcard host; providers
+are added only in code. To make the Bearer providers genuinely first-class (not
+"a host with a bearer token"), each carries its **real required headers**, which
+the integration injects only when the agent didn't set them:
+
+| Provider | Required headers the integration supplies |
+|---|---|
+| GitHub | `User-Agent` (GitHub **403s** without it), `Accept: application/vnd.github+json`, `X-GitHub-Api-Version` |
+| Anthropic | `anthropic-version` (required by the raw REST API) |
+| Stripe | `Stripe-Version` (pins API behaviour) |
+| Slack | `Content-Type: application/json; charset=utf-8` |
+| SendGrid | `Content-Type: application/json` |
+
+Proven live: `GET /github/user` through the proxy with **no `User-Agent` from the
+agent** returns **200** — the integration supplied GitHub's mandatory headers. An
+agent doesn't have to know each provider's quirks; the integration does. That's
+the difference between a real integration and a generic host map.
+
 ### 3. Proxy + type wiring
 
 - `ForwardRequest` gained an optional `auth` field that serialises 1:1 into the
