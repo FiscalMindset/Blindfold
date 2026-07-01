@@ -19,6 +19,8 @@ Runnable, copy-paste examples of using a **sealed** secret — across the three 
 | [`gemini/`](gemini/) | Google Gemini · Node | proxy + sentinel (`x-goog-api-key`) | one line · **real live call, non-Bearer auth** |
 | [`stripe/`](stripe/) | Stripe · Node | proxy + sentinel | **real test-mode read+write, injection can't steal the key** |
 | [`prompt-injection/`](prompt-injection/) | GitHub · Node | proxy + sentinel | **real live credential-theft attack, defeated structurally** |
+| [`twilio/`](twilio/) | HTTP Basic · Node | in-enclave `base64(user:secret)` | **proven live via httpbin (200) — the Twilio scheme** |
+| [`aws/`](aws/) | AWS SigV4 · Node | in-enclave request signing | **proven live vs real S3 + byte-exact AWS vectors** |
 
 > **Integration depth:** Blindfold ships first-class support for 12 providers across 6 industries and 3 in-enclave auth schemes (bearer, HTTP Basic, AWS SigV4). See **[../integration-stack.md](../integration-stack.md)**.
 
