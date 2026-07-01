@@ -16,6 +16,11 @@ Runnable, copy-paste examples of using a **sealed** secret — across the three 
 | [`langchain-summarizer/`](langchain-summarizer/) | LangChain · Node | proxy + sentinel | one line · **includes a live prompt-injection attack** |
 | [`anthropic-quickstart/`](anthropic-quickstart/) | Anthropic SDK · Node | proxy + sentinel | one line |
 | [`grok-via-blindfold.ts`](grok-via-blindfold.ts) | xAI/Grok · Node | `release()` in code | one line |
+| [`gemini/`](gemini/) | Google Gemini · Node | proxy + sentinel (`x-goog-api-key`) | one line · **real live call, non-Bearer auth** |
+| [`stripe/`](stripe/) | Stripe · Node | proxy + sentinel | **real test-mode read+write, injection can't steal the key** |
+| [`prompt-injection/`](prompt-injection/) | GitHub · Node | proxy + sentinel | **real live credential-theft attack, defeated structurally** |
+
+> **Integration depth:** Blindfold ships first-class support for 12 providers across 6 industries and 3 in-enclave auth schemes (bearer, HTTP Basic, AWS SigV4). See **[../integration-stack.md](../integration-stack.md)**.
 
 ## Prerequisites (do once)
 
