@@ -30,3 +30,24 @@ jobs:
         env:
           BLINDFOLD_MOCK: "1"
         run: npm run test:report
+
+      - name: Provider registry tests
+        run: npm run test:providers
+
+  contract:
+    name: Enclave contract (build + auth vectors)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust + wasm32-wasip2 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+
+      - name: Unit-test in-enclave auth (SigV4 + Basic vectors)
+        run: cargo test --manifest-path contract/auth-tests/Cargo.toml
+
+      - name: Build enclave contract (wasm32-wasip2)
+        run: cargo build --manifest-path contract/Cargo.toml --target wasm32-wasip2 --release
