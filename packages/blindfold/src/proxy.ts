@@ -122,6 +122,16 @@ async function handle(
     removeHeader(headers, "authorization");
   }
 
+  // Inject this provider's real required headers (e.g. GitHub's mandatory
+  // User-Agent, Anthropic's anthropic-version, Stripe's pinned API version) —
+  // only when the agent didn't set them, so the agent can still override. This
+  // is what makes each provider a real integration rather than a bare host.
+  for (const [name, value] of Object.entries(provider.defaultHeaders ?? {})) {
+    if (!headers.some(([k]) => k.toLowerCase() === name.toLowerCase())) {
+      headers.push([name, value]);
+    }
+  }
+
   const forwardReq: ForwardRequest = {
     method: req.method ?? "GET",
     url: upstream,
