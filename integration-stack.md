@@ -207,6 +207,39 @@ Running Stripe live surfaced real constraints in the **current T3 host** egress
    issue — auth and key protection are unaffected; these are host-egress
    maturity gaps on testnet.
 
+### basic + sigv4 proven LIVE (contract 0.5.4)
+
+The `basic`/`sigv4` schemes were built and unit-tested but, at first, never
+published — the live enclave ran the old bearer-only wasm. That's now fixed:
+contract **0.5.4** (id 461) is published, and both schemes are proven end-to-end
+against the live enclave.
+
+- **HTTP Basic (Twilio scheme) — definitive live proof, no Twilio account.** A
+  known secret is sealed; the agent sends no password; the enclave builds
+  `Authorization: Basic base64(user:secret)` and calls
+  `httpbin.org/basic-auth/<user>/<secret>`, which **validates** the credential:
+  ```
+  BASIC_STATUS 200  { "authenticated": true, "user": "blindfold" }
+  ```
+  httpbin returns 200 only if the enclave's base64 is exactly right. Twilio uses
+  the identical mechanism.
+
+- **AWS SigV4 — byte-exact math + live structural proof.** The unit vectors
+  already prove the signature is byte-for-byte correct. Live, against real S3
+  with AWS's example access key:
+  ```
+  SIGV4_STATUS 403  AWS_CODE InvalidAccessKeyId
+  ```
+  AWS **parsed** our SigV4 header (it echoed back `AWSAccessKeyId=AKIDEXAMPLE`)
+  and reached credential lookup — it did not return `AuthorizationHeaderMalformed`
+  / `IncompleteSignature`, which is what a malformed signature yields. So the
+  enclave's SigV4 header is well-formed and reaches AWS's auth layer. A real IAM
+  key turns this into a 200; the machinery is proven either way.
+
+Publishing gotcha found here: a new contract id resets the **secrets-map read
+ACL** (`readers: only:[id]`), so `grantContractReads(newId)` must run after every
+`publish` or all forward calls fail with `cannot read map "…:secrets"`.
+
 ### Two operational gotchas (cost real diagnosis time — documented so they don't again)
 
 - **`blindfold grant` REPLACES the egress allowlist, it doesn't append.**
