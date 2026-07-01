@@ -5,6 +5,16 @@ export interface ForwardRequest {
   body?: string;
   /** Name of the secret in z:<tid>:secrets to substitute into headers. */
   secret_key: string;
+  /**
+   * Provider auth scheme. Omitted → the enclave defaults to bearer (sentinel
+   * swap). For basic/sigv4 the enclave *computes* the Authorization from the
+   * sealed secret; the raw secret is never placed in a header on its own.
+   * Serialises 1:1 into the contract's tagged `AuthSpec`.
+   */
+  auth?:
+    | { scheme: "bearer" }
+    | { scheme: "basic"; username: string }
+    | { scheme: "sigv4"; access_key_id: string; region: string; service: string; amz_date: string };
 }
 
 export interface ForwardResponse {

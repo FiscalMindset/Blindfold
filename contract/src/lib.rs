@@ -13,6 +13,7 @@ wit_bindgen::generate!({
     generate_all,
 });
 
+mod auth;
 mod forward;
 
 struct Component;

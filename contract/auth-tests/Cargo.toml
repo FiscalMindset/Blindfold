@@ -1,0 +1,22 @@
+# Standalone native test crate for the enclave auth logic. It includes
+# ../src/auth.rs directly (which has no wit/host dependencies) so the SigV4 and
+# Basic-auth computations can be proven against published vectors with a plain
+# `cargo test`, without a wasm target or a running enclave.
+#
+# `[workspace]` here makes this its own workspace root so it is never absorbed
+# into the blindfold-proxy package build.
+[package]
+name = "blindfold-auth-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+hex = "0.4"
+sha2 = "0.10"
+hmac = "0.12"
