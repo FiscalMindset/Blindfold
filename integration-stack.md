@@ -240,21 +240,23 @@ Publishing gotcha found here: a new contract id resets the **secrets-map read
 ACL** (`readers: only:[id]`), so `grantContractReads(newId)` must run after every
 `publish` or all forward calls fail with `cannot read map "…:secrets"`.
 
-### Two operational gotchas (cost real diagnosis time — documented so they don't again)
+### Two operational gotchas (cost real diagnosis time — now fixed)
 
-- **`blindfold grant` REPLACES the egress allowlist, it doesn't append.**
-  `agentAuthUpdate` sets `allowedHosts: <hosts>` for the contract, so each grant
-  overwrites the previous one. Granting `api.github.com` then `api.stripe.com`
-  separately leaves ONLY Stripe authorized; earlier hosts silently start
-  returning `egress_denied`. **Fix: grant every host in one call** —
-  `grant --host generativelanguage.googleapis.com,api.stripe.com,api.github.com`.
-  (A good follow-up would be to make the CLI merge with the existing allowlist.)
+- **`blindfold grant` used to REPLACE the egress allowlist.** ✅ **Fixed.**
+  T3 replaces `allowedHosts` on every agent-auth update, so `grant` now unions new
+  hosts with the previously-granted set (cached per tenant in
+  `.blindfold/egress-hosts.json`) and sends the full list — grants are additive.
+  `grant` prints the complete authorized set; `grant --replace` forces a reset.
+- **The proxy hid real enclave errors behind `internal proxy error`.** ✅ **Fixed.**
+  The proxy now returns the real T3 error as JSON — status, `code`, `detail`,
+  `request_id`, and an actionable `hint` (e.g. egress not authorized → the exact
+  `blindfold grant` to run; `fuel_per_minute` → "rate limited, retry in ~60s";
+  secrets-ACL → "run blindfold init"; JSON-payload → "use query-string params").
 - **Testnet tenants have a per-minute compute quota (`fuel_per_minute`).**
   Hammering the enclave (tight reliability loops, retry storms, repeated demo
   runs) trips `HTTP 500 too_many_requests: quota exceeded (fuel_per_minute)`,
-  which surfaces to the agent as a generic `internal proxy error`. It looks like
-  an outage but resets within a minute — space calls out, and don't let demo
-  retry loops hammer a already-exhausted quota.
+  now surfaced clearly (see above) instead of a generic 500. It looks like an
+  outage but resets within a minute — space calls out.
 
 ### Honesty hardening of the demos
 
