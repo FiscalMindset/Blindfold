@@ -12,10 +12,42 @@
  * installed it. REAL mode requires `@terminal3/t3n-sdk` (optionalDep).
  */
 import { createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import type { BlindfoldEnv, ForwardRequest, ForwardResponse } from "./types.ts";
 import { CONTRACT_TAIL, CONTRACT_VERSION } from "./constants.ts";
 import { assertRealReady } from "./env.ts";
 import { safeLog } from "./log.ts";
+
+/* ---- egress allowlist cache -------------------------------------------------
+ * T3 REPLACES the contract's egress allowlist on every agent-auth update, so a
+ * grant must send the FULL desired set each time. We remember previously-granted
+ * hosts per tenant in .blindfold/egress-hosts.json and union new hosts in, so
+ * `grant` becomes additive instead of clobbering earlier grants.
+ * ---------------------------------------------------------------------------- */
+function egressCachePath(): string {
+  return process.env.BLINDFOLD_EGRESS_CACHE ?? path.join(process.cwd(), ".blindfold", "egress-hosts.json");
+}
+function loadEgressHosts(did: string): string[] {
+  try {
+    const all = JSON.parse(fs.readFileSync(egressCachePath(), "utf8")) as Record<string, string[]>;
+    return Array.isArray(all[did]) ? all[did] : [];
+  } catch {
+    return [];
+  }
+}
+function saveEgressHosts(did: string, hosts: string[]): void {
+  const p = egressCachePath();
+  let all: Record<string, string[]> = {};
+  try {
+    all = JSON.parse(fs.readFileSync(p, "utf8")) as Record<string, string[]>;
+  } catch {
+    /* fresh file */
+  }
+  all[did] = hosts;
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(all, null, 2));
+}
 
 /** Loaded SDK module shape (subset of the real @terminal3/t3n-sdk exports). */
 interface T3Sdk {
@@ -78,7 +110,7 @@ export interface T3ClientHandle {
    * functions to make outbound calls to the given hosts (the egress grant the
    * proxy + in-enclave http::call path require).
    */
-  grantEgress: (hosts: string[]) => Promise<void>;
+  grantEgress: (hosts: string[], opts?: { replace?: boolean }) => Promise<string[]>;
   /**
    * Authorize an arbitrary agent DID (a teammate) to call this tenant's
    * contract functions for the given hosts. Empty hosts+functions revokes.
@@ -260,8 +292,13 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     });
   };
 
-  const grantEgress = (hosts: string[]): Promise<void> =>
-    agentAuthUpdate(env.did, hosts, ["forward", "release-to-tenant"]);
+  const grantEgress = async (hosts: string[], opts?: { replace?: boolean }): Promise<string[]> => {
+    const prev = opts?.replace ? [] : loadEgressHosts(env.did);
+    const merged = Array.from(new Set([...prev, ...hosts])).sort();
+    await agentAuthUpdate(env.did, merged, ["forward", "release-to-tenant"]);
+    saveEgressHosts(env.did, merged);
+    return merged;
+  };
 
   const setAgentGrant = (agentDid: string, hosts: string[], functions: string[]): Promise<void> =>
     agentAuthUpdate(agentDid, hosts, functions);
@@ -325,6 +362,7 @@ function openMockClient(): T3ClientHandle {
     },
     async grantEgress(hosts) {
       safeLog("info", { msg: "mock-grant-egress", hosts });
+      return hosts;
     },
     async setAgentGrant(agentDid, hosts, functions) {
       safeLog("info", { msg: "mock-set-agent-grant", agentDid, hosts, functions });
