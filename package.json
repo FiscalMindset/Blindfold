@@ -16,6 +16,7 @@
     "demo:b": "tsx demo/agent-b-blindfolded/index.ts",
     "dashboard": "tsx packages/blindfold/bin/blindfold.ts dashboard",
     "test:report": "tsx scripts/run-tests.ts",
+    "test:providers": "tsx scripts/test-providers.ts",
     "test:real": "tsx scripts/real-e2e-test.ts",
     "demo:smtp": "tsx scripts/demo-smtp.ts",
     "compat": "tsx packages/blindfold/bin/blindfold.ts compat",
