@@ -132,11 +132,28 @@ async function handle(
     }
   }
 
+  // Work around the T3 host egress parsing every request body as JSON (a raw
+  // form-encoded body fails with `http.parse_payload: expected value…`).
+  // Form-encoded APIs (Stripe, Twilio, AWS query APIs) accept the same params
+  // in the query string, so move a form body into the URL and send no body.
+  // The agent's code is unchanged — it can POST a normal form and this adapts
+  // it. JSON bodies are left untouched (the host parses those fine).
+  let outboundUrl = upstream;
+  let outboundBody: string | undefined = body.length ? body.toString("utf8") : undefined;
+  const contentType = (headers.find(([k]) => k.toLowerCase() === "content-type")?.[1] ?? "").toLowerCase();
+  if (outboundBody && contentType.includes("application/x-www-form-urlencoded")) {
+    const u = new URL(outboundUrl);
+    for (const [k, v] of new URLSearchParams(outboundBody)) u.searchParams.append(k, v);
+    outboundUrl = u.toString();
+    outboundBody = undefined;
+    safeLog("info", { msg: "form_body_to_query", provider: provider.id });
+  }
+
   const forwardReq: ForwardRequest = {
     method: req.method ?? "GET",
-    url: upstream,
+    url: outboundUrl,
     headers,
-    body: body.length ? body.toString("utf8") : undefined,
+    body: outboundBody,
     secret_key: providerSecretKey,
     auth: provider.auth,
   };
