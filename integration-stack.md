@@ -196,16 +196,22 @@ Running Stripe live surfaced real constraints in the **current T3 host** egress
 (`host:interfaces/http` `call`) — worth recording so nobody re-diagnoses them:
 
 1. **The host parses request bodies as JSON.** A non-JSON payload fails with
-   `http.parse_payload: expected value at line 1 column 1`. JSON APIs (Gemini,
-   OpenAI, Anthropic) and read GETs work fully; form-encoded bodies do not. The
-   Stripe example works around this by putting params in the query string with an
-   empty body.
-2. **On testnet, request headers aren't always forwarded.** Form-encoded Stripe
-   WRITES are flaky because the `content-type` header is intermittently dropped
-   (reads are 100% reliable). The example retries and reports honestly if the
-   egress is dropping headers on a given run. Neither is a Blindfold design
-   issue — auth and key protection are unaffected; these are host-egress
-   maturity gaps on testnet.
+   `http.parse_payload: expected value at line 1 column 1`. **✅ Solved
+   client-side:** the proxy now detects a `application/x-www-form-urlencoded`
+   body, moves its params into the URL query string, and sends an empty body —
+   so the host's JSON parser is never triggered and the agent's code is
+   unchanged (it can POST a normal form). Form-encoded providers (Stripe,
+   Twilio) accept params in the query string, so this is transparent. JSON APIs
+   are untouched.
+2. **On testnet, request headers aren't always forwarded (residual host bug).**
+   Even with the params in the query string, Stripe still requires a
+   `content-type` header, and the testnet host **intermittently drops it** — so
+   a form write succeeds ~4/5 of the time and fails the rest with "check that
+   your POST content type…". Mitigations: the proxy always injects the correct
+   `content-type` for form providers (so it's present when the host does forward
+   it), and clients retry. The residual drop is genuinely host-side (reads are
+   100%); it's the one item worth raising with the T3 team. Auth and key
+   protection are unaffected either way.
 
 ### basic + sigv4 proven LIVE (contract 0.5.4)
 

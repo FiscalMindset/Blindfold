@@ -114,7 +114,7 @@ const PROVIDERS: ProviderDef[] = [
     upstream: (p) => `https://api.stripe.com${stripPrefix(p, "/stripe/")}`,
     secretKey: "stripe_secret_key",
     auth: () => ({ scheme: "bearer" }),
-    defaultHeaders: { "stripe-version": "2024-06-20" },
+    defaultHeaders: { "stripe-version": "2024-06-20", "content-type": "application/x-www-form-urlencoded" },
   },
 
   // ---- Dev infra: GitHub. GitHub REJECTS requests with no User-Agent (403),
@@ -162,6 +162,7 @@ const PROVIDERS: ProviderDef[] = [
     upstream: (p) => `https://api.twilio.com${stripPrefix(p, "/twilio/")}`,
     secretKey: "twilio_auth_token",
     auth: () => ({ scheme: "basic", username: process.env.TWILIO_ACCOUNT_SID || "" }),
+    defaultHeaders: { "content-type": "application/x-www-form-urlencoded" },
   },
 
   // ---- Cloud: AWS SES (SigV4 — secret SIGNS, never transmitted). ------------
