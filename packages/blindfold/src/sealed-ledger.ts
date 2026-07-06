@@ -15,7 +15,8 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
+import { stateDir, withFileLockSync } from "./env.ts";
 
 export interface SealedEntry {
   t: string;           // ISO timestamp
@@ -26,11 +27,33 @@ export interface SealedEntry {
   tenant_did: string;
   map_name: string;    // z:<tid>:secrets
   prev?: string;       // hash of the previous chained entry ("" for the first)
-  hash?: string;       // sha256(prev + "\n" + core) — tamper-evidence
+  hash?: string;       // HMAC(key, prev + "\n" + core) — tamper-evidence
+  alg?: string;        // "hmac-sha256" for keyed entries; absent = legacy sha256
 }
 
 export function defaultSealedLogPath(): string {
-  return process.env.BLINDFOLD_SEALED_LOG ?? path.join(process.cwd(), ".blindfold", "sealed.jsonl");
+  return process.env.BLINDFOLD_SEALED_LOG ?? path.join(stateDir(), "sealed.jsonl");
+}
+
+/**
+ * Local HMAC key for the ledger chain. Unlike the previous plain sha256 chain
+ * (which anyone could recompute), this key is not derivable from the ledger, so
+ * an attacker who edits a line cannot forge a valid chain. Persisted to
+ * .blindfold/ledger.key (0600), generated on first use. Returns null if the key
+ * can't be obtained — callers then fall back to the legacy sha256 chain.
+ */
+function ledgerKey(): Buffer | null {
+  try {
+    const keyPath = path.join(stateDir(), "ledger.key");
+    if (fs.existsSync(keyPath)) return Buffer.from(fs.readFileSync(keyPath, "utf8").trim(), "hex");
+    fs.mkdirSync(path.dirname(keyPath), { recursive: true });
+    const key = randomBytes(32);
+    fs.writeFileSync(keyPath, key.toString("hex"), { mode: 0o600 });
+    try { fs.chmodSync(keyPath, 0o600); } catch { /* best effort */ }
+    return key;
+  } catch {
+    return null;
+  }
 }
 
 /** Canonical serialization of the metadata fields (excludes prev/hash). */
@@ -45,17 +68,44 @@ function sha(s: string): string {
   return createHash("sha256").update(s).digest("hex");
 }
 
+function chainHash(key: Buffer | null, prev: string, core: string): { hash: string; alg?: string } {
+  if (key) return { hash: createHmac("sha256", key).update(`${prev}\n${core}`).digest("hex"), alg: "hmac-sha256" };
+  return { hash: sha(`${prev}\n${core}`) }; // legacy fallback
+}
+
+/** Efficiently read the last non-empty line without parsing the whole file. */
+function readLastLine(p: string): string | null {
+  if (!fs.existsSync(p)) return null;
+  const fd = fs.openSync(p, "r");
+  try {
+    const size = fs.fstatSync(fd).size;
+    if (size === 0) return null;
+    const readLen = Math.min(size, 64 * 1024);
+    const buf = Buffer.alloc(readLen);
+    fs.readSync(fd, buf, 0, readLen, size - readLen);
+    const lines = buf.toString("utf8").split("\n").filter((l) => l.trim().length > 0);
+    return lines.length ? lines[lines.length - 1]! : null;
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 export function recordSealed(entry: SealedEntry): void {
   const p = defaultSealedLogPath();
   try {
-    // Link to the last chained entry (legacy entries without a hash are skipped).
-    const existing = readSealed();
-    let prevHash = "";
-    for (const e of existing) if (e.hash) prevHash = e.hash;
-    const hash = sha(`${prevHash}\n${coreString(entry)}`);
-    const chained: SealedEntry = { ...entry, prev: prevHash, hash };
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.appendFileSync(p, JSON.stringify(chained) + "\n");
+    // Serialize read-tail + append under an exclusive lock so two concurrent
+    // sealers can't read the same prevHash and fork the chain (false "TAMPERED").
+    withFileLockSync(p, () => {
+      let prevHash = "";
+      const last = readLastLine(p);
+      if (last) {
+        try { prevHash = (JSON.parse(last) as SealedEntry).hash ?? ""; } catch { prevHash = ""; }
+      }
+      const { hash, alg } = chainHash(ledgerKey(), prevHash, coreString(entry));
+      const chained: SealedEntry = { ...entry, prev: prevHash, hash, ...(alg ? { alg } : {}) };
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.appendFileSync(p, JSON.stringify(chained) + "\n");
+    });
   } catch {
     /* never let logging crash the seal */
   }
@@ -83,14 +133,24 @@ export interface ChainResult {
  */
 export function verifyLedgerChain(): ChainResult {
   const entries = readSealed();
+  const key = ledgerKey();
   let runningPrev = "";
   let legacy = 0;
   let firstBrokenIndex = -1;
   entries.forEach((e, i) => {
-    if (!e.hash) { legacy++; return; } // legacy entry, not part of the chain
-    const expected = sha(`${runningPrev}\n${coreString(e)}`);
-    if (firstBrokenIndex < 0 && (e.prev !== runningPrev || e.hash !== expected)) {
-      firstBrokenIndex = i;
+    if (!e.hash) { legacy++; return; } // no hash at all — pre-chain, unverifiable
+    if (e.alg === "hmac-sha256") {
+      // Keyed entry — real tamper detection (requires the local key).
+      const expected = key ? createHmac("sha256", key).update(`${runningPrev}\n${coreString(e)}`).digest("hex") : null;
+      if (firstBrokenIndex < 0 && (e.prev !== runningPrev || (expected !== null && e.hash !== expected))) {
+        firstBrokenIndex = i;
+      }
+      if (expected === null) legacy++; // key unavailable → can't verify, don't cry tamper
+    } else {
+      // Legacy plain-sha256 entry: recomputable by anyone, so treat as
+      // unverifiable rather than authoritative. The enclave (blindfold audit)
+      // remains the source of truth for these.
+      legacy++;
     }
     runningPrev = e.hash;
   });
