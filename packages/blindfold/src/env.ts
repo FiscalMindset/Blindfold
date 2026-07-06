@@ -11,15 +11,138 @@ import { fileURLToPath } from "node:url";
 import type { BlindfoldEnv } from "./types.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-// HERE = <repo>/packages/blindfold/src   →   3 ".." up to repo root
-const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
+// Source-relative fallback: HERE = <repo>/packages/blindfold/src → 3 ".." to root.
+const SRC_RELATIVE_ROOT = path.resolve(HERE, "..", "..", "..");
+
+let _repoRoot: string | null = null;
+/**
+ * Resolve the project root. Walks up from the current working directory looking
+ * for a `.env` / `.blindfold` / `.git` marker so the tool works from a
+ * subdirectory and when installed under `node_modules`; falls back to the
+ * source-relative path for the in-repo layout.
+ */
+export function repoRoot(): string {
+  if (_repoRoot) return _repoRoot;
+  let dir = process.cwd();
+  for (let i = 0; i < 12; i++) {
+    if (
+      fs.existsSync(path.join(dir, ".env")) ||
+      fs.existsSync(path.join(dir, ".blindfold")) ||
+      fs.existsSync(path.join(dir, ".git"))
+    ) {
+      _repoRoot = dir;
+      return dir;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  _repoRoot = SRC_RELATIVE_ROOT;
+  return _repoRoot;
+}
+
+/**
+ * Directory holding Blindfold's per-project runtime state (ledger, usage log,
+ * egress cache). Anchored to the repo root (not `process.cwd()`) so running a
+ * command from a subdirectory does not silently fork a fresh, empty ledger.
+ * Overridable via BLINDFOLD_STATE_DIR.
+ */
+export function stateDir(): string {
+  const override = process.env.BLINDFOLD_STATE_DIR;
+  if (override && override.trim()) return path.resolve(override.trim());
+  return path.join(repoRoot(), ".blindfold");
+}
+
+/**
+ * Validate a user-supplied base-URL override. Requires https (localhost may use
+ * http) so a mis-set env var can't route tenant-key auth / released secrets to
+ * an attacker-controlled plaintext host. Throws on anything invalid.
+ */
+export function assertSafeOverrideUrl(raw: string, label: string): void {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    throw new Error(`${label} is not a valid URL: ${raw}`);
+  }
+  const isLocal = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(u.hostname);
+  if (u.protocol !== "https:" && !isLocal) {
+    throw new Error(`${label} must be https (got ${u.protocol}//${u.hostname}); refusing to trust an insecure endpoint`);
+  }
+}
+
+/**
+ * Run `fn` while holding an exclusive lock on `<target>.lock`, so concurrent
+ * processes can't corrupt append-only state (ledger fork, egress-allowlist
+ * clobber). Spins briefly; reclaims a lock older than 10s as stale.
+ */
+export async function withFileLock<T>(target: string, fn: () => T | Promise<T>): Promise<T> {
+  const lockPath = `${target}.lock`;
+  const deadline = Date.now() + 10_000;
+  fs.mkdirSync(path.dirname(lockPath), { recursive: true });
+  // Acquire.
+  for (;;) {
+    try {
+      const fd = fs.openSync(lockPath, "wx");
+      fs.writeSync(fd, String(process.pid));
+      fs.closeSync(fd);
+      break;
+    } catch (e: any) {
+      if (e?.code !== "EEXIST") throw e;
+      // Stale-lock reclaim.
+      try {
+        const st = fs.statSync(lockPath);
+        if (Date.now() - st.mtimeMs > 10_000) {
+          fs.rmSync(lockPath, { force: true });
+          continue;
+        }
+      } catch { /* lock vanished; retry acquire */ }
+      if (Date.now() > deadline) throw new Error(`timed out acquiring lock ${lockPath}`);
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    fs.rmSync(lockPath, { force: true });
+  }
+}
+
+/** Synchronous variant of withFileLock, for code paths that must stay sync. */
+export function withFileLockSync<T>(target: string, fn: () => T): T {
+  const lockPath = `${target}.lock`;
+  const deadline = Date.now() + 10_000;
+  fs.mkdirSync(path.dirname(lockPath), { recursive: true });
+  const sleep = (ms: number) => { try { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); } catch { /* fallback: busy noop */ } };
+  for (;;) {
+    try {
+      const fd = fs.openSync(lockPath, "wx");
+      fs.writeSync(fd, String(process.pid));
+      fs.closeSync(fd);
+      break;
+    } catch (e: any) {
+      if (e?.code !== "EEXIST") throw e;
+      try {
+        const st = fs.statSync(lockPath);
+        if (Date.now() - st.mtimeMs > 10_000) { fs.rmSync(lockPath, { force: true }); continue; }
+      } catch { /* lock vanished; retry */ }
+      if (Date.now() > deadline) throw new Error(`timed out acquiring lock ${lockPath}`);
+      sleep(25);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    fs.rmSync(lockPath, { force: true });
+  }
+}
 
 /** Absolute path to the project's .env file (repo root). */
 export function defaultEnvPath(): string {
-  return path.join(REPO_ROOT, ".env");
+  return path.join(repoRoot(), ".env");
 }
 
-export function loadEnvFromFile(envPath = path.join(REPO_ROOT, ".env")): void {
+export function loadEnvFromFile(envPath = path.join(repoRoot(), ".env")): void {
   if (!fs.existsSync(envPath)) return;
   const text = fs.readFileSync(envPath, "utf8");
   for (const raw of text.split(/\r?\n/)) {
@@ -46,6 +169,9 @@ export function loadBlindfoldEnv(): BlindfoldEnv {
   // Optional node-URL override — point at a healthy/leader node when the SDK's
   // default node is unhealthy (the failure mode behind days of phantom 500s).
   const t3BaseUrl = (process.env.T3_BASE_URL ?? process.env.BLINDFOLD_BASE_URL ?? "").trim();
+  if (t3BaseUrl) {
+    assertSafeOverrideUrl(t3BaseUrl, process.env.T3_BASE_URL ? "T3_BASE_URL" : "BLINDFOLD_BASE_URL");
+  }
   // MOCK is opt-in only — used by the standalone demo and CI tests. The
   // production path is REAL. If T3 creds are missing in REAL mode, callers
   // must surface a clear error (not silently fall back to mock).

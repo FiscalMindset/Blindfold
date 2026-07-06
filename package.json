@@ -21,7 +21,11 @@
     "demo:smtp": "tsx scripts/demo-smtp.ts",
     "compat": "tsx packages/blindfold/bin/blindfold.ts compat",
     "env:fingerprint": "bash scripts/env-fingerprint.sh",
-    "seal:blogger": "tsx scripts/seal-blogger-key.ts"
+    "seal:blogger": "tsx scripts/seal-blogger-key.ts",
+    "chatbot": "tsx packages/chatbot/bin/chatbot.ts",
+    "chatbot:serve": "tsx packages/chatbot/bin/chatbot.ts serve",
+    "chatbot:extract": "tsx packages/chatbot/bin/extract-knowledge.ts",
+    "chatbot:audit": "tsx packages/chatbot/bin/chatbot.ts audit"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

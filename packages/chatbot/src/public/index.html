@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Blindfold Chatbot — rule-based Q&A for the Blindfold project</title>
+  <meta name="description" content="A rule-based chatbot that answers questions about Blindfold, the open-source Terminal 3 TDX enclave wrapper that makes AI agent API keys un-leakable. For users, developers, founders, enterprise security architects, and researchers.">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230f1419'/%3E%3Cpath d='M32 12 L48 22 V42 L32 52 L16 42 V22 Z' fill='none' stroke='%2300ff88' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%2300ff88'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- Header — fixed, terminal-style -->
+  <header class="hdr">
+    <div class="hdr-inner">
+      <div class="hdr-mark">
+        <svg class="hdr-glyph" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 8 L52 18 V46 L32 56 L12 46 V18 Z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M32 22 L42 27 V37 L32 42 L22 37 V27 Z" fill="currentColor" opacity="0.25"/>
+        </svg>
+        <div>
+          <h1 class="hdr-title">Blindfold Chatbot</h1>
+          <div class="hdr-sub">rule-based · audience-aware · 481 KB entries · <a href="https://github.com/FiscalMindset/Blindfold">github.com/FiscalMindset/Blindfold</a></div>
+        </div>
+      </div>
+      <div class="hdr-controls">
+        <label class="audience-pick">
+          <span class="audience-label">audience</span>
+          <select id="audience-select" aria-label="audience">
+            <option value="auto">auto-detect</option>
+            <option value="user">user</option>
+            <option value="developer">developer</option>
+            <option value="founder">founder</option>
+            <option value="enterprise">enterprise</option>
+            <option value="researcher">researcher</option>
+          </select>
+        </label>
+        <button id="side-toggle" class="side-toggle" aria-label="open topics panel" aria-expanded="false">☰ topics</button>
+        <a class="hdr-btn" href="/api/audit" target="_blank" rel="noopener">audit</a>
+        <a class="hdr-btn" href="/api/stats" target="_blank" rel="noopener">stats</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main — split view: chat on the left, side panel on the right (collapses on mobile) -->
+  <main class="main">
+
+    <!-- Chat column -->
+    <section class="chat" aria-label="conversation">
+      <div id="messages" class="messages" role="log" aria-live="polite">
+        <!-- Welcome message — populated by JS -->
+      </div>
+      <form id="composer" class="composer" autocomplete="off">
+        <textarea
+          id="input"
+          rows="1"
+          placeholder="Ask anything about Blindfold…  (Enter to send · Shift+Enter newline · /help)"
+          aria-label="your question"
+          autofocus></textarea>
+        <button type="submit" id="send-btn" aria-label="send">
+          <span class="send-glyph">→</span>
+          <span class="send-label">send</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Side panel — KB browser, history, hints -->
+    <div class="side-drawer-overlay" id="side-overlay" aria-hidden="true"></div>
+    <aside class="side" id="side" aria-label="knowledge base browser">
+      <div class="side-tabs" role="tablist">
+        <button class="side-tab active" data-tab="topics" role="tab">topics</button>
+        <button class="side-tab" data-tab="history" role="tab">history</button>
+        <button class="side-tab" data-tab="about" role="tab">about</button>
+      </div>
+
+      <div class="side-pane active" data-pane="topics">
+        <input id="topic-search" class="topic-search" placeholder="filter…">
+        <div id="topic-list" class="topic-list" aria-label="topics">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="side-pane" data-pane="history">
+        <div class="history-empty" id="history-empty">
+          <p>No questions yet. Try one of the topics on the left.</p>
+        </div>
+        <ol id="history-list" class="history-list" aria-label="history"></ol>
+      </div>
+
+      <div class="side-pane" data-pane="about">
+        <h3>About this chatbot</h3>
+        <p>
+          A <strong>rule-based</strong> chatbot. No LLM in the hot path. Knowledge
+          base is a curated JSON file derived from the actual Blindfold
+          documentation (README, FAQ, usage, EXAMPLES, contracts, source code)
+          and refreshed by <code>npm run chatbot -- extract</code>.
+        </p>
+        <h4>Hard rules</h4>
+        <ul>
+          <li>Never invent APIs, commands, env vars, or file paths.</li>
+          <li>Never paste a real or fake <code>sk-…</code> value.</li>
+          <li>Never log or echo a secret.</li>
+          <li>Always cite the doc / file that backs the answer.</li>
+          <li>Always prefer the canonical doc over a guess.</li>
+        </ul>
+        <h4>Audiences</h4>
+        <p>Same question, different audience → different depth + cited sources.</p>
+        <table class="aud-table">
+          <thead><tr><th>role</th><th>emphasizes</th></tr></thead>
+          <tbody>
+            <tr><td>user</td><td>what it is, why, the one-line change</td></tr>
+            <tr><td>developer</td><td>code snippets, file paths, commands</td></tr>
+            <tr><td>founder</td><td>positioning, market, pricing angle</td></tr>
+            <tr><td>enterprise</td><td>trust model, audit, compliance</td></tr>
+            <tr><td>researcher</td><td>TDX primitive, audit invariant, threat model</td></tr>
+          </tbody>
+        </table>
+        <h4>API</h4>
+        <p>
+          <code>POST /api/chat</code> with JSON <code>{ message, audience?, history? }</code>.
+          <code>GET /api/audit</code> lists KB entries.
+        </p>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer class="ftr">
+    <div class="ftr-inner">
+      <span>MIT licensed</span> · <span>no tracking</span> · <span>chat history stays in your browser</span> ·
+      <a href="https://github.com/FiscalMindset/Blindfold">Blindfold</a> ·
+      <a href="/api/health" target="_blank">/api/health</a>
+    </div>
+  </footer>
+
+  <!-- Quick-actions floating dock -->
+  <div class="dock" id="dock">
+    <button class="dock-btn" data-q="What is Blindfold?">what is blindfold?</button>
+    <button class="dock-btn" data-q="How does it work?">how does it work?</button>
+    <button class="dock-btn" data-q="What is the sentinel?">what is the sentinel?</button>
+    <button class="dock-btn" data-q="How is this different from Vault?">vs vault?</button>
+    <button class="dock-btn" data-q="How do I register a key?">how do I register?</button>
+    <button class="dock-btn" data-q="What providers are supported?">providers?</button>
+    <button class="dock-btn" data-q="Is this production-ready?">production-ready?</button>
+  </div>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
