@@ -1,0 +1,43 @@
+{
+  "name": "@blindfold/chatbot",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Rule-based chatbot that answers any question about Blindfold — for users, founders, enterprise owners, and developers. Curated knowledge base sourced from the actual project documentation.",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./engine": "./src/engine.ts",
+    "./knowledge": "./src/knowledge.ts",
+    "./intents": "./src/intents.ts",
+    "./responder": "./src/responder.ts",
+    "./audiences": "./src/audiences.ts",
+    "./server": "./src/server.ts"
+  },
+  "bin": {
+    "blindfold-chatbot": "bin/chatbot.ts"
+  },
+  "scripts": {
+    "start": "tsx bin/chatbot.ts",
+    "cli": "tsx bin/chatbot.ts",
+    "serve": "tsx bin/chatbot.ts serve",
+    "extract": "tsx bin/extract-knowledge.ts"
+  },
+  "keywords": [
+    "blindfold",
+    "chatbot",
+    "tdx",
+    "enclave",
+    "api-key-security",
+    "prompt-injection",
+    "rule-based"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@blindfold/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

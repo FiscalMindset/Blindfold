@@ -125,6 +125,18 @@ async function main(): Promise<void> {
       // Mode A: quick auth test against an HTTPS endpoint with Bearer auth.
       if (argv.flags.url) {
         const url = String(argv.flags.url);
+        // The released plaintext key is sent as a Bearer token to this URL.
+        // Refuse a non-https target (localhost excepted) so a mistyped/hostile
+        // URL can't exfiltrate the key. --allow-insecure overrides for testing.
+        if (!argv.flags["allow-insecure"]) {
+          let u: URL;
+          try { u = new URL(url); } catch (e) { die(`invalid --url: ${(e as Error).message}`); return; }
+          const isLocal = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(u.hostname);
+          if (u.protocol !== "https:" && !isLocal) {
+            die(`refusing to send the released key to a non-https URL (${u.protocol}//${u.hostname}). Use https, target localhost, or pass --allow-insecure to override.`);
+            return;
+          }
+        }
         const res = await fetch(url, {
           headers: { Authorization: `Bearer ${value}`, "User-Agent": "blindfold", Accept: "*/*" },
         });
@@ -203,7 +215,7 @@ async function main(): Promise<void> {
     case "rollback": {
       const name = String(argv.flags.name ?? "");
       if (!name) die("usage: blindfold rollback --name <secret> [--to <iso-ts | fingerprint>]");
-      const { readVersions } = await import("../src/versions.ts");
+      const { readVersions, isValidVersionKey } = await import("../src/versions.ts");
       const versions = readVersions(name);
       if (versions.length === 0) {
         die(`no saved versions for "${name}". \`blindfold rotate\` creates them; \`blindfold versions --name ${name}\` lists them.`);
@@ -215,12 +227,23 @@ async function main(): Promise<void> {
         if (!sel) die(`no version of "${name}" matches --to ${want} (see \`blindfold versions --name ${name}\`)`);
         target = sel;
       }
+      // Integrity guard: versions.jsonl is local and could be tampered with to
+      // point `versionKey` at an arbitrary enclave key. A legitimate key always
+      // matches __bfver__<name>__<ts>; reject anything else before releasing.
+      if (!isValidVersionKey(name, target.versionKey)) {
+        die(`refusing rollback: version key "${target.versionKey}" is not a valid snapshot key for "${name}" (tampered versions.jsonl?)`);
+      }
       const env = loadBlindfoldEnv();
       const { openT3Client } = await import("../src/t3-client.ts");
       const client = await openT3Client(env);
       try {
         const before = await client.verifySecret(name);
         const restored = await client.releaseSecret(target.versionKey);
+        // And verify the released value matches the fingerprint recorded when the
+        // snapshot was taken — catches a versionKey swapped to a different value.
+        if (fingerprint(restored) !== target.fingerprint) {
+          die(`refusing rollback: released snapshot fingerprint ${fingerprint(restored)} ≠ recorded ${target.fingerprint} (tampered versions.jsonl?)`);
+        }
         await client.seedSecret(name, restored);
         console.log(`✓ Rolled back "${name}"`);
         console.log(`  ${before.present ? `fp ${before.fingerprint} (${before.length} B)` : "(no current value)"}  →  fp ${fingerprint(restored)} (${restored.length} B)`);

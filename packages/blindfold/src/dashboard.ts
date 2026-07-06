@@ -19,11 +19,12 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import { timingSafeEqual } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
 import { CONTRACT_VERSION, DEFAULT_DASHBOARD_PORT } from "./constants.ts";
-import { loadBlindfoldEnv } from "./env.ts";
-import { clearUsage, defaultLogPath, readUsage } from "./usage-log.ts";
+import { defaultEnvPath, loadBlindfoldEnv } from "./env.ts";
+import { clearUsage, defaultLogPath, readUsage, readUsageTail } from "./usage-log.ts";
 import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "./sealed-ledger.ts";
 
 export interface DashboardHandle {
@@ -38,13 +39,22 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
   // Optional access token (BLINDFOLD_DASHBOARD_TOKEN). The server binds to
   // 127.0.0.1 regardless; this adds a guard if you tunnel/forward the port.
   const TOKEN = process.env.BLINDFOLD_DASHBOARD_TOKEN || "";
+  const tokenEq = (candidate: string): boolean => {
+    // Constant-time compare so the token can't be recovered by timing.
+    const a = Buffer.from(candidate);
+    const b = Buffer.from(TOKEN);
+    return a.length === b.length && timingSafeEqual(a, b);
+  };
   const authed = (req: http.IncomingMessage, url: string): boolean => {
     if (!TOKEN) return true;
+    // Prefer the Authorization header (query strings leak into logs/history).
+    const auth = req.headers.authorization || "";
+    if (auth.startsWith("Bearer ") && tokenEq(auth.slice(7))) return true;
     try {
       const t = new URL(url, "http://x").searchParams.get("token");
-      if (t === TOKEN) return true;
+      if (t && tokenEq(t)) return true;
     } catch { /* ignore */ }
-    return (req.headers.authorization || "") === `Bearer ${TOKEN}`;
+    return false;
   };
 
   const server = http.createServer(async (req, res) => {
@@ -75,8 +85,14 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
       return;
     }
     if (req.method === "GET" && pathname === "/api/events") {
+      // Serve only a bounded tail (not the whole log) so a polled dashboard
+      // never loads a multi-hundred-MB file into memory on every refresh.
+      const limit = Math.min(Number(new URL(url, "http://x").searchParams.get("limit")) || 500, 5000);
+      const events = readUsageTail(limit);
+      const counters: Record<string, number> = {};
+      for (const e of events) counters[e.provider] = (counters[e.provider] ?? 0) + 1;
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ events: readUsage(), source: defaultLogPath() }));
+      res.end(JSON.stringify({ events, counters, returned: events.length, source: defaultLogPath() }));
       return;
     }
     if (req.method === "GET" && pathname === "/api/sealed") {
@@ -141,21 +157,19 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
     }
     if (req.method === "GET" && pathname === "/api/audit") {
       const sealed = readSealed();
-      const envKeys = readEnvKeyNames();
-      const exposed = sealed
-        .map((s) => s.name)
-        .filter((name, i, arr) => arr.indexOf(name) === i)   // dedupe (overwrites)
-        .filter((name) => envKeys.includes(name))
-        .map((name) => {
-          const latest = [...sealed].reverse().find((s) => s.name === name)!;
-          return { name, length: latest.length, sealed_at: latest.t };
-        });
-      const uniqueSealed = new Set(sealed.map((s) => s.name)).size;
+      const envKeys = new Set(readEnvKeyNames());
+      // Single pass: keep the latest entry per name (entries are append-order).
+      const latestByName = new Map<string, typeof sealed[number]>();
+      for (const s of sealed) latestByName.set(s.name, s);
+      const exposed = Array.from(latestByName.values())
+        .filter((latest) => envKeys.has(latest.name))
+        .map((latest) => ({ name: latest.name, length: latest.length, sealed_at: latest.t }));
+      const uniqueSealed = latestByName.size;
       const chain = verifyLedgerChain();
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({
         exposed_in_env: exposed,
-        env_keys: envKeys,
+        env_keys: Array.from(envKeys),
         sealed_count: uniqueSealed,
         ledger_chain: chain, // { ok, total, legacy, firstBrokenIndex }
       }));
@@ -191,8 +205,7 @@ function shortenDid(did: string): string {
 }
 
 function readEnvKeyNames(): string[] {
-  const HERE = path.dirname(fileURLToPath(import.meta.url));
-  const ENV_PATH = path.resolve(HERE, "..", "..", "..", ".env");
+  const ENV_PATH = defaultEnvPath();
   if (!fs.existsSync(ENV_PATH)) return [];
   return fs.readFileSync(ENV_PATH, "utf8")
     .split(/\r?\n/)

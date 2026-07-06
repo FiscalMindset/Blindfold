@@ -14,6 +14,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { stateDir } from "./env.ts";
 
 export interface VersionEntry {
   t: string;            // ISO timestamp the snapshot was taken
@@ -24,12 +25,21 @@ export interface VersionEntry {
 }
 
 export function defaultVersionsPath(): string {
-  return process.env.BLINDFOLD_VERSIONS_LOG ?? path.join(process.cwd(), ".blindfold", "versions.jsonl");
+  return process.env.BLINDFOLD_VERSIONS_LOG ?? path.join(stateDir(), "versions.jsonl");
 }
 
 /** Build the reserved enclave key for a new snapshot of `name`. */
 export function versionKeyFor(name: string, stampMs: number): string {
   return `__bfver__${name}__${stampMs}`;
+}
+
+/**
+ * Guard against a tampered versions.jsonl pointing `rollback` at an arbitrary
+ * enclave key: a legitimate versionKey is always `__bfver__<name>__<digits>`.
+ * (rollback additionally verifies the released value's fingerprint.)
+ */
+export function isValidVersionKey(name: string, versionKey: string): boolean {
+  return new RegExp(`^__bfver__${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}__\\d+$`).test(versionKey);
 }
 
 export function recordVersion(entry: VersionEntry): void {

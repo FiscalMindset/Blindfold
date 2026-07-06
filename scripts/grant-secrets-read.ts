@@ -35,13 +35,15 @@ async function main(): Promise<void> {
   const contractDid = `${env.did}/${contractIdArg}`;
   const idNum = Number(contractIdArg);
 
+  // SECURITY: only scoped grants (limited to this contract id) are attempted.
+  // A `readers: "all"` fallback would authorize EVERY principal to read the
+  // sealed-secrets map — never use it. If all scoped shapes are rejected, this
+  // script errors out rather than silently opening the map to the world.
   const attempts: Array<[string, unknown]> = [
     ["readers: only [<contract_id>]", { readers: { only: [idNum] } }],
     ["readers: Only [<contract_id>] (capitalized)", { readers: { Only: [idNum] } }],
     ["extraReadGrants: [<contract_did>]", { extraReadGrants: [contractDid] }],
     ["extraReadGrants: [<contract_id_string>]", { extraReadGrants: [String(idNum)] }],
-    ["readers: 'all'", { readers: "all" }],
-    ["readers: 'All'", { readers: "All" }],
   ];
 
   for (const [label, patch] of attempts) {

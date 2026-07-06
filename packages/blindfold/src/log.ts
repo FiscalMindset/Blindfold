@@ -41,7 +41,7 @@ function redactHeaders(
   h: Record<string, unknown> | Array<[string, string]>,
 ): Record<string, string> | Array<[string, string]> {
   if (Array.isArray(h)) {
-    return h.map(([k, v]) => [k, HEADER_BLOCKLIST.has(k.toLowerCase()) ? "[redacted]" : v]);
+    return h.map(([k, v]): [string, string] => [k, HEADER_BLOCKLIST.has(k.toLowerCase()) ? "[redacted]" : v]);
   }
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(h)) {

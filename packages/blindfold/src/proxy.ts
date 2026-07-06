@@ -29,8 +29,8 @@ import type { AddressInfo } from "node:net";
 import { SENTINEL } from "./constants.ts";
 import { loadBlindfoldEnv } from "./env.ts";
 import { safeLog } from "./log.ts";
-import { openT3Client, type T3ClientHandle } from "./t3-client.ts";
-import type { ForwardRequest } from "./types.ts";
+import { openT3Client, T3TimeoutError, type T3ClientHandle } from "./t3-client.ts";
+import type { BlindfoldEnv, ForwardRequest } from "./types.ts";
 import { logUsage, providerForUpstream } from "./usage-log.ts";
 import { resolveProvider } from "./providers.ts";
 
@@ -39,6 +39,10 @@ export interface ProxyOpts {
   /** Logical name of the secret to substitute. Default: "openai_api_key". */
   secretKey?: string;
 }
+
+// Cap the proxied request body so a huge upload can't exhaust proxy memory.
+const MAX_BODY_BYTES = Number(process.env.BLINDFOLD_MAX_BODY_BYTES) || 5 * 1024 * 1024;
+class PayloadTooLargeError extends Error {}
 
 export interface ProxyHandle {
   url: string;
@@ -53,7 +57,13 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
   const t3 = await openT3Client(env);
 
   const server = http.createServer((req, res) => {
-    handle(req, res, t3, secretKey).catch((e) => {
+    handle(req, res, t3, secretKey, env).catch((e) => {
+      if (e instanceof PayloadTooLargeError) {
+        if (!res.headersSent) res.writeHead(413, { "content-type": "text/plain", "connection": "close" });
+        res.end("request body too large");
+        req.destroy();
+        return;
+      }
       safeLog("error", { msg: "proxy_unhandled", error: (e as Error).message });
       if (!res.headersSent) res.writeHead(500, { "content-type": "text/plain" });
       res.end("internal proxy error");
@@ -83,10 +93,11 @@ async function handle(
   res: http.ServerResponse,
   t3: T3ClientHandle,
   secretKey: string,
+  env: BlindfoldEnv,
 ): Promise<void> {
   if (req.url === "/health") {
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ ok: true, mock: loadBlindfoldEnv().mock }));
+    res.end(JSON.stringify({ ok: true, mock: env.mock }));
     return;
   }
 
@@ -102,7 +113,7 @@ async function handle(
   // name their own sealed secret.
   const providerSecretKey = provider.secretKey ?? secretKey;
 
-  const body = await readBody(req);
+  const body = await readBody(req, MAX_BODY_BYTES);
   // Build the headers we'll send to the contract. Any Authorization the agent
   // sent is discarded. For bearer providers we plant the sentinel for the
   // enclave to swap; for basic/sigv4 the enclave BUILDS the Authorization from
@@ -182,7 +193,7 @@ async function handle(
   // Record non-sensitive telemetry. Never the body, never the header values.
   logUsage({
     t: new Date().toISOString(),
-    mode: loadBlindfoldEnv().mock ? "mock" : "real",
+    mode: env.mock ? "mock" : "real",
     provider: provider.id || providerForUpstream(upstream),
     method: forwardReq.method,
     path: req.url ?? "/",
@@ -201,12 +212,24 @@ async function handle(
   res.end(bodyBytes);
 }
 
-function readBody(req: http.IncomingMessage): Promise<Buffer> {
+function readBody(req: http.IncomingMessage, maxBytes: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (c: Buffer) => chunks.push(c));
-    req.on("end", () => resolve(Buffer.concat(chunks)));
-    req.on("error", reject);
+    let size = 0;
+    let aborted = false;
+    req.on("data", (c: Buffer) => {
+      if (aborted) return;
+      size += c.length;
+      if (size > maxBytes) {
+        // Stop accumulating; the handler sends 413 then destroys the socket.
+        aborted = true;
+        reject(new PayloadTooLargeError(`request body exceeds ${maxBytes} bytes`));
+        return;
+      }
+      chunks.push(c);
+    });
+    req.on("end", () => { if (!aborted) resolve(Buffer.concat(chunks)); });
+    req.on("error", (e) => { if (!aborted) reject(e); });
   });
 }
 
@@ -251,12 +274,24 @@ function headersFromTuple(t: Array<[string, string]>): Record<string, string> {
  */
 function explainForwardError(err: Error): { status: number; body: string } {
   const msg = err?.message ?? String(err);
+  if (err instanceof T3TimeoutError) {
+    return {
+      status: 504,
+      body: JSON.stringify({
+        error: "blindfold_forward_failed",
+        status: 504,
+        code: "t3_timeout",
+        detail: msg,
+        hint: "The T3 node did not respond within the deadline (BLINDFOLD_T3_TIMEOUT_MS). It may be slow or unreachable; retry, or point T3_BASE_URL at a healthy node.",
+      }, null, 2),
+    };
+  }
   let status = Number(msg.match(/HTTP (\d{3})/)?.[1]) || 502;
   let code = "";
   let detail = msg;
   let requestId = "";
   const jsonM = msg.match(/\((\{.*\})\)\s*$/);
-  if (jsonM) {
+  if (jsonM && jsonM[1]) {
     try {
       const o = JSON.parse(jsonM[1]) as Record<string, string>;
       code = o.code ?? "";
