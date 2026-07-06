@@ -15,9 +15,23 @@
  */
 import { loadBlindfoldEnv } from "./env.ts";
 import { CONTRACT_TAIL, CONTRACT_VERSION } from "./constants.ts";
-import { openT3Client } from "./t3-client.ts";
+import { openT3Client, type T3ClientHandle } from "./t3-client.ts";
 import { logUsage } from "./usage-log.ts";
 import type { BlindfoldEnv } from "./types.ts";
+
+// Reuse one opened client per (tenant, node) for the process lifetime. Opening
+// a client does a WASM load + handshake + authenticate (3–4 round-trips); doing
+// that on every release() is the latency amplification flagged in review.
+const clientCache = new Map<string, Promise<T3ClientHandle>>();
+function sharedClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
+  const key = `${env.did}|${env.t3Env}|${env.t3BaseUrl}|${env.mock ? 1 : 0}`;
+  let c = clientCache.get(key);
+  if (!c) {
+    c = openT3Client(env).catch((e) => { clientCache.delete(key); throw e; });
+    clientCache.set(key, c);
+  }
+  return c;
+}
 
 export interface ReleaseOpts {
   /** Override the T3 client env (useful in tests). If omitted, loadBlindfoldEnv() is used. */
@@ -38,7 +52,10 @@ export interface ReleaseOpts {
  */
 export async function release(name: string, opts?: ReleaseOpts): Promise<string> {
   const env = opts?.env ?? loadBlindfoldEnv();
-  const t3 = await openT3Client(env);
+  // Use the shared, memoized client on the common runtime path; when the caller
+  // supplies an explicit env (tests), open a dedicated client and close it.
+  const useShared = !opts?.env;
+  const t3 = useShared ? await sharedClient(env) : await openT3Client(env);
   const startedAt = Date.now();
   try {
     const value = await t3.releaseSecret(name);
@@ -60,6 +77,6 @@ export async function release(name: string, opts?: ReleaseOpts): Promise<string>
     });
     return value;
   } finally {
-    await t3.close();
+    if (!useShared) await t3.close();
   }
 }

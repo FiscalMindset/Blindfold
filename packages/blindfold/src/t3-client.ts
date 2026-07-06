@@ -1,12 +1,16 @@
 /**
  * Thin wrapper around @terminal3/t3n-sdk (v3.x).
  *
- * SECURITY INVARIANT: this module never sees a plaintext API key,
- * neither at registration nor at runtime.
- *   - At registration time, `register.ts` passes the value as the literal
- *     `value` field of one `executeControl("map-entry-set", …)` call.
- *   - At runtime, the proxy sends headers whose Authorization is the
- *     sentinel string; the contract substitutes inside the enclave.
+ * SECURITY MODEL — read carefully, the paths differ:
+ *   - PROXY/FORWARD path: plaintext is substituted INSIDE the enclave. The
+ *     proxy sends the sentinel string as Authorization; this module never sees
+ *     the plaintext key for forwarded calls. This is the un-leakable path.
+ *   - SEED path (registration): `seedSecret()` DOES handle the plaintext once,
+ *     passing it as the `value` of a single `map-entry-set` call. It is dropped
+ *     immediately and never logged.
+ *   - RELEASE path: `releaseSecret()` RETURNS plaintext to the local process by
+ *     design (broker use/export/rotate/rollback). Protection here rests on the
+ *     tenant key (T3N_API_KEY) not being reachable by the agent — see SECURITY.md.
  *
  * The SDK is loaded lazily so MOCK mode works on machines that haven't
  * installed it. REAL mode requires `@terminal3/t3n-sdk` (optionalDep).
@@ -16,8 +20,22 @@ import fs from "node:fs";
 import path from "node:path";
 import type { BlindfoldEnv, ForwardRequest, ForwardResponse } from "./types.ts";
 import { CONTRACT_TAIL, CONTRACT_VERSION } from "./constants.ts";
-import { assertRealReady } from "./env.ts";
+import { assertRealReady, stateDir, withFileLockSync } from "./env.ts";
 import { safeLog } from "./log.ts";
+
+/** Deadline wrapper so a stalled T3 node can't hang an agent request forever. */
+const T3_TIMEOUT_MS = Number(process.env.BLINDFOLD_T3_TIMEOUT_MS) || 30_000;
+export class T3TimeoutError extends Error {}
+function withDeadline<T>(promise: Promise<T>, label: string, ms = T3_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);
+    if (typeof (timer as any).unref === "function") (timer as any).unref();
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); },
+    );
+  });
+}
 
 /* ---- egress allowlist cache -------------------------------------------------
  * T3 REPLACES the contract's egress allowlist on every agent-auth update, so a
@@ -26,7 +44,7 @@ import { safeLog } from "./log.ts";
  * `grant` becomes additive instead of clobbering earlier grants.
  * ---------------------------------------------------------------------------- */
 function egressCachePath(): string {
-  return process.env.BLINDFOLD_EGRESS_CACHE ?? path.join(process.cwd(), ".blindfold", "egress-hosts.json");
+  return process.env.BLINDFOLD_EGRESS_CACHE ?? path.join(stateDir(), "egress-hosts.json");
 }
 function loadEgressHosts(did: string): string[] {
   try {
@@ -38,15 +56,20 @@ function loadEgressHosts(did: string): string[] {
 }
 function saveEgressHosts(did: string, hosts: string[]): void {
   const p = egressCachePath();
-  let all: Record<string, string[]> = {};
-  try {
-    all = JSON.parse(fs.readFileSync(p, "utf8")) as Record<string, string[]>;
-  } catch {
-    /* fresh file */
-  }
-  all[did] = hosts;
-  fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(all, null, 2));
+  // Lock + re-read + union so two concurrent grants can't clobber each other's
+  // hosts (T3 replaces the whole allowlist, so a dropped host = lost egress).
+  withFileLockSync(p, () => {
+    let all: Record<string, string[]> = {};
+    try {
+      all = JSON.parse(fs.readFileSync(p, "utf8")) as Record<string, string[]>;
+    } catch {
+      /* fresh file */
+    }
+    const existing = Array.isArray(all[did]) ? all[did] : [];
+    all[did] = Array.from(new Set([...existing, ...hosts])).sort();
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, JSON.stringify(all, null, 2));
+  });
 }
 
 /** Loaded SDK module shape (subset of the real @terminal3/t3n-sdk exports). */
@@ -195,11 +218,11 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     // The contract's forward() returns { ok, code, body, length } — the
     // canonical T3 http.response has a status code + payload but NO response
     // headers. Adapt that to the proxy's ForwardResponse shape.
-    const raw = (await tenant.contracts.execute(CONTRACT_TAIL, {
+    const raw = (await withDeadline(tenant.contracts.execute(CONTRACT_TAIL, {
       version: CONTRACT_VERSION,
       functionName: "forward",
       input: req,
-    })) as { ok?: boolean; code?: number; body?: string; status?: number; headers?: Array<[string, string]> };
+    }), "forward")) as { ok?: boolean; code?: number; body?: string; status?: number; headers?: Array<[string, string]> };
     // Tolerate both the new shape (code/body) and any legacy shape (status/headers).
     if (typeof raw.status === "number" && Array.isArray(raw.headers)) {
       return { status: raw.status, headers: raw.headers, body: raw.body ?? "" };
@@ -229,23 +252,24 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     // contract's read-ACL on the secrets map). Requires the contract published
     // on this tenant.
     try {
-      const r = (await tenant.contracts.execute(CONTRACT_TAIL, {
+      const r = (await withDeadline(tenant.contracts.execute(CONTRACT_TAIL, {
         version: CONTRACT_VERSION,
         functionName: "release-to-tenant",
         input: { secret_key: name },
-      })) as { ok?: boolean; value?: string };
+      }), "release-to-tenant")) as { ok?: boolean; value?: string };
       if (r && r.ok && r.value) return r.value;
-    } catch {
+    } catch (e) {
+      if (e instanceof T3TimeoutError) throw e; // don't mask a hang as "not published"
       /* contract not published on this tenant — fall through to direct read */
     }
     // Fallback: the tenant owner reads its own secrets map directly. Same trust
     // boundary (the holder of the tenant key can always release its secrets),
     // but works without a published contract.
     const direct = decodeSecret(
-      await tenant.executeControl("map-entry-get", {
+      await withDeadline(tenant.executeControl("map-entry-get", {
         map_name: tenant.canonicalName("secrets"),
         key: name,
-      }),
+      }), "map-entry-get"),
     );
     if (!direct) throw new Error(`secret "${name}" not found in the secrets map`);
     return direct;

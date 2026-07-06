@@ -107,7 +107,16 @@ export async function runMigrate(opts: { envPath?: string; keep?: boolean } = {}
   // Rewrite .env (backup first) — drop/comment the successfully-sealed lines.
   if (sealedVars.size > 0) {
     const original = fs.readFileSync(envPath, "utf8");
-    fs.writeFileSync(`${envPath}.bak.${Math.floor(Date.now() / 1000)}`, original);
+    // The backup contains ALL original plaintext secrets. Write it 0600 (owner
+    // only) so it isn't world/group readable, and warn the user to delete it
+    // once they've verified the migration.
+    const backupPath = `${envPath}.bak.${Math.floor(Date.now() / 1000)}`;
+    fs.writeFileSync(backupPath, original, { mode: 0o600 });
+    try { fs.chmodSync(backupPath, 0o600); } catch { /* best effort (umask/FS) */ }
+    console.warn(
+      `⚠️  Wrote a PLAINTEXT backup of your secrets to ${backupPath} (mode 0600). ` +
+      `Delete it once you've verified the migration: rm "${backupPath}"`,
+    );
     const out: string[] = [];
     for (const raw of original.split(/\r?\n/)) {
       const eq = raw.indexOf("=");
