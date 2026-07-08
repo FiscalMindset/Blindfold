@@ -152,7 +152,9 @@ async function handle(
   let outboundUrl = upstream;
   let outboundBody: string | undefined = body.length ? body.toString("utf8") : undefined;
   const contentType = (headers.find(([k]) => k.toLowerCase() === "content-type")?.[1] ?? "").toLowerCase();
-  if (outboundBody && contentType.includes("application/x-www-form-urlencoded")) {
+  // Skip the form→query rewrite for webhook providers: the URL is the sentinel
+  // (the enclave substitutes the real URL), so it isn't parseable here.
+  if (provider.auth.scheme !== "webhook" && outboundBody && contentType.includes("application/x-www-form-urlencoded")) {
     const u = new URL(outboundUrl);
     for (const [k, v] of new URLSearchParams(outboundBody)) u.searchParams.append(k, v);
     outboundUrl = u.toString();

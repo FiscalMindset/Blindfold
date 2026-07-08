@@ -14,7 +14,8 @@ export interface ForwardRequest {
   auth?:
     | { scheme: "bearer" }
     | { scheme: "basic"; username: string }
-    | { scheme: "sigv4"; access_key_id: string; region: string; service: string; amz_date: string };
+    | { scheme: "sigv4"; access_key_id: string; region: string; service: string; amz_date: string }
+    | { scheme: "webhook" };
 }
 
 export interface ForwardResponse {
