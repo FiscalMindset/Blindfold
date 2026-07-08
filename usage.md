@@ -31,6 +31,58 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 
 ---
 
+## Command reference (all of them)
+
+> Run any command with `blindfold <cmd>` (global install) or
+> `npm run blindfold -- <cmd>` (in the repo). No secret value is ever printed.
+
+**Setup**
+| Command | What it does |
+|---|---|
+| `login` | Store tenant creds in `~/.blindfold`; tenant key → OS keychain. Works from any directory afterward. |
+| `logout` | Remove stored creds (keychain + `~/.blindfold/config.json`). |
+| `whoami` | Show config path, tenant, env, and where the key is stored (never the value). |
+| `doctor` | Config sanity + a live T3 handshake/auth check. |
+| `verify` | Quick T3 round-trip smoke test. |
+| `init` | One-shot setup (publish + seed + grant). |
+
+**Seal & inspect**
+| Command | What it does |
+|---|---|
+| `register --name <name> [--from-env <VAR>]` | Seal a secret. Without `--from-env` it prompts (hidden). |
+| `sealed` | Local ledger of sealed keys (metadata only). |
+| `status` | Mode, tenant health, and the sealed-secrets list. |
+| `audit` | Reconcile the ledger against the enclave — what's actually usable now. |
+| `versions [--name <name>]` | List rollback snapshots (from `rotate`). |
+
+**Use**
+| Command | What it does |
+|---|---|
+| `use --name <name> -- <cmd>` | Release + inject the key into one child command only. |
+| `use --name <name> --url <https>` | Quick "does it auth?" check. |
+| `proxy [--port 8787]` | Run the local proxy; agents use `__BLINDFOLD__`. |
+| `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
+
+**Lifecycle**
+| Command | What it does |
+|---|---|
+| `rotate --name <name> [--from-env <VAR>]` | Replace a secret's value; snapshots the old one. |
+| `rollback --name <name> [--to <fp\|ts>]` | Restore a snapshot (verifies fingerprint first). |
+| `migrate [--dry-run] [--keep]` | Seal every `.env` secret at once; `--dry-run` previews. |
+| `grant --host <h>[,<h2>…]` | Authorize egress to hosts (needed for proxy/in-enclave calls). |
+| `share --to <did> --host <h>` | Give a teammate forward-only (use, not extract) access. |
+| `revoke --to <did>` | Remove a teammate's access. |
+| `publish [--wasm <path>]` | Publish the enclave contract (one-time / on contract change). |
+
+**Extras**
+| Command | What it does |
+|---|---|
+| `compat` | Scan this machine for agent tools + print the exact env-var swap. |
+| `dashboard` | Live HTML dashboard of usage/sealed keys. |
+| `skill install [--global\|--opencode\|--cursor\|--cline\|--all]` / `skill uninstall` | Install/remove the agent skill. |
+
+---
+
 ## ⚡ Fastest path — seal your whole `.env` in one command
 
 Already have a `.env` full of keys? Move them all into the enclave at once:
