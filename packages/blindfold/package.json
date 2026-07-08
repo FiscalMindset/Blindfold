@@ -1,6 +1,6 @@
 {
   "name": "blindfold",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Make any AI agent's API keys un-leakable, by sealing them inside a Terminal 3 TDX enclave.",
   "main": "src/index.ts",
@@ -11,12 +11,23 @@
     "./wrap": "./src/wrap.ts"
   },
   "bin": {
-    "blindfold": "bin/blindfold.ts"
+    "blindfold": "dist/cli.mjs"
   },
+  "files": [
+    "dist",
+    "bin",
+    "src",
+    "README.md"
+  ],
   "scripts": {
-    "start": "tsx bin/blindfold.ts"
+    "start": "tsx bin/blindfold.ts",
+    "build": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk",
+    "prepare": "npm run build"
   },
   "dependencies": {},
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
   "optionalDependencies": {
     "@terminal3/t3n-sdk": "*"
   }
