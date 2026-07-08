@@ -42,3 +42,6 @@ response.md
 
 # Generated compatibility / status reports (may embed env key names)
 report.html
+
+# OpenCode skill install (per-machine copy; source is .claude/skills)
+.opencode/
