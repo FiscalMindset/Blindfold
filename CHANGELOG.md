@@ -4,6 +4,45 @@
 
 ---
 
+## [0.3.0] — Tenant key in the OS keychain
+
+### Added
+- `blindfold login` / `logout` / `whoami`. `login` stores the tenant key in the
+  **OS keychain** (macOS `security` / Linux `secret-tool`); `config.json` keeps
+  only the non-secret DID + settings.
+
+### Security
+- Closes the residual risk that a plaintext credentials file could be read by a
+  prompt-injected agent — the tenant key is no longer a readable file.
+
+## [0.2.0] — Installable, SSD-independent CLI
+
+### Added
+- Bundled CLI (`esbuild` → `dist/cli.mjs`); `npm i -g`-able, runs with plain
+  `node` off the source drive.
+- State + config moved to `~/.blindfold` (auto-migrated from the in-repo
+  `.blindfold/`). Overridable via `BLINDFOLD_STATE_DIR`.
+- Credentials via `blindfold login` (`~/.blindfold/config.json`), so the CLI
+  works from any directory without a repo `.env`.
+
+## [0.1.x] — Security/scale hardening + Discord webhook
+
+### Added
+- **Discord webhook support.** New `webhook` auth scheme in the contract
+  (v0.5.5): the enclave substitutes the sealed URL *in the URL*. A `/discord`
+  proxy provider + a release-path example (`examples/discord-webhook/`).
+- **GitHub example** (`examples/github/`) with real, redacted runs.
+
+### Fixed (security & scale audit)
+- blindfold: HMAC-keyed tamper-evident ledger + file locking; 504 timeouts on
+  enclave calls; dashboard tail + usage-log rotation; proxy body cap;
+  egress-hosts lock+union; `rollback` fingerprint guard; removed the
+  `readers:"all"` grant fallback; `migrate` backup written `0600`; `use --url`
+  https guard.
+- chatbot: KB cache fix + per-entry token index; request body cap + per-IP rate
+  limit + LLM concurrency cap/timeout; `javascript:`-URI XSS guard; CORS opt-in.
+- CI: removed the phantom `@blindfold/core` dependency that 404'd `npm install`.
+
 ## [Unreleased]
 
 ### Added
