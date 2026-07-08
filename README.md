@@ -23,6 +23,8 @@
 > - **Installable CLI** — `npm i -g ./packages/blindfold` gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency).
 > - **`blindfold login`** — store tenant creds in `~/.blindfold`, with the tenant key in the **OS keychain** (macOS/Linux), not a plaintext file. Then `blindfold …` works anywhere.
 > - **Webhook support** — a `webhook` auth scheme (contract v0.5.5) + a `/discord` proxy provider let an agent post to a webhook **without ever holding the URL**. See [`examples/discord-webhook/`](examples/discord-webhook/).
+>
+> **Full command list** (`login`, `logout`, `whoami`, `register`, `use`, `proxy`, `grant`, `share`, `revoke`, `rotate`, `rollback`, `versions`, `migrate`, `status`, `sealed`, `audit`, `export`, `dashboard`, `doctor`, `verify`, `compat`, `publish`, `skill`): see the **[Usage Guide → Command reference](usage.md#command-reference-all-of-them)**.
 
 ## TL;DR
 
