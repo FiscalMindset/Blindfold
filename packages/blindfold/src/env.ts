@@ -6,6 +6,7 @@
  * stripped; lines starting with # are comments.
  */
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { BlindfoldEnv } from "./types.ts";
@@ -41,16 +42,41 @@ export function repoRoot(): string {
   return _repoRoot;
 }
 
+/** The product's home directory for state + config: ~/.blindfold (v0.2+). */
+export function homeDir(): string {
+  return path.join(os.homedir(), ".blindfold");
+}
+
+/** Absolute path to the user-level config file (tenant DID + settings). */
+export function configPath(): string {
+  return path.join(homeDir(), "config.json");
+}
+
 /**
- * Directory holding Blindfold's per-project runtime state (ledger, usage log,
- * egress cache). Anchored to the repo root (not `process.cwd()`) so running a
- * command from a subdirectory does not silently fork a fresh, empty ledger.
- * Overridable via BLINDFOLD_STATE_DIR.
+ * Directory holding Blindfold's runtime state (ledger, usage log, egress cache,
+ * config). As of v0.2 this defaults to ~/.blindfold so the tool is installable
+ * and runs from any directory — independent of the repo checkout. On first run
+ * it migrates a legacy in-repo `.blindfold/` (so existing grants/ledger carry
+ * over). Overridable via BLINDFOLD_STATE_DIR.
  */
 export function stateDir(): string {
   const override = process.env.BLINDFOLD_STATE_DIR;
   if (override && override.trim()) return path.resolve(override.trim());
-  return path.join(repoRoot(), ".blindfold");
+  const home = homeDir();
+  if (!fs.existsSync(home)) {
+    // One-time migration from the old repo-anchored location, if present.
+    try {
+      const legacy = path.join(repoRoot(), ".blindfold");
+      if (fs.existsSync(legacy) && fs.statSync(legacy).isDirectory()) {
+        fs.cpSync(legacy, home, { recursive: true });
+      } else {
+        fs.mkdirSync(home, { recursive: true });
+      }
+    } catch {
+      try { fs.mkdirSync(home, { recursive: true }); } catch { /* best effort */ }
+    }
+  }
+  return home;
 }
 
 /**
@@ -159,8 +185,29 @@ export function loadEnvFromFile(envPath = path.join(repoRoot(), ".env")): void {
   }
 }
 
+/**
+ * Load user-level config from ~/.blindfold/config.json (and ~/.blindfold/.env),
+ * filling any env vars not already set. This is the installed-product source of
+ * creds — populated by `blindfold login` — so the CLI works with the repo `.env`
+ * absent (e.g. run from any directory, or installed globally). Repo `.env` still
+ * takes precedence when present (dev convenience).
+ */
+export function loadHomeConfig(): void {
+  try {
+    const cfg = configPath();
+    if (fs.existsSync(cfg)) {
+      const obj = JSON.parse(fs.readFileSync(cfg, "utf8")) as Record<string, unknown>;
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === "string" && process.env[k] === undefined) process.env[k] = v;
+      }
+    }
+  } catch { /* malformed config must not crash the CLI */ }
+  loadEnvFromFile(path.join(homeDir(), ".env"));
+}
+
 export function loadBlindfoldEnv(): BlindfoldEnv {
-  loadEnvFromFile();
+  loadEnvFromFile();      // repo .env (dev) — wins when present
+  loadHomeConfig();       // ~/.blindfold/config.json (installed product) — fallback
   const t3nApiKey = process.env.T3N_API_KEY ?? "";
   const did = process.env.DID ?? "";
   const port = Number.parseInt(process.env.BLINDFOLD_PORT ?? "8787", 10);

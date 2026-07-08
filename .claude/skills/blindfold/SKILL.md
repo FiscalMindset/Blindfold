@@ -28,12 +28,40 @@ You're working in (or with) Blindfold — a Terminal 3 TDX-enclave wrapper that 
 |---|---|---|
 | `npm run blindfold -- doctor` | mode + cred presence (yes/no) | ✅ |
 | `npm run blindfold -- verify` | T3 round-trip status | ✅ |
-| `npm run blindfold -- sealed` | sealed-keys ledger (metadata only) | ✅ |
+| `npm run blindfold -- sealed` | sealed-keys ledger (metadata only, LOCAL) | ✅ |
+| `npm run blindfold -- audit` | reconcile ledger against the ENCLAVE — what's actually usable now | ✅ |
+| `npm run blindfold -- status` | one-glance: mode, tenant health, sealed list | ✅ |
 | `npm run env:fingerprint` | `.env` lines as `KEY = first3…last2 (N bytes)` | ✅ |
 | `npx tsx scripts/test-v5-release.ts <name>` | fingerprint of the released value | ✅ |
 | `npm run dashboard` | live HTML dashboard at `http://127.0.0.1:8799` | n/a (UI) |
 | `npm run blindfold -- register --name <K>` | interactive seal (no echo) | ⚠ tell user to run in their terminal |
 | `printf 'V' \| npm run blindfold -- register --name <K>` | piped seal (value briefly in this process) | ⚠ only if user already pasted value |
+
+## Seal once, use forever (no re-seal per session)
+
+A sealed key lives in the **Terminal 3 enclave**, not in a session, terminal, or
+machine. So the answer to *"do I need to re-seal in a new session?"* is **no** —
+any new session can use an already-sealed key directly. Don't propose re-running
+`register` for a key that's already sealed.
+
+To **use** already-sealed keys, a session needs three persistent things (all
+survive across sessions — none require re-sealing):
+
+1. **Tenant creds in `.env`** — `T3N_API_KEY` + `DID`. These authenticate to the
+   enclave and are what release/proxy require. (Exception to R4: they stay in
+   `.env`; see R4.)
+2. **Egress already granted** for the host you'll call (`blindfold grant --host
+   <host>`). The grant is per-tenant and persistent.
+3. **The proxy running** if using the HTTP path: `npm run blindfold -- proxy`
+   (listens on `127.0.0.1:8787`). Point the tool at it with base URL
+   `http://127.0.0.1:8787/v1` and key `__BLINDFOLD__`. (Code paths use the
+   release-broker instead — see R3.)
+
+**Before assuming a key is usable, run `audit`, not `sealed`.** `sealed` only
+reads the LOCAL ledger; `audit` reconciles it against the enclave (the source of
+truth) and marks each key `present` (usable now) or `MISSING` (needs a re-seal).
+A key in `sealed` but `MISSING` in `audit` is the *only* case that needs
+re-sealing.
 
 ## What to do, by scenario
 
