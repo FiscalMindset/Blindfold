@@ -32,9 +32,7 @@
     "rule-based"
   ],
   "license": "MIT",
-  "dependencies": {
-    "@blindfold/core": "*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.9.0",
     "tsx": "^4.19.2",
