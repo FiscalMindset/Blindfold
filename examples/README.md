@@ -22,6 +22,7 @@ Runnable, copy-paste examples of using a **sealed** secret — across the three 
 | [`twilio/`](twilio/) | HTTP Basic · Node | in-enclave `base64(user:secret)` | **proven live via httpbin (200) — the Twilio scheme** |
 | [`aws/`](aws/) | AWS SigV4 · Node | in-enclave request signing | **proven live vs real S3 + byte-exact AWS vectors** |
 | [`github/`](github/) | GitHub API · Node/CLI | proxy + sentinel · `use`/`export` | **real live run: proxy, release, CI export — full README of redacted outputs** |
+| [`discord-webhook/`](discord-webhook/) | Discord webhook · Node/CLI | **release broker** (secret is the URL) | **real live post to a channel (HTTP 204); webhook URL never leaves the enclave** |
 
 > **Integration depth:** Blindfold ships first-class support for 12 providers across 6 industries and 3 in-enclave auth schemes (bearer, HTTP Basic, AWS SigV4). See **[../integration-stack.md](../integration-stack.md)**.
 
