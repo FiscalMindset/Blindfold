@@ -1,3 +1,5 @@
+import { SENTINEL } from "./constants.ts";
+
 /**
  * Blindfold provider registry — concrete, first-class integrations.
  *
@@ -20,7 +22,8 @@
 export type ForwardAuth =
   | { scheme: "bearer" }
   | { scheme: "basic"; username: string }
-  | { scheme: "sigv4"; access_key_id: string; region: string; service: string; amz_date: string };
+  | { scheme: "sigv4"; access_key_id: string; region: string; service: string; amz_date: string }
+  | { scheme: "webhook" };
 
 /** For bearer providers: which header carries the sentinel, and its prefix.
  * Defaults to Authorization / "Bearer ". Google Gemini uses `x-goog-api-key`
@@ -181,6 +184,18 @@ const PROVIDERS: ProviderDef[] = [
     upstream: (p) => `https://s3.${awsRegion()}.amazonaws.com${stripPrefix(p, "/aws/s3/")}`,
     secretKey: "aws_secret_access_key",
     auth: () => ({ scheme: "sigv4", access_key_id: awsAccessKeyId(), region: awsRegion(), service: "s3", amz_date: amzDate() }),
+  },
+
+  // ---- Webhook: Discord. The SECRET IS THE URL — the enclave substitutes the
+  //      sealed webhook URL for the sentinel, so the agent POSTs to /discord
+  //      with only a JSON body and never holds the URL. Needs egress for
+  //      discord.com (`blindfold grant --host discord.com`).
+  {
+    id: "discord",
+    prefix: "/discord",
+    upstream: () => SENTINEL, // enclave replaces this with the sealed webhook URL
+    secretKey: "webhook_discord_url",
+    auth: () => ({ scheme: "webhook" }),
   },
 ];
 
