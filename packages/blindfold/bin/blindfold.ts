@@ -15,7 +15,8 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { loadBlindfoldEnv } from "../src/env.ts";
+import { loadBlindfoldEnv, configPath, homeDir } from "../src/env.ts";
+import { readSecretLine } from "../src/prompt.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
 import { startDashboard } from "../src/dashboard.ts";
@@ -82,6 +83,46 @@ async function main(): Promise<void> {
   const cmd = argv._[0] ?? "help";
 
   switch (cmd) {
+    case "login": {
+      // Store tenant credentials in ~/.blindfold/config.json so the CLI works
+      // from any directory, installed globally, without a repo .env.
+      const did = argv.flags.did
+        ? String(argv.flags.did)
+        : (await readSecretLine("Tenant DID (did:t3n:…): ")).trim();
+      if (!/^did:t3n:[0-9a-fA-F]+$/.test(did)) die('DID must look like "did:t3n:<hex>".');
+      const key = argv.flags.key
+        ? String(argv.flags.key)
+        : (await readSecretLine("T3N_API_KEY (0x…, hidden): ")).trim();
+      if (!/^0x[0-9a-fA-F]{64}$/.test(key)) die("T3N_API_KEY must be a 0x-prefixed 32-byte hex.");
+      const env = String(argv.flags.env ?? "").toLowerCase() === "production" ? "production" : "testnet";
+      const cfg = configPath();
+      let existing: Record<string, string> = {};
+      try { if (fs.existsSync(cfg)) existing = JSON.parse(fs.readFileSync(cfg, "utf8")); } catch { /* overwrite */ }
+      const merged = { ...existing, DID: did, T3N_API_KEY: key, BLINDFOLD_T3_ENV: env };
+      fs.mkdirSync(homeDir(), { recursive: true });
+      fs.writeFileSync(cfg, JSON.stringify(merged, null, 2), { mode: 0o600 });
+      try { fs.chmodSync(cfg, 0o600); } catch { /* best effort */ }
+      console.log(`✓ Saved credentials to ${cfg} (mode 0600). Blindfold now works from any directory.`);
+      console.log(`  Tenant: ${did}  ·  env: ${env}  ·  key: stored (never printed)`);
+      console.log(`  Verify: blindfold doctor`);
+      return;
+    }
+
+    case "logout": {
+      const cfg = configPath();
+      if (fs.existsSync(cfg)) { fs.rmSync(cfg, { force: true }); console.log(`✓ Removed ${cfg}. Tenant credentials cleared from this machine.`); }
+      else console.log("Nothing to remove — no saved credentials at " + cfg);
+      return;
+    }
+
+    case "whoami": {
+      const env = loadBlindfoldEnv();
+      console.log(`config:  ${configPath()}${fs.existsSync(configPath()) ? "" : "  (not present)"}`);
+      console.log(`tenant:  ${env.did || "(none — run `blindfold login`)"}`);
+      console.log(`env:     ${env.t3Env}   ·   key: ${env.t3nApiKey ? "set (hidden)" : "MISSING"}`);
+      return;
+    }
+
     case "register": {
       const name = String(argv.flags.name ?? "");
       const fromEnv = argv.flags["from-env"] ? String(argv.flags["from-env"]) : undefined;
