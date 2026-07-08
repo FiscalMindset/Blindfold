@@ -1,5 +1,8 @@
 # The Process — first time using Blindfold, end to end
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 > Written for someone opening this repo cold. Two real examples (Deepgram + Grok). Every command + every expected output. ~10 minutes total.
 
 ---

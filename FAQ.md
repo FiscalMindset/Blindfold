@@ -2,6 +2,9 @@
 
 # ❓ Blindfold FAQ
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 **Real questions, straight answers.** New here? Start with the first three.
 
 ### 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; **[FAQ](FAQ.md)** &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)

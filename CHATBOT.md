@@ -1,5 +1,8 @@
 # Blindfold Chatbot — full documentation
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 > The rule-based Q&A system that lives at `packages/chatbot/`. Audience-aware, source-cited, MIT-licensed. See [`packages/chatbot/README.md`](packages/chatbot/README.md) for the quick start; this doc goes deeper.
 
 ---

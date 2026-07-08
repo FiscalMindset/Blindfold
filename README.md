@@ -19,6 +19,11 @@
 
 ---
 
+> **What's new (v0.2 / v0.3 + webhook):**
+> - **Installable CLI** — `npm i -g ./packages/blindfold` gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency).
+> - **`blindfold login`** — store tenant creds in `~/.blindfold`, with the tenant key in the **OS keychain** (macOS/Linux), not a plaintext file. Then `blindfold …` works anywhere.
+> - **Webhook support** — a `webhook` auth scheme (contract v0.5.5) + a `/discord` proxy provider let an agent post to a webhook **without ever holding the URL**. See [`examples/discord-webhook/`](examples/discord-webhook/).
+
 ## TL;DR
 
 Today, your AI agent holds its OpenAI / Stripe / Anthropic API key in memory. A single prompt-injection from a webpage, email, or PDF can talk your agent into exfiltrating that key — and there is no probabilistic defense (guardrails, classifiers, allowlists) that closes the gap structurally.
