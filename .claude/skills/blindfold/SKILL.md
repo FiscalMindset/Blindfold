@@ -28,6 +28,9 @@ You're working in (or with) Blindfold — a Terminal 3 TDX-enclave wrapper that 
 |---|---|---|
 | `npm run blindfold -- doctor` | mode + cred presence (yes/no) | ✅ |
 | `npm run blindfold -- verify` | T3 round-trip status | ✅ |
+| `npm run blindfold -- login` | store tenant creds in `~/.blindfold` (OS keychain for the key) — works from any dir | ⚠ tell user to run it (prompts for key) |
+| `npm run blindfold -- whoami` | show config path, tenant, env, key source (never the value) | ✅ |
+| `npm run blindfold -- logout` | remove stored creds (keychain + `~/.blindfold/config.json`) | ✅ |
 | `npm run blindfold -- sealed` | sealed-keys ledger (metadata only, LOCAL) | ✅ |
 | `npm run blindfold -- audit` | reconcile ledger against the ENCLAVE — what's actually usable now | ✅ |
 | `npm run blindfold -- status` | one-glance: mode, tenant health, sealed list | ✅ |
@@ -47,9 +50,14 @@ any new session can use an already-sealed key directly. Don't propose re-running
 To **use** already-sealed keys, a session needs three persistent things (all
 survive across sessions — none require re-sealing):
 
-1. **Tenant creds in `.env`** — `T3N_API_KEY` + `DID`. These authenticate to the
-   enclave and are what release/proxy require. (Exception to R4: they stay in
-   `.env`; see R4.)
+1. **Tenant creds** — `T3N_API_KEY` + `DID`. These authenticate to the enclave
+   and are what release/proxy require. Two ways to provide them:
+   - **Repo `.env`** (dev). Exception to R4: they stay in `.env`; see R4.
+   - **`blindfold login`** (v0.2+, product path): stores DID + settings in
+     `~/.blindfold/config.json` and the tenant key in the **OS keychain** (v0.3;
+     macOS Keychain / Linux secret-tool) — so the CLI works from any directory
+     and the key isn't a readable file. Precedence: `process.env` > repo `.env` >
+     `~/.blindfold`. State (ledger/usage/egress) also lives in `~/.blindfold`.
 2. **Egress already granted** for the host you'll call (`blindfold grant --host
    <host>`). The grant is per-tenant and persistent.
 3. **The proxy running** if using the HTTP path: `npm run blindfold -- proxy`
@@ -76,6 +84,21 @@ re-sealing.
 > ```
 >
 > It'll prompt for the value with input hidden (no echo, no shell history). Paste your `sk_live_…` there, press Enter. Once done, paste me the output of `npm run blindfold -- sealed` so I can verify it landed in the right place.
+
+### "Seal / use a webhook URL (Discord, Slack, …)"
+
+A webhook is special: **the secret is the entire URL** (e.g.
+`https://discord.com/api/webhooks/<id>/<token>`), POSTed with no auth header.
+Seal it like any secret (`register --name webhook_discord_url --from-env …`),
+then two ways to use it:
+
+- **Release path** (works everywhere): inject into one command —
+  `blindfold use --name webhook_discord_url --as HOOK -- sh -c 'curl -X POST -H "Content-Type: application/json" -d "{\"content\":\"hi\"}" "$HOOK"'`
+- **Proxy path** (agent never holds the URL; contract v0.5.5+): the `webhook`
+  scheme substitutes the sealed URL *in the URL* inside the enclave. There's a
+  `/discord` provider — grant egress (`grant --host discord.com`), run the proxy,
+  and POST a JSON body to `http://127.0.0.1:8787/discord`. See
+  `examples/discord-webhook/`.
 
 ### "I already pasted my OpenAI key in chat — seal it"
 
