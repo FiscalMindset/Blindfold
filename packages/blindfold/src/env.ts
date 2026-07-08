@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { BlindfoldEnv } from "./types.ts";
+import { keychainAvailable, keychainGet } from "./keychain.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // Source-relative fallback: HERE = <repo>/packages/blindfold/src → 3 ".." to root.
@@ -198,11 +199,19 @@ export function loadHomeConfig(): void {
     if (fs.existsSync(cfg)) {
       const obj = JSON.parse(fs.readFileSync(cfg, "utf8")) as Record<string, unknown>;
       for (const [k, v] of Object.entries(obj)) {
+        // Never treat the store marker as a value; skip it.
+        if (k === "T3N_API_KEY_STORE") continue;
         if (typeof v === "string" && process.env[k] === undefined) process.env[k] = v;
       }
     }
   } catch { /* malformed config must not crash the CLI */ }
   loadEnvFromFile(path.join(homeDir(), ".env"));
+  // If the tenant key wasn't in env/files, pull it from the OS keychain (keyed
+  // by DID). This is the v0.3 default — the key isn't a readable file at all.
+  if (process.env.T3N_API_KEY === undefined && process.env.DID && keychainAvailable()) {
+    const k = keychainGet(process.env.DID);
+    if (k) process.env.T3N_API_KEY = k;
+  }
 }
 
 export function loadBlindfoldEnv(): BlindfoldEnv {
