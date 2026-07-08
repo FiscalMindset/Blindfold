@@ -1,5 +1,8 @@
 # Knowledge Base
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 > The structured Q&A that powers the Blindfold chatbot. This doc covers the schema, the contributor workflow, the extraction pipeline, and the refresh policy.
 
 The KB lives at `packages/chatbot/data/knowledge.json`. It is loaded by `packages/chatbot/src/knowledge.ts`, indexed by intent, and queried by `findByIntent` and `findByQuestionMatch`. The format is **deliberately boring JSON** so that:

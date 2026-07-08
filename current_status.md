@@ -1,5 +1,11 @@
 # Blindfold — Current Status (as of 2026-06-28, real seal working)
 
+> **2026-07 update:** shipped v0.2 (installable, SSD-independent CLI — `npm i -g`,
+> state in `~/.blindfold`, runs from any directory), v0.3 (tenant key in the OS
+> keychain via `blindfold login`), a full security/scale hardening pass, and
+> Discord webhook support (release path + `/discord` proxy provider, contract
+> v0.5.5). CI is green. See `CHANGELOG.md` for the full list.
+
 > Snapshot. Read top to bottom. §2 is the headline.
 >
 > **2026-06-28 update — RESOLVED:** the live-seal failures were **not** a

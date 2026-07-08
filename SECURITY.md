@@ -4,6 +4,15 @@
 
 This document is original to the Blindfold project. For the deep technical analysis of why agent APIs leak and what existing fixes miss, see [`docs/01-problem-analysis.md`](docs/01-problem-analysis.md).
 
+> **Update (v0.3):** the tenant key (`T3N_API_KEY`) is no longer required to sit
+> in a plaintext file. `blindfold login` stores it in the **OS keychain** (macOS
+> `security` / Linux `secret-tool`); `~/.blindfold/config.json` holds only the
+> non-secret DID + settings. This closes the residual risk documented below —
+> that a prompt-injected agent could read a plaintext creds file and release
+> every sealed secret. (An agent running as the same user with an unlocked
+> keychain can still prompt it, so the proxy-under-a-separate-user hardening
+> remains on the roadmap — but the trivial "read the file" path is gone.)
+
 ---
 
 ## 1. The threat model in one paragraph

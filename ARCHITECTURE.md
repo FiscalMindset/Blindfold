@@ -1,5 +1,8 @@
 # Blindfold — Architecture
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 > Where every piece lives, where the key lives, where the key **never** lives, and the exact change a developer makes. This is the *whole* system in one document — the proxy, the contract, the chatbot, the dashboard, and the public surface.
 
 This document is original to the Blindfold project and the chatbot that wraps it; for the canonical deep-dive on the runtime alone, see `docs/03-architecture.md` and `explain.md` in the repo.

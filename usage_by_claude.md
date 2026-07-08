@@ -1,5 +1,8 @@
 # Usage by Claude — dogfooding status & protocol
 
+> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+
+
 > Can a coding agent (me, Claude Code) actually use Blindfold for the keys it sees while chatting with you? Yes, with two unavoidable limits and one protocol that closes the gap around them. This file is the agent-side rulebook, updated whenever the situation changes.
 
 ---
