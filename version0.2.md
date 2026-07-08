@@ -96,10 +96,7 @@ self-contained and work from a global install off the SSD.
 
 ### Roadmap beyond v0.2
 
-- **Keychain storage** — put `T3N_API_KEY` in the OS keychain (macOS Keychain /
-  libsecret / Windows Credential Manager) instead of a `0600` file, closing the
-  residual risk that an agent which can read `~/.blindfold/config.json` can
-  release every secret.
+- ✅ **Keychain storage** — done in v0.3, see below.
 - **Managed service** — `blindfold service install` to run the proxy as a
   launchd/systemd daemon (auto-start, auto-restart, logs) instead of a terminal
   you keep open.
@@ -107,3 +104,41 @@ self-contained and work from a global install off the SSD.
   inside the package so `skill`/`dashboard`/`publish` work from a global install.
 - **One-line SDK** — `wrap(client)` that ensures the proxy is running, so code
   integrates without manually starting it.
+
+---
+
+# v0.3 — Tenant key in the OS keychain
+
+v0.2 stored the tenant key (`T3N_API_KEY`) in `~/.blindfold/config.json` at
+`0600`. That's still a plaintext file a prompt-injected agent with filesystem
+read could grab — the core residual risk. v0.3 moves the key **out of any file**
+and into the OS keychain.
+
+## How it works
+
+- **`blindfold login`** now writes the tenant key to the OS keychain, keyed by
+  tenant DID. `config.json` keeps only the **non-secret** DID + settings plus a
+  `"T3N_API_KEY_STORE": "keychain"` marker — no plaintext key on disk.
+- Backends (dependency-free, shells out to the platform tool):
+  - macOS → `security` (Keychain)
+  - Linux → `secret-tool` (libsecret / GNOME Keyring)
+  - no keychain → falls back to the v0.2 `0600` file (`login --file` forces this)
+- **Credential load** (`env.ts`): after reading DID from config, if the key
+  isn't already in the environment it's fetched from the keychain by DID.
+- **`blindfold logout`** removes the key from the keychain *and* deletes the
+  config file.
+- **`blindfold whoami`** reports the key source: `macOS Keychain`,
+  `config file, 0600`, or `env / repo .env`.
+
+## Why it matters
+
+This closes the residual risk for the release/broker path on a properly set-up
+machine: with the tenant key in the keychain, there is no readable credential
+file for an agent to exfiltrate. (An agent could still prompt the OS keychain if
+it runs as the same user with an unlocked keychain — so the proxy-under-a-
+separate-user hardening remains on the roadmap — but the trivial "read the file"
+path is gone.)
+
+Verified on macOS: `login` stores the key in Keychain with zero plaintext in
+`config.json`; `logout` clears both; the existing repo-`.env` workflow is
+unchanged (keychain is consulted only when the key isn't already present).

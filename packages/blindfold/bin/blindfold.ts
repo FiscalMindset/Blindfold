@@ -16,6 +16,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv, configPath, homeDir } from "../src/env.ts";
+import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from "../src/keychain.ts";
 import { readSecretLine } from "../src/prompt.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
@@ -98,28 +99,56 @@ async function main(): Promise<void> {
       const cfg = configPath();
       let existing: Record<string, string> = {};
       try { if (fs.existsSync(cfg)) existing = JSON.parse(fs.readFileSync(cfg, "utf8")); } catch { /* overwrite */ }
-      const merged = { ...existing, DID: did, T3N_API_KEY: key, BLINDFOLD_T3_ENV: env };
+
+      // Prefer the OS keychain for the tenant key; the config file then holds
+      // only non-secret DID + settings. Fall back to a 0600 file where no
+      // keychain exists (--file forces the file path).
+      const useKeychain = !argv.flags.file && keychainAvailable();
+      const merged: Record<string, string> = { ...existing, DID: did, BLINDFOLD_T3_ENV: env };
+      if (useKeychain) {
+        if (!keychainSet(did, key)) die("failed to write the key to the OS keychain. Retry, or use `blindfold login --file`.");
+        merged.T3N_API_KEY_STORE = "keychain";
+        delete merged.T3N_API_KEY; // ensure no stale plaintext key lingers in the file
+      } else {
+        merged.T3N_API_KEY = key;
+        merged.T3N_API_KEY_STORE = "file";
+      }
       fs.mkdirSync(homeDir(), { recursive: true });
       fs.writeFileSync(cfg, JSON.stringify(merged, null, 2), { mode: 0o600 });
       try { fs.chmodSync(cfg, 0o600); } catch { /* best effort */ }
-      console.log(`✓ Saved credentials to ${cfg} (mode 0600). Blindfold now works from any directory.`);
+      const where = useKeychain ? `the ${keychainBackend()}` : `${cfg} (mode 0600)`;
+      console.log(`✓ Saved tenant key to ${where}. Blindfold now works from any directory.`);
       console.log(`  Tenant: ${did}  ·  env: ${env}  ·  key: stored (never printed)`);
+      if (!useKeychain && !argv.flags.file) console.log(`  (No OS keychain found — stored in a 0600 file. On macOS/Linux the keychain is used automatically.)`);
       console.log(`  Verify: blindfold doctor`);
       return;
     }
 
     case "logout": {
       const cfg = configPath();
-      if (fs.existsSync(cfg)) { fs.rmSync(cfg, { force: true }); console.log(`✓ Removed ${cfg}. Tenant credentials cleared from this machine.`); }
-      else console.log("Nothing to remove — no saved credentials at " + cfg);
+      let did = "";
+      let store = "";
+      try { if (fs.existsSync(cfg)) { const o = JSON.parse(fs.readFileSync(cfg, "utf8")); did = o.DID ?? ""; store = o.T3N_API_KEY_STORE ?? ""; } } catch { /* ignore */ }
+      let removed = false;
+      if (store === "keychain" && did && keychainAvailable()) { if (keychainDelete(did)) { console.log("✓ Removed tenant key from the OS keychain."); removed = true; } }
+      if (fs.existsSync(cfg)) { fs.rmSync(cfg, { force: true }); console.log(`✓ Removed ${cfg}.`); removed = true; }
+      if (!removed) console.log("Nothing to remove — no saved credentials at " + cfg);
+      else console.log("Tenant credentials cleared from this machine.");
       return;
     }
 
     case "whoami": {
+      const cfg = configPath();
+      let store = "";
+      try { if (fs.existsSync(cfg)) store = (JSON.parse(fs.readFileSync(cfg, "utf8")).T3N_API_KEY_STORE) ?? ""; } catch { /* ignore */ }
       const env = loadBlindfoldEnv();
-      console.log(`config:  ${configPath()}${fs.existsSync(configPath()) ? "" : "  (not present)"}`);
+      const keySource = !env.t3nApiKey ? "MISSING"
+        : process.env.T3N_API_KEY && store === "keychain" ? `set (${keychainBackend()})`
+        : store === "file" ? "set (config file, 0600)"
+        : "set (env / repo .env)";
+      console.log(`config:  ${cfg}${fs.existsSync(cfg) ? "" : "  (not present)"}`);
       console.log(`tenant:  ${env.did || "(none — run `blindfold login`)"}`);
-      console.log(`env:     ${env.t3Env}   ·   key: ${env.t3nApiKey ? "set (hidden)" : "MISSING"}`);
+      console.log(`env:     ${env.t3Env}   ·   key: ${keySource}`);
       return;
     }
 

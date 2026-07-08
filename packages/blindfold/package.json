@@ -1,6 +1,6 @@
 {
   "name": "blindfold",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Make any AI agent's API keys un-leakable, by sealing them inside a Terminal 3 TDX enclave.",
   "main": "src/index.ts",
