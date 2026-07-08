@@ -57,6 +57,10 @@ enum AuthSpec {
         service: String,
         amz_date: String,
     },
+    /// Webhook: the SECRET IS THE URL (e.g. a Discord/Slack webhook). The
+    /// sentinel in the outbound URL is replaced with the sealed URL inside the
+    /// enclave; no Authorization header is added. The URL never leaves here.
+    Webhook,
 }
 
 impl Default for AuthSpec {
@@ -93,6 +97,15 @@ fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, Stri
             .headers
             .iter()
             .map(|(k, v)| (k.clone(), v.replace(SENTINEL, secret)))
+            .collect()),
+
+        // Webhook: the secret is the URL, substituted below in `forward`. No
+        // auth header — drop any client-supplied Authorization to be safe.
+        AuthSpec::Webhook => Ok(input
+            .headers
+            .iter()
+            .filter(|(k, _)| !k.eq_ignore_ascii_case("authorization"))
+            .cloned()
             .collect()),
 
         AuthSpec::Basic { username } => {
@@ -172,19 +185,30 @@ pub fn forward(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
     let secret = read_secret(&input.secret_key)?;
     let substituted = build_headers(&input, &secret)?;
 
+    // Webhook providers carry the secret in the URL: swap the sentinel for the
+    // sealed URL. Every other scheme leaves the URL untouched (no-op unless the
+    // sentinel literally appears in the URL, which it never does for them).
+    let out_url = match &input.auth {
+        AuthSpec::Webhook => input.url.replace(SENTINEL, &secret),
+        _ => input.url.clone(),
+    };
+
     if input.dry_run {
-        let auth_len = substituted.iter()
-            .find(|(k, _)| k.eq_ignore_ascii_case("authorization"))
-            .map(|(_, v)| v.len()).unwrap_or(0);
+        let proof_len = match &input.auth {
+            AuthSpec::Webhook => out_url.len(),
+            _ => substituted.iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case("authorization"))
+                .map(|(_, v)| v.len()).unwrap_or(0),
+        };
         return serde_json::to_vec(&ForwardOutput {
-            ok: true, code: 0, body: String::new(), length: auth_len, dry_run: true,
+            ok: true, code: 0, body: String::new(), length: proof_len, dry_run: true,
         }).map_err(|e| format!("encode: {e}"));
     }
 
     let method = parse_verb(&input.method)?;
     let req = http::Request {
         method,
-        url: input.url.clone(),
+        url: out_url,
         headers: Some(substituted),
         payload: input.body.clone().map(|b| b.into_bytes()),
     };
