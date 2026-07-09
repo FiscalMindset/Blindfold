@@ -81,6 +81,31 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | `dashboard` | Live HTML dashboard of usage/sealed keys. |
 | `skill install [--global\|--opencode\|--cursor\|--cline\|--all]` / `skill uninstall` | Install/remove the agent skill. |
 
+### Install (any OS)
+
+```bash
+npm install -g blindfold        # or: npm i -g ./packages/blindfold from a clone
+blindfold login                 # tenant DID + key → OS credential store
+blindfold doctor                # confirm; then use `blindfold` from any directory
+```
+
+Credentials are stored in the OS credential store — macOS **Keychain**, Linux
+**libsecret** (`secret-tool`), Windows **Credential Manager**. If none is
+available (or a non-interactive session), `login` falls back to a `0600` file
+and says so. `~/.blindfold/config.json` holds only the non-secret DID + settings.
+
+### Windows notes
+
+- The global install **auto-adds** `%APPDATA%\npm` to your user PATH. **Open a
+  new terminal** afterward so `blindfold` is recognized. (If it still isn't, add
+  that folder to PATH manually, or run via the shim `%APPDATA%\npm\blindfold.cmd`.)
+- `git` isn't required to *use* Blindfold; a normal `npm i -g blindfold` works.
+- To store the key in the **Credential Manager**, run `blindfold login` in an
+  **interactive desktop terminal** — over SSH/non-interactive sessions Windows
+  returns `1312` (no logon session) and Blindfold falls back to the `0600` file.
+  Verify with `blindfold whoami` (want: `key: set (Windows Credential Manager)`)
+  and `cmdkey /list | findstr blindfold`.
+
 ---
 
 ## ⚡ Fastest path — seal your whole `.env` in one command
