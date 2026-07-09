@@ -18,12 +18,14 @@
     "bin",
     "src",
     "assets",
+    "postinstall.mjs",
     "README.md"
   ],
   "scripts": {
     "start": "tsx bin/blindfold.ts",
     "build": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk && node copy-assets.mjs",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "postinstall": "node postinstall.mjs"
   },
   "dependencies": {},
   "devDependencies": {
