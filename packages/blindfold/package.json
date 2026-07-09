@@ -29,6 +29,6 @@
     "esbuild": "^0.24.0"
   },
   "optionalDependencies": {
-    "@terminal3/t3n-sdk": "*"
+    "@terminal3/t3n-sdk": "^3.12.3"
   }
 }
