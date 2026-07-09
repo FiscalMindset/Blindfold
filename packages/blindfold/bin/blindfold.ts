@@ -28,6 +28,15 @@ import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/seal
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
+const PKG_ROOT = path.resolve(HERE, ".."); // packages/blindfold (or the installed package root)
+
+/** Resolve an asset needed by skill/publish: prefer the repo source (dev), else
+ *  the copy bundled in the package's assets/ (standalone/global install). */
+function assetPath(repoRelative: string, assetName: string): string {
+  const repoPath = path.join(REPO_ROOT, ...repoRelative.split("/"));
+  if (fs.existsSync(repoPath)) return repoPath;
+  return path.join(PKG_ROOT, "assets", assetName);
+}
 
 type Argv = { _: string[]; flags: Record<string, string | boolean> };
 
@@ -465,7 +474,7 @@ async function main(): Promise<void> {
     case "publish": {
       const wasmPath =
         (argv.flags.wasm as string | undefined) ??
-        path.join(REPO_ROOT, "contract", "target", "wasm32-wasip2", "release", "blindfold_proxy.wasm");
+        assetPath("contract/target/wasm32-wasip2/release/blindfold_proxy.wasm", "blindfold_proxy.wasm");
       if (!fs.existsSync(wasmPath)) {
         die(`no wasm found at ${wasmPath} — run scripts/build-contract.sh first`);
       }
@@ -728,9 +737,9 @@ async function main(): Promise<void> {
 
     case "skill": {
       const sub = argv._[1] ?? "help";
-      const skillSource = path.join(REPO_ROOT, ".claude", "skills", "blindfold", "SKILL.md");
+      const skillSource = assetPath(".claude/skills/blindfold/SKILL.md", "SKILL.md");
       if (!fs.existsSync(skillSource)) {
-        die(`skill source not found at ${skillSource} — are you in the Blindfold repo?`);
+        die(`skill source not found at ${skillSource} — reinstall Blindfold or run from the repo.`);
       }
       const skillContent = fs.readFileSync(skillSource, "utf-8");
 

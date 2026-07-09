@@ -17,11 +17,12 @@
     "dist",
     "bin",
     "src",
+    "assets",
     "README.md"
   ],
   "scripts": {
     "start": "tsx bin/blindfold.ts",
-    "build": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk",
+    "build": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk && node copy-assets.mjs",
     "prepare": "npm run build"
   },
   "dependencies": {},

@@ -70,10 +70,22 @@ export async function startDashboard(opts: { port?: number } = {}): Promise<Dash
     if (req.method === "GET" && pathname === "/logo.png") {
       try {
         const HERE = path.dirname(fileURLToPath(import.meta.url));
-        const logo = path.resolve(HERE, "..", "..", "..", "assets", "logo.png");
-        const buf = fs.readFileSync(logo);
-        res.writeHead(200, { "content-type": "image/png", "cache-control": "max-age=3600" });
-        res.end(buf);
+        // Repo layout (dev) first, else the copy bundled with the package.
+        const candidates = [
+          path.resolve(HERE, "..", "..", "..", "assets", "logo.png"),
+          path.resolve(HERE, "..", "assets", "logo.png"),
+        ];
+        const logo = candidates.find((p) => fs.existsSync(p));
+        if (logo) {
+          res.writeHead(200, { "content-type": "image/png", "cache-control": "max-age=3600" });
+          res.end(fs.readFileSync(logo));
+        } else {
+          // Standalone install with no bundled logo: serve an inline SVG shield
+          // so the dashboard always renders a mark (no heavy asset shipped).
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ff8c2b"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="#161b22"/><path d="M50 14l28 10v22c0 20-13 33-28 40-15-7-28-20-28-40V24z" fill="url(#g)" opacity="0.92"/><rect x="34" y="46" width="32" height="24" rx="5" fill="#0b0e14"/><rect x="42" y="36" width="16" height="16" rx="8" fill="none" stroke="#0b0e14" stroke-width="5"/></svg>`;
+          res.writeHead(200, { "content-type": "image/svg+xml", "cache-control": "max-age=3600" });
+          res.end(svg);
+        }
       } catch {
         res.writeHead(404, { "content-type": "text/plain" }).end("logo not found");
       }
