@@ -100,6 +100,37 @@ then two ways to use it:
   and POST a JSON body to `http://127.0.0.1:8787/discord`. See
   `examples/discord-webhook/`.
 
+### "Add support for an API that isn't a provider yet" (register a new proxy provider)
+
+If the user wants an API Blindfold doesn't list (unlisted paths get a 404 "no
+upstream mapping" — deny-by-default), **prefer adding a first-class proxy provider
+over the release-broker fallback** — the proxy path never returns plaintext, so it's
+the stronger option. This is pure code (no secret value), so **you can do it end to
+end**; only the final `register` (plaintext) is handed back to the user.
+
+1. Add a ~5-line entry to `packages/blindfold/src/providers.ts` — no enclave/Rust
+   change is needed as long as the API uses one of the four existing auth schemes
+   (`bearer` / `basic` / `sigv4` / `webhook`). Example for a bearer API (Notion):
+   ```ts
+   {
+     id: "notion",
+     prefix: "/notion/",
+     upstream: (p) => `https://api.notion.com${stripPrefix(p, "/notion/")}`,
+     secretKey: "notion_api_key",
+     auth: () => ({ scheme: "bearer" }),
+     defaultHeaders: { "Notion-Version": "2022-06-28" }, // provider-required headers
+   },
+   ```
+2. Rebuild (`npm run build` in `packages/blindfold`) so `dist/` picks up the entry.
+3. Hand back the two one-time human steps: seal the key —
+   `npm run blindfold -- register --name notion_api_key` (in their terminal, R1) —
+   and grant egress: `blindfold grant --host api.notion.com`.
+4. The agent then calls `http://127.0.0.1:8787/notion/...` with
+   `Authorization: Bearer __BLINDFOLD__`; the enclave swaps in the sealed key.
+
+Only touch the Rust contract (`contract/src/forward.rs`) if the API needs a brand-new
+auth scheme none of the four cover — otherwise this stays a TypeScript-only change.
+
 ### "I already pasted my OpenAI key in chat — seal it"
 
 It's in our chat context now (can't undo). Reduce future surface:
