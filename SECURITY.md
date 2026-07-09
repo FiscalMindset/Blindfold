@@ -5,13 +5,27 @@
 This document is original to the Blindfold project. For the deep technical analysis of why agent APIs leak and what existing fixes miss, see [`docs/01-problem-analysis.md`](docs/01-problem-analysis.md).
 
 > **Update (v0.3):** the tenant key (`T3N_API_KEY`) is no longer required to sit
-> in a plaintext file. `blindfold login` stores it in the **OS keychain** (macOS
-> `security` / Linux `secret-tool`); `~/.blindfold/config.json` holds only the
-> non-secret DID + settings. This closes the residual risk documented below —
-> that a prompt-injected agent could read a plaintext creds file and release
-> every sealed secret. (An agent running as the same user with an unlocked
-> keychain can still prompt it, so the proxy-under-a-separate-user hardening
-> remains on the roadmap — but the trivial "read the file" path is gone.)
+> in a plaintext file. `blindfold login` stores it in the **OS credential store**:
+>
+> | OS | Backend |
+> |----|---------|
+> | macOS | Keychain (`security`) |
+> | Linux | libsecret / GNOME Keyring (`secret-tool`) |
+> | Windows | Credential Manager (Win32 `advapi32` `Cred*`) |
+>
+> `~/.blindfold/config.json` then holds only the non-secret DID + settings (plus
+> a `"T3N_API_KEY_STORE": "keychain"` marker). This closes the residual risk
+> documented below — that a prompt-injected agent could read a plaintext creds
+> file and release every sealed secret.
+>
+> Fallbacks and caveats:
+> - If no credential store is available, or the store write fails (e.g. a
+>   non-interactive session — SSH returns `ERROR_NO_SUCH_LOGON_SESSION`/1312 on
+>   Windows), `login` **falls back to a `0600` file** and says so. Run `login`
+>   in an interactive desktop session to use the OS store.
+> - An agent running as the same user with an unlocked store can still *prompt*
+>   it, so the proxy-under-a-separate-user hardening remains on the roadmap — but
+>   the trivial "read the file" path is gone.
 
 ---
 

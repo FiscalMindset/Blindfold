@@ -110,12 +110,13 @@ async function main(): Promise<void> {
       try { if (fs.existsSync(cfg)) existing = JSON.parse(fs.readFileSync(cfg, "utf8")); } catch { /* overwrite */ }
 
       // Prefer the OS keychain for the tenant key; the config file then holds
-      // only non-secret DID + settings. Fall back to a 0600 file where no
-      // keychain exists (--file forces the file path).
-      const useKeychain = !argv.flags.file && keychainAvailable();
+      // only non-secret DID + settings. Fall back to a 0600 file when no
+      // keychain exists OR the keychain write fails (e.g. err 1312 in a
+      // non-interactive session). --file forces the file path.
       const merged: Record<string, string> = { ...existing, DID: did, BLINDFOLD_T3_ENV: env };
-      if (useKeychain) {
-        if (!keychainSet(did, key)) die("failed to write the key to the OS keychain. Retry, or use `blindfold login --file`.");
+      const triedKeychain = !argv.flags.file && keychainAvailable();
+      const inKeychain = triedKeychain && keychainSet(did, key);
+      if (inKeychain) {
         merged.T3N_API_KEY_STORE = "keychain";
         delete merged.T3N_API_KEY; // ensure no stale plaintext key lingers in the file
       } else {
@@ -125,10 +126,13 @@ async function main(): Promise<void> {
       fs.mkdirSync(homeDir(), { recursive: true });
       fs.writeFileSync(cfg, JSON.stringify(merged, null, 2), { mode: 0o600 });
       try { fs.chmodSync(cfg, 0o600); } catch { /* best effort */ }
-      const where = useKeychain ? `the ${keychainBackend()}` : `${cfg} (mode 0600)`;
-      console.log(`✓ Saved tenant key to ${where}. Blindfold now works from any directory.`);
+      console.log(`✓ Saved tenant key to ${inKeychain ? `the ${keychainBackend()}` : `${cfg} (mode 0600)`}. Blindfold now works from any directory.`);
       console.log(`  Tenant: ${did}  ·  env: ${env}  ·  key: stored (never printed)`);
-      if (!useKeychain && !argv.flags.file) console.log(`  (No OS keychain found — stored in a 0600 file. On macOS/Linux the keychain is used automatically.)`);
+      if (!inKeychain && !argv.flags.file) {
+        console.log(triedKeychain
+          ? `  (Keychain write unavailable here — stored in a 0600 file. Run \`blindfold login\` in an interactive desktop session to use ${keychainBackend()}.)`
+          : `  (No OS keychain found — stored in a 0600 file. On macOS/Linux/Windows an interactive session uses the OS credential store automatically.)`);
+      }
       console.log(`  Verify: blindfold doctor`);
       return;
     }
