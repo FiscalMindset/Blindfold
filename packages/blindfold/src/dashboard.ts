@@ -291,7 +291,20 @@ const HTML = `<!DOCTYPE html>
   .tagline { font-size:12px; color:var(--dim); margin-top:7px; display:flex; align-items:center; gap:6px; }
   .tagline .lock { color:var(--orange); display:inline-block; animation:clack .5s .45s cubic-bezier(.3,1.4,.5,1) both; }
   @keyframes clack { from{transform:rotate(-35deg) translateY(-2px);opacity:0;} to{transform:rotate(0) translateY(0);opacity:1;} }
-  @media (prefers-reduced-motion:reduce){ .logo-img,.letter,.ribbon,.brand::after,.tagline .lock{ animation:none!important; } .ribbon{ display:none; } .letter{ color:var(--fg)!important; transform:none!important; text-shadow:none!important; } .brand::after{ transform:scaleX(1)!important; opacity:1!important; } }
+  /* --- Distinctive "decrypt → seal" wordmark animation (JS-driven) --- */
+  .letter.scrambling { color:var(--accent); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; opacity:.92; }
+  .letter.sealed { animation:sealSnap .55s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes sealSnap {
+    0%   { color:var(--accent); text-shadow:0 0 14px rgba(139,92,246,.95),0 0 4px rgba(139,92,246,.8); transform:translateY(-3px) scale(1.18); }
+    55%  { color:var(--fg);     text-shadow:0 0 8px rgba(139,92,246,.5);  transform:translateY(1px)  scale(.97);  }
+    100% { color:var(--fg);     text-shadow:none; transform:none; }
+  }
+  /* seal sweep: a vertical light bar that passes across the word once as it seals */
+  .sealbar { position:absolute; top:-22%; height:144%; width:16px; left:-8%; z-index:3; pointer-events:none; border-radius:9px; opacity:0;
+    background:linear-gradient(90deg,transparent, rgba(139,92,246,.55) 45%, rgba(88,166,255,.35) 60%, transparent); filter:blur(2px); }
+  .sealbar.run { animation:sealSweep 1.15s cubic-bezier(.5,0,.3,1) both; }
+  @keyframes sealSweep { 0%{ left:-8%; opacity:0;} 12%{opacity:1;} 86%{opacity:1;} 100%{ left:104%; opacity:0;} }
+  @media (prefers-reduced-motion:reduce){ .logo-img,.letter,.ribbon,.brand::after,.tagline .lock,.sealbar{ animation:none!important; } .ribbon,.sealbar{ display:none; } .letter{ color:var(--fg)!important; transform:none!important; text-shadow:none!important; } .brand::after{ transform:scaleX(1)!important; opacity:1!important; } }
   .tagline b { color:var(--fg); font-weight:600; }
   .tags { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center; }
   .tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:3px 10px; max-width:100%; }
@@ -327,8 +340,12 @@ const HTML = `<!DOCTYPE html>
   .card {
     background:linear-gradient(180deg,var(--card),var(--card2)); border:1px solid var(--line);
     border-radius:12px; padding:14px 16px; min-width:0; box-shadow:var(--shadow); position:relative; overflow:hidden;
+    transition:transform .18s cubic-bezier(.2,.8,.2,1), border-color .18s, box-shadow .18s;
   }
-  .card.kpi::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--kpi,var(--accent)); }
+  .card:hover { transform:translateY(-3px); border-color:var(--line-strong); box-shadow:0 6px 22px rgba(0,0,0,.28), 0 0 0 1px rgba(139,92,246,.08); }
+  /* KPI cards get a soft accent glow that brightens on hover */
+  .card.kpi::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--kpi,var(--accent)); box-shadow:0 0 12px var(--kpi,var(--accent)); opacity:.55; transition:opacity .18s; }
+  .card.kpi:hover::before { opacity:1; }
   .card .label { font-size:10.5px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; display:flex; align-items:center; gap:5px; }
   .card .value { font-size:clamp(20px,3.5vw,26px); font-weight:700; margin-top:5px; overflow-wrap:anywhere; }
   .card .sub2 { font-size:11.5px; color:var(--dim); margin-top:3px; overflow-wrap:anywhere; }
@@ -390,7 +407,7 @@ const HTML = `<!DOCTYPE html>
     <div class="brandwrap">
       <img id="logo" class="logo-img" alt="Blindfold" />
       <div>
-        <h1><span class="brand"><span class="letter">B</span><span class="letter">l</span><span class="letter">i</span><span class="letter">n</span><span class="letter">d</span><span class="letter">f</span><span class="letter">o</span><span class="letter">l</span><span class="letter">d</span><div class="ribbon" id="brand-ribbon"></div></span><span class="eyebrow">Dashboard</span></h1>
+        <h1><span class="brand"><span class="letter">B</span><span class="letter">l</span><span class="letter">i</span><span class="letter">n</span><span class="letter">d</span><span class="letter">f</span><span class="letter">o</span><span class="letter">l</span><span class="letter">d</span><div class="ribbon" id="brand-ribbon"></div><div class="sealbar" id="brand-sealbar"></div></span><span class="eyebrow">Dashboard</span></h1>
         <div class="tagline"><span class="lock">🔒</span> Secrets sealed in a <b>TEE</b> — keys you can't leak</div>
         <div class="tags" id="tags"></div>
       </div>
@@ -471,6 +488,40 @@ const HTML = `<!DOCTYPE html>
   <div id="tooltip"></div>
 
 <script>
+/* Distinctive wordmark: each letter scrambles through cipher glyphs, then
+   snap-seals into place — mirroring how a real key becomes __BLINDFOLD__.
+   Purely decorative; respects prefers-reduced-motion. */
+(function sealWordmark(){
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    var letters = Array.prototype.slice.call(document.querySelectorAll('.brand > .letter'));
+    if (!letters.length) return;
+    var GLYPHS = '▓█▒░#@$%&*/\\<>=+·:';
+    var finals = letters.map(function(el){ return el.textContent; });
+    letters.forEach(function(el){ el.classList.add('scrambling'); });
+    var bar = document.getElementById('brand-sealbar');
+    if (bar) { bar.classList.add('run'); }
+    var start = performance.now();
+    var settleAt = letters.map(function(_, i){ return 260 + i * 95; }); // staggered lock, left→right
+    function frame(now){
+      var t = now - start, done = 0;
+      letters.forEach(function(el, i){
+        if (el.dataset.sealed) { done++; return; }
+        if (t >= settleAt[i]) {
+          el.textContent = finals[i];
+          el.classList.remove('scrambling');
+          el.classList.add('sealed');
+          el.dataset.sealed = '1';
+          done++;
+        } else if (t % 60 < 20) {
+          el.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+      });
+      if (done < letters.length) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  } catch (e) { /* animation must never break the dashboard */ }
+})();
 var PALETTE=['#8b5cf6','#58a6ff','#3fb950','#d29922','#f85149','#ff7b72','#39c5cf','#f778ba'];
 function hashIdx(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h%PALETTE.length;}
 function colorFor(name){return PALETTE[hashIdx(String(name||'?'))];}
