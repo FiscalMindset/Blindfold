@@ -93,11 +93,26 @@ fn split_url(url: &str) -> Result<(String, String, String), String> {
 /// consumed here and never returned to the caller.
 fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, String)>, String> {
     match &input.auth {
-        AuthSpec::Bearer => Ok(input
-            .headers
-            .iter()
-            .map(|(k, v)| (k.clone(), v.replace(SENTINEL, secret)))
-            .collect()),
+        // Bearer: substitute the sentinel ONLY inside the Authorization header,
+        // so a caller can't smuggle the secret into an attacker-observable header
+        // (H1). Reject the sentinel appearing anywhere else.
+        AuthSpec::Bearer => {
+            let mut out: Vec<(String, String)> = Vec::with_capacity(input.headers.len());
+            for (k, v) in &input.headers {
+                if k.eq_ignore_ascii_case("authorization") {
+                    out.push((k.clone(), v.replace(SENTINEL, secret)));
+                } else {
+                    if v.contains(SENTINEL) {
+                        return Err(format!(
+                            "sentinel not allowed in header '{}' (only Authorization is substituted)",
+                            k
+                        ));
+                    }
+                    out.push((k.clone(), v.clone()));
+                }
+            }
+            Ok(out)
+        }
 
         // Webhook: the secret is the URL, substituted below in `forward`. No
         // auth header — drop any client-supplied Authorization to be safe.
@@ -121,6 +136,12 @@ fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, Stri
         }
 
         AuthSpec::Sigv4 { access_key_id, region, service, amz_date } => {
+            // Validate the caller-supplied amz_date before it's sliced [..8] in
+            // sigv4_authorization (M2): ASCII `YYYYMMDDTHHMMSSZ`, ≥15 chars — so a
+            // short or multibyte value can't panic (trap) the enclave.
+            if amz_date.len() < 15 || !amz_date.is_ascii() {
+                return Err("invalid amz_date: expected ASCII 'YYYYMMDDTHHMMSSZ'".into());
+            }
             let (host, path, query) = split_url(&input.url)?;
             let payload = input.body.as_deref().unwrap_or("").as_bytes();
             let payload_hash = crate::auth::payload_sha256(payload);
@@ -189,7 +210,15 @@ pub fn forward(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
     // sealed URL. Every other scheme leaves the URL untouched (no-op unless the
     // sentinel literally appears in the URL, which it never does for them).
     let out_url = match &input.auth {
-        AuthSpec::Webhook => input.url.replace(SENTINEL, &secret),
+        // Webhook: the sealed secret IS the URL. Require the caller's url to be
+        // exactly the sentinel and use the sealed URL verbatim — so the caller
+        // can't graft the secret onto an attacker host via surrounding text (H3).
+        AuthSpec::Webhook => {
+            if input.url.trim() != SENTINEL {
+                return Err("webhook url must be exactly the sentinel; the sealed URL is used verbatim".into());
+            }
+            secret.clone()
+        }
         _ => input.url.clone(),
     };
 
@@ -217,11 +246,19 @@ pub fn forward(input_bytes: &[u8]) -> Result<Vec<u8>, String> {
     // plaintext secret never leaves this process except inside this request.
     let resp = http::call(&req).map_err(|e| format!("http::call: {e}"))?;
 
+    // Defense-in-depth against reflection exfiltration (H2): if the upstream
+    // echoes the sealed secret (or webhook URL) back in its body, redact it so
+    // the untrusted caller can't recover the secret via a header-reflecting host.
+    let mut body = String::from_utf8_lossy(&resp.payload).into_owned();
+    if !secret.is_empty() && body.contains(secret.as_str()) {
+        body = body.replace(secret.as_str(), "[REDACTED_BY_BLINDFOLD]");
+    }
+
     serde_json::to_vec(&ForwardOutput {
         ok: resp.code >= 200 && resp.code < 400,
         code: resp.code,
         length: resp.payload.len(),
-        body: String::from_utf8_lossy(&resp.payload).into_owned(),
+        body,
         dry_run: false,
     }).map_err(|e| format!("encode: {e}"))
 }
