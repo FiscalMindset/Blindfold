@@ -174,7 +174,8 @@ async function main(): Promise<void> {
       }
       // Attestation gate (no-op unless a measurement is pinned): don't seal into
       // an enclave that doesn't verify.
-      const sealGate = await attestationGate({ skip: !!argv.flags["no-attest"] });
+      const sealGate = await attestationGate({ skip: !!argv.flags["no-attest"], requirePin: true });
+      if (sealGate.warning) console.error(`⚠️  ${sealGate.warning}`);
       if (sealGate.enforced && !sealGate.ok) {
         die(`attestation gate: ${sealGate.message}. Refusing to seal into an unverified enclave. (bypass: --no-attest, or clear the pin)`);
       }
@@ -226,6 +227,18 @@ async function main(): Promise<void> {
           if (u.protocol !== "https:" && !isLocal) {
             die(`refusing to send the released key to a non-https URL (${u.protocol}//${u.hostname}). Use https, target localhost, or pass --allow-insecure to override.`);
             return;
+          }
+          // M3: gate --url behind the same egress allowlist the proxy uses, so a
+          // hijacked agent can't POST the released key to an arbitrary https host.
+          if (!isLocal) {
+            const { loadEgressHosts } = await import("../src/t3-client.ts");
+            const env = loadBlindfoldEnv();
+            const granted = loadEgressHosts(env.did);
+            const allowed = granted.some((h) => h === u.hostname || u.hostname.endsWith(`.${h}`));
+            if (!allowed) {
+              die(`refusing to send the released key to ${u.hostname}: host is not in the egress allowlist. Run \`blindfold grant --host ${u.hostname}\` first, or pass --allow-insecure to override.`);
+              return;
+            }
           }
         }
         const res = await fetch(url, {
@@ -488,10 +501,14 @@ async function main(): Promise<void> {
       // Attestation gate (no-op unless a measurement is pinned): don't route
       // secrets through an enclave that doesn't verify.
       const proxyGate = await attestationGate({ skip: !!argv.flags["no-attest"] });
+      if (proxyGate.warning) console.error(`⚠️  ${proxyGate.warning}`);
       if (proxyGate.enforced && !proxyGate.ok) {
         die(`attestation gate: ${proxyGate.message}. Refusing to start the proxy against an unverified enclave. (bypass: --no-attest, or clear the pin)`);
       }
       if (proxyGate.enforced) console.log("✓ enclave attestation verified");
+      if (socket && !token) {
+        console.error("⚠️  --socket without --auth: access is gated only by the socket's 0600 owner permission. Add --auth for a per-process token too.");
+      }
       const handle = await startProxy({ port, secretKey: secret, token, socket });
       console.log(`✓ Blindfold proxy listening at ${handle.url}`);
       if (handle.socket) {
@@ -501,10 +518,16 @@ async function main(): Promise<void> {
         console.log(`  Point your agent at:   OPENAI_BASE_URL=${handle.url}/v1`);
       }
       if (handle.token) {
-        console.log(`  Auth ON — every request must send header:`);
-        console.log(`    x-blindfold-token: ${handle.token}`);
-        console.log(`  Only a process given this token can use the proxy. Set it for your agent, e.g.:`);
-        console.log(`    export BLINDFOLD_PROXY_TOKEN=${handle.token}   # then wrap()/curl -H "x-blindfold-token: $BLINDFOLD_PROXY_TOKEN"`);
+        // Print auth material to STDERR (not stdout) so it doesn't land in piped
+        // logs, and warn that env/argv are readable by other same-user processes.
+        console.error(`  Auth ON — every request must send header:`);
+        console.error(`    x-blindfold-token: ${handle.token}`);
+        console.error(`  Give it to your agent via BLINDFOLD_PROXY_TOKEN or wrap({ token }).`);
+        console.error(`  NOTE: env vars and argv are readable by same-user processes — on a shared`);
+        console.error(`        machine prefer --socket (OS-enforced) over the token alone.`);
+        if (argv.flags.token) {
+          console.error(`  ⚠️  --token on the command line is visible in \`ps\`/proc; prefer --auth (mints one) or BLINDFOLD_PROXY_TOKEN.`);
+        }
       } else {
         console.log(`  Auth OFF — add --auth to require a per-session token (recommended on shared machines).`);
       }
@@ -521,7 +544,7 @@ async function main(): Promise<void> {
       // Verify the T3 enclave cluster's TDX attestation (chains to Intel's root
       // CA). Optionally pin RTMR3 (the running code/config measurement).
       const expectRtmr3 = argv.flags["expect-rtmr3"] ? String(argv.flags["expect-rtmr3"]) : undefined;
-      const r = await attest({ expectRtmr3 });
+      const r = await attest({ expectRtmr3, noCache: true }); // CLI check is always fresh
       if (argv.flags.json) {
         console.log(JSON.stringify(r, null, 2));
         return;
@@ -543,6 +566,14 @@ async function main(): Promise<void> {
       if (argv.flags.pin) {
         const toPin = expectRtmr3 ?? r.rtmr3s[0];
         if (r.valid && toPin) {
+          // TOFU caveat: pinning what the node reported only helps if that value
+          // matches your reproducible enclave build. Warn unless the user
+          // supplied the expected value explicitly (--expect-rtmr3).
+          if (!expectRtmr3) {
+            console.error(`  ⚠️  Pinning the measurement the node just reported (trust-on-first-use).`);
+            console.error(`      Cross-check ${toPin} against your enclave's published/reproducible build hash;`);
+            console.error(`      if this first contact was with a malicious node, you'd be pinning its measurement.`);
+          }
           writePinnedRtmr3(toPin);
           console.log(`  ✓ pinned — \`seal\` and \`proxy\` will now verify this measurement first.`);
         } else {

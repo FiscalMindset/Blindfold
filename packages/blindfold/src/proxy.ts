@@ -27,6 +27,7 @@
 import http from "node:http";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import net from "node:net";
 import type { AddressInfo } from "node:net";
 import { SENTINEL } from "./constants.ts";
 import { loadBlindfoldEnv } from "./env.ts";
@@ -60,6 +61,12 @@ export interface ProxyOpts {
 
 // Cap the proxied request body so a huge upload can't exhaust proxy memory.
 const MAX_BODY_BYTES = Number(process.env.BLINDFOLD_MAX_BODY_BYTES) || 5 * 1024 * 1024;
+// Idle-read timeout so a slow-loris client can't hold a request open forever (L4).
+const BODY_IDLE_MS = Number(process.env.BLINDFOLD_BODY_IDLE_MS) || 30_000;
+// Bound concurrent enclave calls so a burst can't fan out unbounded to the node
+// (S1). Excess requests get 503/Retry-After instead of piling on.
+const MAX_INFLIGHT = Number(process.env.BLINDFOLD_MAX_INFLIGHT) || 64;
+let inflight = 0;
 class PayloadTooLargeError extends Error {}
 
 /** Constant-time string compare (avoids leaking the token via timing). */
@@ -71,6 +78,20 @@ function tokenMatches(provided: string, expected: string): boolean {
 }
 
 export const PROXY_TOKEN_HEADER = "x-blindfold-token";
+
+/** Resolve true if a LIVE server is already accepting on this unix socket
+ *  (so we don't unlink a socket another instance is serving). ECONNREFUSED /
+ *  missing file ⇒ stale ⇒ safe to remove. */
+function isSocketLive(socketPath: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (!fs.existsSync(socketPath)) { resolve(false); return; }
+    const c = net.connect(socketPath);
+    const done = (live: boolean) => { try { c.destroy(); } catch { /* ignore */ } resolve(live); };
+    c.once("connect", () => done(true));
+    c.once("error", () => done(false));
+    c.setTimeout(500, () => done(false));
+  });
+}
 
 export interface ProxyHandle {
   url: string;
@@ -88,6 +109,13 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
   const secretKey = opts.secretKey ?? "openai_api_key";
   const token = (opts.token ?? process.env.BLINDFOLD_PROXY_TOKEN ?? "").trim() || undefined;
   const socketPath = opts.socket?.trim() || undefined;
+
+  // Refuse to clobber a socket a LIVE instance is already serving (L3). A stale
+  // file (ECONNREFUSED) is fine to replace.
+  if (socketPath && (await isSocketLive(socketPath))) {
+    throw new Error(`a Blindfold proxy is already listening on ${socketPath} — stop it first, or use a different --socket path`);
+  }
+
   const t3 = await openT3Client(env);
 
   const server = http.createServer((req, res) => {
@@ -107,12 +135,16 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
   return await new Promise<ProxyHandle>((resolve, reject) => {
     server.once("error", reject);
 
+    let prevUmask: number | undefined;
     const onListening = () => {
       let url: string;
       let bound = 0;
       if (socketPath) {
-        // Restrict the socket to the owner: only same-user processes can connect.
+        // The umask below already birthed the socket as 0600 (closing the
+        // bind→chmod TOCTOU window, H5); re-chmod as belt-and-suspenders and
+        // restore the process umask.
         try { fs.chmodSync(socketPath, 0o600); } catch { /* best-effort */ }
+        if (prevUmask !== undefined) { try { process.umask(prevUmask); } catch { /* ignore */ } }
         url = `unix:${socketPath}`;
       } else {
         bound = (server.address() as AddressInfo).port;
@@ -133,8 +165,11 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
     };
 
     if (socketPath) {
-      // Remove a stale socket file from a previous run, then bind.
+      // Remove a stale socket file from a previous run, then bind the socket
+      // PRIVATE from birth: umask 0177 → new files are 0600, so there is no
+      // window where the socket is world-connectable before chmod (H5).
       try { fs.rmSync(socketPath, { force: true }); } catch { /* ignore */ }
+      prevUmask = process.umask(0o177);
       server.listen(socketPath, onListening);
     } else {
       server.listen(port, "127.0.0.1", onListening);
@@ -245,8 +280,17 @@ async function handle(
     upstream: upstream.replace(/\?.*$/, ""),
   });
 
+  // Backpressure: don't fan out unbounded concurrent enclave calls (S1).
+  if (inflight >= MAX_INFLIGHT) {
+    safeLog("warn", { msg: "proxy_saturated", inflight, max: MAX_INFLIGHT });
+    if (!res.headersSent) res.writeHead(503, { "content-type": "text/plain", "retry-after": "1" });
+    res.end("proxy saturated: too many concurrent enclave calls — retry shortly");
+    return;
+  }
+
   const startedAt = Date.now();
   let result;
+  inflight++;
   try {
     result = await t3.invokeForward(forwardReq);
   } catch (e) {
@@ -257,6 +301,8 @@ async function handle(
     if (!res.headersSent) res.writeHead(status, { "content-type": "application/json" });
     res.end(body);
     return;
+  } finally {
+    inflight--;
   }
   const latency = Date.now() - startedAt;
 
@@ -287,19 +333,26 @@ function readBody(req: http.IncomingMessage, maxBytes: number): Promise<Buffer> 
     const chunks: Buffer[] = [];
     let size = 0;
     let aborted = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const fail = (e: Error) => { aborted = true; clearTimeout(timer); reject(e); };
+    const arm = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { if (!aborted) fail(new Error(`request body read timed out after ${BODY_IDLE_MS}ms`)); }, BODY_IDLE_MS);
+    };
+    arm();
     req.on("data", (c: Buffer) => {
       if (aborted) return;
+      arm(); // reset the idle timer on progress
       size += c.length;
       if (size > maxBytes) {
         // Stop accumulating; the handler sends 413 then destroys the socket.
-        aborted = true;
-        reject(new PayloadTooLargeError(`request body exceeds ${maxBytes} bytes`));
+        fail(new PayloadTooLargeError(`request body exceeds ${maxBytes} bytes`));
         return;
       }
       chunks.push(c);
     });
-    req.on("end", () => { if (!aborted) resolve(Buffer.concat(chunks)); });
-    req.on("error", (e) => { if (!aborted) reject(e); });
+    req.on("end", () => { clearTimeout(timer); if (!aborted) resolve(Buffer.concat(chunks)); });
+    req.on("error", (e) => { if (!aborted) fail(e); });
   });
 }
 

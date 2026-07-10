@@ -77,7 +77,10 @@ function socketFetch(socketPath: string, token?: string): typeof fetch {
       const body = init?.body;
       if (body != null) {
         if (typeof body === "string" || body instanceof Buffer || body instanceof Uint8Array) req.write(body);
-        else req.write(String(body));
+        else if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) req.write(body.toString());
+        else if (ArrayBuffer.isView(body as ArrayBufferView)) { const v = body as ArrayBufferView; req.write(Buffer.from(v.buffer, v.byteOffset, v.byteLength)); }
+        else if (body instanceof ArrayBuffer) req.write(Buffer.from(body));
+        else { req.destroy(); reject(new Error("socketFetch: unsupported body type (use string/Buffer/typed-array/URLSearchParams)")); return; }
       }
       req.end();
     });
