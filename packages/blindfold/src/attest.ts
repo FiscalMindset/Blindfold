@@ -21,8 +21,34 @@
  *
  * This does not need the tenant key; it reads the node's public /status.
  */
-import { loadBlindfoldEnv } from "./env.ts";
+import fs from "node:fs";
+import path from "node:path";
+import { loadBlindfoldEnv, configPath } from "./env.ts";
 import type { BlindfoldEnv } from "./types.ts";
+
+const PIN_FIELD = "expectedRtmr3";
+
+/** The RTMR3 measurement pinned in config.json, if any. */
+export function readPinnedRtmr3(): string | undefined {
+  try {
+    const obj = JSON.parse(fs.readFileSync(configPath(), "utf8")) as Record<string, unknown>;
+    const v = obj[PIN_FIELD];
+    return typeof v === "string" && v ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Persist a pinned RTMR3 in config.json (preserving other fields, 0600). */
+export function writePinnedRtmr3(value: string): void {
+  const cfg = configPath();
+  let obj: Record<string, unknown> = {};
+  try { obj = JSON.parse(fs.readFileSync(cfg, "utf8")) as Record<string, unknown>; } catch { /* new file */ }
+  obj[PIN_FIELD] = value;
+  fs.mkdirSync(path.dirname(cfg), { recursive: true });
+  fs.writeFileSync(cfg, JSON.stringify(obj, null, 2), { mode: 0o600 });
+  try { fs.chmodSync(cfg, 0o600); } catch { /* best effort */ }
+}
 
 /** Subset of the @terminal3/t3n-sdk attestation surface we rely on. */
 interface AttestSdk {
@@ -113,5 +139,43 @@ export async function attest(opts: AttestOpts = {}): Promise<AttestResult> {
     rtmr3s,
     pinned: Boolean(opts.expectRtmr3) && r.valid,
     error: r.error,
+  };
+}
+
+export interface GateResult {
+  /** True when attestation was actually required (a pin exists or was forced). */
+  enforced: boolean;
+  /** True when not enforced, or enforced and verified. */
+  ok: boolean;
+  message?: string;
+}
+
+/**
+ * Attestation gate for sensitive operations (seal, proxy). It is a no-op unless
+ * the user has pinned an RTMR3 (`attest --pin`) or set `BLINDFOLD_REQUIRE_ATTEST=1`
+ * — so it's opt-in and back-compat. When enforced, it verifies the live enclave
+ * (and RTMR3 pin) and returns ok=false with a reason if it doesn't check out.
+ * Skipped entirely in mock mode or when `skip` is set (`--no-attest`).
+ */
+export async function attestationGate(opts: { env?: BlindfoldEnv; skip?: boolean } = {}): Promise<GateResult> {
+  const env = opts.env ?? loadBlindfoldEnv();
+  if (env.mock || opts.skip) return { enforced: false, ok: true };
+
+  const pinned = readPinnedRtmr3();
+  const required = Boolean(pinned) || process.env.BLINDFOLD_REQUIRE_ATTEST === "1";
+  if (!required) return { enforced: false, ok: true };
+
+  let r: AttestResult;
+  try {
+    r = await attest({ env, expectRtmr3: pinned });
+  } catch (e) {
+    return { enforced: true, ok: false, message: (e as Error).message };
+  }
+  if (!r.available) return { enforced: true, ok: false, message: `node published no attestation (${r.nodeUrl})` };
+  const ok = r.valid && (!pinned || r.pinned);
+  return {
+    enforced: true,
+    ok,
+    message: ok ? undefined : `enclave attestation failed${pinned ? " (RTMR3 pin mismatch)" : ""} at ${r.nodeUrl}`,
   };
 }
