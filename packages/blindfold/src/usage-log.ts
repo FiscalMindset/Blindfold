@@ -61,12 +61,19 @@ function rotateIfNeeded(p: string): void {
   }
 }
 
+// Hot-path telemetry must not block the event loop (S4): ensure the dir once,
+// throttle the rotation stat, and append asynchronously (fire-and-forget).
+const ensuredDirs = new Set<string>();
+const ROTATE_CHECK_EVERY = 500;
+let writesSinceRotateCheck = ROTATE_CHECK_EVERY; // check on the first write
+
 export function logUsage(event: UsageEvent): void {
   const p = defaultLogPath();
   try {
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    rotateIfNeeded(p);
-    fs.appendFileSync(p, JSON.stringify(event) + "\n");
+    const dir = path.dirname(p);
+    if (!ensuredDirs.has(dir)) { fs.mkdirSync(dir, { recursive: true }); ensuredDirs.add(dir); }
+    if (++writesSinceRotateCheck >= ROTATE_CHECK_EVERY) { writesSinceRotateCheck = 0; rotateIfNeeded(p); }
+    fs.appendFile(p, JSON.stringify(event) + "\n", () => { /* never throw on the request path */ });
   } catch {
     // Logging is never allowed to throw and crash a request path.
   }

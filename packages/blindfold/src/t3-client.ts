@@ -46,7 +46,7 @@ function withDeadline<T>(promise: Promise<T>, label: string, ms = T3_TIMEOUT_MS)
 function egressCachePath(): string {
   return process.env.BLINDFOLD_EGRESS_CACHE ?? path.join(stateDir(), "egress-hosts.json");
 }
-function loadEgressHosts(did: string): string[] {
+export function loadEgressHosts(did: string): string[] {
   try {
     const all = JSON.parse(fs.readFileSync(egressCachePath(), "utf8")) as Record<string, string[]>;
     return Array.isArray(all[did]) ? all[did] : [];
