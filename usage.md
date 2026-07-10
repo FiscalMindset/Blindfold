@@ -212,9 +212,23 @@ curl --unix-socket ~/.blindfold/proxy.sock http://localhost/v1/models
 
 The socket file is created `0600`, so only processes running as **your OS user** can
 connect — the kernel enforces it, no token needed. `--socket <path>` picks a custom
-path; combine with `--auth` for both layers. (Client support today: `curl
---unix-socket`; pointing an SDK at a unix socket needs a custom fetch/agent — that
-wiring is a follow-up. TCP remains the default.)
+path; combine with `--auth` for both layers.
+
+Point an SDK at the socket with `wrap()` (it routes over the socket and adds the
+token for you):
+
+```ts
+import OpenAI from "openai";
+import { wrap } from "blindfold";
+// socket + token via opts, or the BLINDFOLD_PROXY_SOCKET / BLINDFOLD_PROXY_TOKEN env vars
+const openai = wrap(new OpenAI({ apiKey: "__BLINDFOLD__" }), {
+  socket: "~/.blindfold/proxy.sock",
+  token: process.env.BLINDFOLD_PROXY_TOKEN,
+});
+```
+
+Raw `curl` uses `--unix-socket <path>`. TCP remains the default when `--socket` is
+omitted.
 
 ### 3b. Pattern B — release-broker (works today, any protocol)
 

@@ -12,6 +12,7 @@
  * The wrap layer never sees the real key. Substitution happens inside
  * the T3 contract, downstream.
  */
+import http from "node:http";
 import { DEFAULT_PORT, SENTINEL } from "./constants.ts";
 
 export interface WrapOpts {
@@ -24,9 +25,64 @@ export interface WrapOpts {
    * back to the `BLINDFOLD_PROXY_TOKEN` env var.
    */
   token?: string;
+  /**
+   * Route requests over a unix-domain socket (see `blindfold proxy --socket`)
+   * instead of a TCP host:port. The request URL's host is ignored; only its
+   * path is used. Falls back to the `BLINDFOLD_PROXY_SOCKET` env var.
+   */
+  socket?: string;
 }
 
 const PROXY_TOKEN_HEADER = "x-blindfold-token";
+
+/**
+ * A `fetch`-compatible function that sends the request over a unix-domain
+ * socket via node:http (`socketPath`). Only the URL's path+query is used; the
+ * host is irrelevant when talking to a socket. Optionally injects the
+ * per-session token header.
+ */
+function socketFetch(socketPath: string, token?: string): typeof fetch {
+  return (async (input: Parameters<typeof fetch>[0], init: Parameters<typeof fetch>[1] = {}) => {
+    const reqObj = typeof Request !== "undefined" && input instanceof Request ? input : undefined;
+    const rawUrl = reqObj ? reqObj.url : String(input);
+    const url = new URL(rawUrl);
+    const method = init?.method ?? reqObj?.method ?? "GET";
+    const headers = new Headers(init?.headers ?? reqObj?.headers);
+    if (token) headers.set(PROXY_TOKEN_HEADER, token);
+
+    const outHeaders: Record<string, string> = {};
+    headers.forEach((v, k) => { outHeaders[k] = v; });
+
+    return await new Promise<Response>((resolve, reject) => {
+      const req = http.request(
+        { socketPath, path: url.pathname + url.search, method, headers: outHeaders },
+        (res) => {
+          const chunks: Buffer[] = [];
+          res.on("data", (c) => chunks.push(c as Buffer));
+          res.on("end", () => {
+            const respHeaders = new Headers();
+            for (const [k, v] of Object.entries(res.headers)) {
+              if (typeof v === "string") respHeaders.set(k, v);
+              else if (Array.isArray(v)) respHeaders.set(k, v.join(", "));
+            }
+            resolve(new Response(Buffer.concat(chunks), {
+              status: res.statusCode ?? 502,
+              statusText: res.statusMessage ?? "",
+              headers: respHeaders,
+            }));
+          });
+        },
+      );
+      req.on("error", reject);
+      const body = init?.body;
+      if (body != null) {
+        if (typeof body === "string" || body instanceof Buffer || body instanceof Uint8Array) req.write(body);
+        else req.write(String(body));
+      }
+      req.end();
+    });
+  }) as typeof fetch;
+}
 
 /**
  * Loose structural type — we don't want a hard dep on the openai package.
@@ -43,8 +99,13 @@ export function wrap<T extends OpenAIish>(client: T, opts: WrapOpts = {}): T {
   client.baseURL = baseUrl;
   client.apiKey = SENTINEL;
 
-  const token = (opts.token ?? process.env.BLINDFOLD_PROXY_TOKEN ?? "").trim();
-  if (token) {
+  const token = (opts.token ?? process.env.BLINDFOLD_PROXY_TOKEN ?? "").trim() || undefined;
+  const socket = (opts.socket ?? process.env.BLINDFOLD_PROXY_SOCKET ?? "").trim() || undefined;
+
+  if (socket) {
+    // Talk to the proxy over its unix-domain socket (adds the token too, if set).
+    client.fetch = socketFetch(socket, token);
+  } else if (token) {
     // Inject the per-session token on every outbound request without a hard
     // dep on the OpenAI SDK: wrap whatever fetch the client uses.
     const base = client.fetch ?? fetch;
