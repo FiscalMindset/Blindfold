@@ -15,7 +15,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { loadBlindfoldEnv, configPath, homeDir } from "../src/env.ts";
+import { loadBlindfoldEnv, configPath, homeDir, stateDir } from "../src/env.ts";
 import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from "../src/keychain.ts";
 import { readSecretLine } from "../src/prompt.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
@@ -468,9 +468,23 @@ async function main(): Promise<void> {
       // still can't be stolen — this only gates *use* by co-resident processes).
       let token = argv.flags.token ? String(argv.flags.token) : undefined;
       if (!token && argv.flags.auth) token = randomBytes(24).toString("hex");
-      const handle = await startProxy({ port, secretKey: secret, token });
+      // `--socket [path]` binds a unix-domain socket (0600) instead of a TCP
+      // port, so only same-user processes can connect. Bare `--socket` defaults
+      // to <stateDir>/proxy.sock.
+      let socket: string | undefined;
+      if (argv.flags.socket !== undefined) {
+        socket = typeof argv.flags.socket === "string" && argv.flags.socket.length > 0
+          ? String(argv.flags.socket)
+          : path.join(stateDir(), "proxy.sock");
+      }
+      const handle = await startProxy({ port, secretKey: secret, token, socket });
       console.log(`✓ Blindfold proxy listening at ${handle.url}`);
-      console.log(`  Point your agent at:   OPENAI_BASE_URL=${handle.url}/v1`);
+      if (handle.socket) {
+        console.log(`  Unix socket (0600) — only your user's processes can connect.`);
+        console.log(`  Call it with:          curl --unix-socket ${handle.socket} http://localhost/v1/...`);
+      } else {
+        console.log(`  Point your agent at:   OPENAI_BASE_URL=${handle.url}/v1`);
+      }
       if (handle.token) {
         console.log(`  Auth ON — every request must send header:`);
         console.log(`    x-blindfold-token: ${handle.token}`);
