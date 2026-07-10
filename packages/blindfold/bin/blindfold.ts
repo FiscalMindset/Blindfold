@@ -902,7 +902,8 @@ Commands:
   status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
   sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
   audit                                              Verify the ledger's tamper-evident hash-chain AND reconcile it against the enclave (the source of truth) — flags drift/missing/tampering.
-  proxy    [--port 8787] [--secret openai_api_key] Run the local OpenAI-shaped proxy.
+  proxy    [--port 8787] [--auth] [--socket [path]] Run the local OpenAI-shaped proxy. --auth mints a per-session token; --socket binds a 0600 unix socket (only your OS user can connect).
+  attest   [--expect-rtmr3 <b64>] [--pin] [--json]  Verify the enclave's TDX attestation (chains to Intel's root CA). --pin records the RTMR3 so seal/proxy auto-verify it first.
   publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
   grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com
   share    --to <agent-did> --host <host>[,...]    Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive the plaintext (forward only, least privilege).
