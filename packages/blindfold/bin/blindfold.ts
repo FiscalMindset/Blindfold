@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv, configPath, homeDir } from "../src/env.ts";
 import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from "../src/keychain.ts";
@@ -463,9 +463,22 @@ async function main(): Promise<void> {
     case "proxy": {
       const port = argv.flags.port ? Number(argv.flags.port) : undefined;
       const secret = argv.flags.secret ? String(argv.flags.secret) : undefined;
-      const handle = await startProxy({ port, secretKey: secret });
+      // Per-session auth: `--token <t>` supplies one; `--auth` mints a random
+      // one. Without either, the proxy stays open to any local process (the key
+      // still can't be stolen — this only gates *use* by co-resident processes).
+      let token = argv.flags.token ? String(argv.flags.token) : undefined;
+      if (!token && argv.flags.auth) token = randomBytes(24).toString("hex");
+      const handle = await startProxy({ port, secretKey: secret, token });
       console.log(`✓ Blindfold proxy listening at ${handle.url}`);
       console.log(`  Point your agent at:   OPENAI_BASE_URL=${handle.url}/v1`);
+      if (handle.token) {
+        console.log(`  Auth ON — every request must send header:`);
+        console.log(`    x-blindfold-token: ${handle.token}`);
+        console.log(`  Only a process given this token can use the proxy. Set it for your agent, e.g.:`);
+        console.log(`    export BLINDFOLD_PROXY_TOKEN=${handle.token}   # then wrap()/curl -H "x-blindfold-token: $BLINDFOLD_PROXY_TOKEN"`);
+      } else {
+        console.log(`  Auth OFF — add --auth to require a per-session token (recommended on shared machines).`);
+      }
       console.log(`  Health check:          ${handle.url}/health`);
       // long-running: don't close until SIGINT
       process.on("SIGINT", async () => {
