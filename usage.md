@@ -62,6 +62,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | `use --name <name> --url <https>` | Quick "does it auth?" check. |
 | `proxy [--port 8787] [--auth] [--socket [path]]` | Run the local proxy; agents use `__BLINDFOLD__`. `--auth` mints a per-session token so only the wrapped agent (not any co-resident process) can use it. `--socket` binds a unix-domain socket (0600) instead of a TCP port, so only your OS user's processes can connect. |
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
+| `attest [--expect-rtmr3 <b64>] [--json]` | Verify the enclave cluster's TDX attestation (chains to Intel's root CA); optionally pin the RTMR3 code measurement. |
 
 **Lifecycle**
 | Command | What it does |
@@ -229,6 +230,31 @@ const openai = wrap(new OpenAI({ apiKey: "__BLINDFOLD__" }), {
 
 Raw `curl` uses `--unix-socket <path>`. TCP remains the default when `--socket` is
 omitted.
+
+### Verify the enclave before you trust it (`attest`)
+
+Don't just *trust* that Terminal 3 runs a genuine TDX enclave — **verify** it. The
+node publishes a TDX attestation bundle; `blindfold attest` cryptographically checks
+that every cluster quote's ECDSA signature chains to **Intel's SGX root CA** and
+extracts the RTMR3 measurement (the fingerprint of the code/config running inside
+the enclave):
+
+```bash
+blindfold attest
+#   chain to Intel root:  ✅ valid
+#   quotes verified:      3/3
+#   RTMR3 (code measure): B6mn+/ADHhD...
+#   Tip: pin it next time → blindfold attest --expect-rtmr3 B6mn+/ADHhD...
+```
+
+Pin the measurement so a changed/rogue enclave fails the check (exit code `1`):
+
+```bash
+blindfold attest --expect-rtmr3 B6mn+/ADHhD...   # ✅ matches expected, or ✖ + exit 1
+```
+
+This upgrades the trust model from *"trust the operator"* to *"verify the silicon."*
+(`--json` for scripting; needs a real node — not available in `BLINDFOLD_MOCK` mode.)
 
 ### 3b. Pattern B — release-broker (works today, any protocol)
 
