@@ -69,6 +69,7 @@ export async function runOpenAIAgent(cfg: OpenAIAgentConfig): Promise<OpenAIAgen
     });
 
     const choice = resp.choices[0];
+    if (!choice) throw new Error("model returned no choices");
     messages.push(choice.message as OpenAI.Chat.ChatCompletionMessageParam);
 
     if (choice.finish_reason === "stop" || !choice.message.tool_calls?.length) {
@@ -76,6 +77,7 @@ export async function runOpenAIAgent(cfg: OpenAIAgentConfig): Promise<OpenAIAgen
     }
 
     for (const tc of choice.message.tool_calls) {
+      if (tc.type !== "function") continue; // only function tool calls carry `.function`
       const args = JSON.parse(tc.function.arguments) as Record<string, string>;
       log(cfg.label, `→ tool ${tc.function.name}(${fmtArgs(args)})`);
 

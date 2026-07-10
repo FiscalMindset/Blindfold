@@ -188,14 +188,14 @@ function renderTablesTerm(s: string): string {
   const out: string[] = [];
   let i = 0;
   while (i < lines.length) {
-    const line = lines[i];
+    const line = lines[i] ?? "";
     if (line && /^\s*\|.+\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|[\s\-:|]+\|\s*$/.test(lines[i + 1] ?? "")) {
       // Header row
       const header = parseRowTerm(line);
       const body: string[][] = [];
       i += 2;
       while (i < lines.length && /^\s*\|.+\|\s*$/.test(lines[i] ?? "")) {
-        body.push(parseRowTerm(lines[i]));
+        body.push(parseRowTerm(lines[i] ?? ""));
         i++;
       }
       // Compute widths.
@@ -247,7 +247,7 @@ function renderListsTerm(s: string): string {
   for (const line of lines) {
     const m = line.match(/^(\s*)([-*+]|\d+\.)\s+(.+)/);
     if (m) {
-      const isOrdered = /^\d+\./.test(m[2]);
+      const isOrdered = /^\d+\./.test(m[2] ?? "");
       if (!inList || ordered !== isOrdered) {
         if (inList) out.push("");
         inList = true;

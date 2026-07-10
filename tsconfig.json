@@ -11,11 +11,19 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": false,
     "forceConsistentCasingInFileNames": true,
     "declaration": false,
     "sourceMap": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "dist",
+    "**/dist",
+    "examples/langchain-summarizer"
+  ]
 }
