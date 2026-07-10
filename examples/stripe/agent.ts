@@ -78,7 +78,7 @@ async function main(): Promise<void> {
       await new Promise((r) => setTimeout(r, 700 * attempt));
     }
     if (!balRes || balRes.status !== 200) {
-      console.log(`✗ Stripe HTTP ${balRes.status}: ${JSON.stringify(bal).slice(0, 200)}`);
+      console.log(`✗ Stripe HTTP ${balRes?.status ?? "no response"}: ${JSON.stringify(bal).slice(0, 200)}`);
       console.log("  (Seal stripe_secret_key and `grant --host api.stripe.com` first.)");
       return;
     }

@@ -123,7 +123,7 @@ function nodeFetch(
         const outHeaders: Record<string, string> = {};
         for (const [k, v] of Object.entries(proxyRes.headers)) {
           if (typeof v === "string") outHeaders[k] = v;
-          else if (Array.isArray(v)) outHeaders[k] = v[0];
+          else if (Array.isArray(v) && typeof v[0] === "string") outHeaders[k] = v[0];
         }
         resolve({ statusCode: proxyRes.statusCode ?? 200, headers: outHeaders, body: Buffer.concat(chunks) });
       });

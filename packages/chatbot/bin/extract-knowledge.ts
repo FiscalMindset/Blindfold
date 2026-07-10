@@ -122,7 +122,7 @@ function chunkDoc(file: RawFile): Chunk[] {
     const h = line.match(/^#{1,3}\s+(.+)/);
     if (h) {
       if (cur && cur.content.trim().length > 200) chunks.push(cur);
-      cur = { title: h[1].trim(), content: "" };
+      cur = { title: (h[1] ?? "").trim(), content: "" };
     } else if (cur) {
       cur.content += line + "\n";
     }
