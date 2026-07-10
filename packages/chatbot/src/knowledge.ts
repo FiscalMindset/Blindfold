@@ -81,9 +81,55 @@ export function findByIntent(kb: KnowledgeBase, intent: string): KnowledgeEntry[
   return kb.entries.filter((e) => e.intent === intent);
 }
 
+// Inverted index so scoring touches only candidate entries, not the whole KB
+// per request (S2). Cached per KnowledgeBase object (loadKB caches the KB).
+interface KbIndex {
+  postings: Map<string, Set<KnowledgeEntry>>; // q/a token → entries containing it
+  byIntentLower: Map<string, KnowledgeEntry[]>; // distinct intent → entries
+}
+const kbIndexCache = new WeakMap<KnowledgeBase, KbIndex>();
+
+function kbIndex(kb: KnowledgeBase): KbIndex {
+  const cached = kbIndexCache.get(kb);
+  if (cached) return cached;
+  const postings = new Map<string, Set<KnowledgeEntry>>();
+  const byIntentLower = new Map<string, KnowledgeEntry[]>();
+  const add = (t: string, e: KnowledgeEntry) => {
+    let s = postings.get(t);
+    if (!s) { s = new Set(); postings.set(t, s); }
+    s.add(e);
+  };
+  for (const e of kb.entries) {
+    const { qTokens, aTokens, intentLower } = entryIndex(e);
+    for (const t of qTokens) add(t, e);
+    for (const t of aTokens) add(t, e);
+    let list = byIntentLower.get(intentLower);
+    if (!list) { list = []; byIntentLower.set(intentLower, list); }
+    list.push(e);
+  }
+  const ix = { postings, byIntentLower };
+  kbIndexCache.set(kb, ix);
+  return ix;
+}
+
 export function findByQuestionMatch(kb: KnowledgeBase, text: string, limit = 5): KnowledgeEntry[] {
   const queryTokens = tokenise(text.toLowerCase());
-  const scored = kb.entries.map((e) => {
+  const ix = kbIndex(kb);
+
+  // Gather candidates: entries sharing any query token (q/a postings) + entries
+  // whose intent substring-matches a query token (scanned over the small,
+  // distinct intent set only). Any entry NOT gathered would score 0 anyway.
+  const candidates = new Set<KnowledgeEntry>();
+  for (const t of queryTokens) {
+    const p = ix.postings.get(t);
+    if (p) for (const e of p) candidates.add(e);
+  }
+  for (const [intentLower, entries] of ix.byIntentLower) {
+    if (queryTokens.some((t) => intentLower.includes(t))) for (const e of entries) candidates.add(e);
+  }
+
+  const scored: Array<{ entry: KnowledgeEntry; score: number }> = [];
+  for (const e of candidates) {
     const { qTokens, aTokens, intentLower } = entryIndex(e);
     let score = 0;
     for (const t of queryTokens) {
@@ -92,10 +138,9 @@ export function findByQuestionMatch(kb: KnowledgeBase, text: string, limit = 5):
       if (intentLower.includes(t)) score += 3;
     }
     score *= e.confidence;
-    return { entry: e, score };
-  });
+    if (score > 0) scored.push({ entry: e, score });
+  }
   return scored
-    .filter((s) => s.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
     .map((s) => s.entry);
