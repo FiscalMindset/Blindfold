@@ -27,6 +27,30 @@ This document is original to the Blindfold project. For the deep technical analy
 >   it, so the proxy-under-a-separate-user hardening remains on the roadmap — but
 >   the trivial "read the file" path is gone.
 
+> **Update (defense-in-depth + audit remediation):** a full adversarial security
+> audit was run against the whole system (core, chatbot, scalability, and the Rust
+> enclave contract + attestation). All findings (HIGH→LOW) were remediated. Headline
+> hardening now in place:
+> - **Layered proxy access control:** per-session token (`proxy --auth`, which
+>   *process*), unix socket `0600` (`proxy --socket`, which *OS user*), and
+>   client-side **TDX attestation** (`blindfold attest`, which *code* — quotes chain
+>   to Intel's SGX root CA, RTMR3 pinned). `attest --pin` makes `seal`/`proxy`
+>   verify the enclave first; sealing **requires** a pin.
+> - **Enclave contract v0.5.6:** the sentinel is substituted **only** into
+>   `Authorization` (rejected elsewhere), the sealed secret is **redacted from the
+>   returned body** (reflection-exfil defense), the webhook URL must be exactly the
+>   sentinel (no host-grafting), and `amz_date` is validated (no enclave panic).
+> - **Release/CLI:** `use --url` is gated by the egress allowlist; the socket is
+>   born `0600` via umask (no bind→chmod race); config writes are locked.
+> - **Chatbot:** `X-Forwarded-For` trusted only behind a proxy flag + a global
+>   per-window spend budget on the paid LLM fallback; CORS allowlist; no error-detail
+>   leak; validated history; KB treated as untrusted data.
+>
+> One honest open item: **unpinned** attestation proves "genuine TDX silicon," not
+> "runs my exact code" (the ML-KEM key is fetched from the node under test) — the
+> definitive binding fix is a question for the Terminal 3 SDK team; mitigated today
+> by requiring an RTMR3 pin before sealing.
+
 ---
 
 ## 1. The threat model in one paragraph

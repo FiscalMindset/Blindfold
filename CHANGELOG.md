@@ -4,6 +4,38 @@
 
 ---
 
+## [Unreleased] — Defense-in-depth + full security-audit remediation
+
+### Added
+- **Per-session proxy token** (`proxy --auth`) — only the wrapped agent can use
+  the proxy (constant-time checked); **unix-domain socket** mode (`proxy --socket`,
+  `0600`) so only your OS user can connect, usable by SDKs via `wrap({ socket })`.
+- **Client-side TDX remote attestation** (`blindfold attest`) — verifies the
+  enclave's quotes chain to Intel's SGX root CA and pins the RTMR3 code
+  measurement; `attest --pin` makes `seal`/`proxy` auto-verify the enclave first.
+
+### Security (self-audit remediation)
+- **Enclave contract v0.5.6** (published, id 476): the sentinel is substituted
+  **only** into `Authorization` (other headers containing it are rejected); the
+  sealed secret is **redacted from the returned body** (reflection-exfil defense);
+  the webhook URL must be exactly the sentinel (no host-grafting); `amz_date` is
+  validated before slicing (no enclave panic). *Verified live: a header-smuggling
+  attempt now returns HTTP 400.*
+- Attestation gate requires a **pinned RTMR3 to seal**, refuses **mock mode** when
+  attestation is required, and warns loudly on `--no-attest` / unpinned / TOFU-pin.
+- `use --url` is now gated by the **egress allowlist**; the proxy token prints to
+  stderr with a shared-machine warning; config writes are file-locked.
+- **Chatbot:** `X-Forwarded-For` is trusted only behind a proxy flag, plus a
+  **global per-window spend budget** on the paid LLM fallback; CORS allowlist;
+  no error-detail leak; history validation; KB treated as untrusted data.
+
+### Performance / scale
+- Bounded concurrent enclave calls (`BLINDFOLD_MAX_INFLIGHT`, 503 when saturated);
+  attestation result cached with a TTL; non-blocking usage log; chatbot KB served
+  via an inverted index instead of a full per-request scan.
+
+---
+
 ## [0.3.0] — Tenant key in the OS keychain
 
 ### Added
