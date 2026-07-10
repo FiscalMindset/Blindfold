@@ -63,7 +63,10 @@ survive across sessions — none require re-sealing):
 3. **The proxy running** if using the HTTP path: `npm run blindfold -- proxy`
    (listens on `127.0.0.1:8787`). Point the tool at it with base URL
    `http://127.0.0.1:8787/v1` and key `__BLINDFOLD__`. (Code paths use the
-   release-broker instead — see R3.)
+   release-broker instead — see R3.) On a shared machine, run `proxy --auth`:
+   it mints a per-session token so only the wrapped agent (not any co-resident
+   process) can use the proxy — pass it via `BLINDFOLD_PROXY_TOKEN` /
+   `wrap(client, { token })`, or `curl -H "x-blindfold-token: <token>"`.
 
 **Before assuming a key is usable, run `audit`, not `sealed`.** `sealed` only
 reads the LOCAL ledger; `audit` reconciles it against the enclave (the source of
