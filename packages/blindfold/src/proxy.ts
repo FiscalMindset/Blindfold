@@ -26,6 +26,7 @@
  */
 import http from "node:http";
 import crypto from "node:crypto";
+import fs from "node:fs";
 import type { AddressInfo } from "node:net";
 import { SENTINEL } from "./constants.ts";
 import { loadBlindfoldEnv } from "./env.ts";
@@ -47,6 +48,14 @@ export interface ProxyOpts {
    * `BLINDFOLD_PROXY_TOKEN` env var. Omit/empty ⇒ no auth (back-compat).
    */
   token?: string;
+  /**
+   * Bind a unix-domain socket at this filesystem path instead of a TCP port.
+   * The socket file is created with 0600 permissions, so only processes running
+   * as the same OS user can even connect — closing the "any local process can
+   * reach 127.0.0.1" gap at the OS level. When set, `port` is ignored.
+   * (Client support: `curl --unix-socket <path>`; SDK-over-socket is a follow-up.)
+   */
+  socket?: string;
 }
 
 // Cap the proxied request body so a huge upload can't exhaust proxy memory.
@@ -68,6 +77,8 @@ export interface ProxyHandle {
   port: number;
   /** The active per-session token, if auth is enabled (else undefined). */
   token?: string;
+  /** The unix-domain socket path, if bound to one instead of a TCP port. */
+  socket?: string;
   close: () => Promise<void>;
 }
 
@@ -76,6 +87,7 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
   const port = opts.port ?? env.port ?? 8787;
   const secretKey = opts.secretKey ?? "openai_api_key";
   const token = (opts.token ?? process.env.BLINDFOLD_PROXY_TOKEN ?? "").trim() || undefined;
+  const socketPath = opts.socket?.trim() || undefined;
   const t3 = await openT3Client(env);
 
   const server = http.createServer((req, res) => {
@@ -94,20 +106,39 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
 
   return await new Promise<ProxyHandle>((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, "127.0.0.1", () => {
-      const { port: bound } = server.address() as AddressInfo;
-      const url = `http://127.0.0.1:${bound}`;
+
+    const onListening = () => {
+      let url: string;
+      let bound = 0;
+      if (socketPath) {
+        // Restrict the socket to the owner: only same-user processes can connect.
+        try { fs.chmodSync(socketPath, 0o600); } catch { /* best-effort */ }
+        url = `unix:${socketPath}`;
+      } else {
+        bound = (server.address() as AddressInfo).port;
+        url = `http://127.0.0.1:${bound}`;
+      }
       safeLog("info", { msg: "proxy_listening", url, mock: env.mock });
       resolve({
         url,
         port: bound,
         token,
+        socket: socketPath,
         close: async () => {
           await new Promise<void>((r) => server.close(() => r()));
+          if (socketPath) { try { fs.rmSync(socketPath, { force: true }); } catch { /* ignore */ } }
           await t3.close();
         },
       });
-    });
+    };
+
+    if (socketPath) {
+      // Remove a stale socket file from a previous run, then bind.
+      try { fs.rmSync(socketPath, { force: true }); } catch { /* ignore */ }
+      server.listen(socketPath, onListening);
+    } else {
+      server.listen(port, "127.0.0.1", onListening);
+    }
   });
 }
 

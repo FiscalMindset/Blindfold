@@ -60,7 +60,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 |---|---|
 | `use --name <name> -- <cmd>` | Release + inject the key into one child command only. |
 | `use --name <name> --url <https>` | Quick "does it auth?" check. |
-| `proxy [--port 8787] [--auth]` | Run the local proxy; agents use `__BLINDFOLD__`. `--auth` mints a per-session token so only the wrapped agent (not any co-resident process) can use it. |
+| `proxy [--port 8787] [--auth] [--socket [path]]` | Run the local proxy; agents use `__BLINDFOLD__`. `--auth` mints a per-session token so only the wrapped agent (not any co-resident process) can use it. `--socket` binds a unix-domain socket (0600) instead of a TCP port, so only your OS user's processes can connect. |
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
 
 **Lifecycle**
@@ -199,6 +199,22 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 `x-blindfold-token` header automatically; with raw `curl`, add
 `-H "x-blindfold-token: $BLINDFOLD_PROXY_TOKEN"`. `/health` stays open. Without
 `--auth`, behaviour is unchanged.
+
+**Or take the port off the table entirely (`--socket`).** Instead of a TCP port
+that any local process can dial, bind a unix-domain socket the OS restricts to your
+user:
+
+```bash
+npm run blindfold -- proxy --socket            # defaults to <stateDir>/proxy.sock (0600)
+# call it:
+curl --unix-socket ~/.blindfold/proxy.sock http://localhost/v1/models
+```
+
+The socket file is created `0600`, so only processes running as **your OS user** can
+connect — the kernel enforces it, no token needed. `--socket <path>` picks a custom
+path; combine with `--auth` for both layers. (Client support today: `curl
+--unix-socket`; pointing an SDK at a unix socket needs a custom fetch/agent — that
+wiring is a follow-up. TCP remains the default.)
 
 ### 3b. Pattern B — release-broker (works today, any protocol)
 
