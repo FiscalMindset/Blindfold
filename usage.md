@@ -256,6 +256,20 @@ blindfold attest --expect-rtmr3 B6mn+/ADHhD...   # ✅ matches expected, or ✖ 
 This upgrades the trust model from *"trust the operator"* to *"verify the silicon."*
 (`--json` for scripting; needs a real node — not available in `BLINDFOLD_MOCK` mode.)
 
+**Make it automatic — pin once, then every `seal`/`proxy` verifies first.** Add
+`--pin` to persist the measurement; from then on `register` (seal) and `proxy`
+refuse to run if the live enclave doesn't match:
+
+```bash
+blindfold attest --pin                 # verify + save this RTMR3 as the expected one
+blindfold register --name openai_api_key   # → "✓ enclave attestation verified", then seals
+# if the enclave ever changes / fails: the command aborts before sealing.
+```
+
+The gate is a no-op until you pin (or set `BLINDFOLD_REQUIRE_ATTEST=1`), so nothing
+changes for existing users. Bypass a pinned check with `--no-attest`; clear it by
+removing `expectedRtmr3` from `~/.blindfold/config.json`.
+
 ### 3b. Pattern B — release-broker (works today, any protocol)
 
 This is the **production-viable path right now**. Your code calls the T3 contract to fetch the sealed secret just-in-time, uses it for one call, drops it. Works for SMTP / IMAP / gRPC / anything.

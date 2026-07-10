@@ -20,7 +20,7 @@ import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from 
 import { readSecretLine } from "../src/prompt.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
-import { attest } from "../src/attest.ts";
+import { attest, attestationGate, writePinnedRtmr3 } from "../src/attest.ts";
 import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
@@ -172,6 +172,13 @@ async function main(): Promise<void> {
       if (!name) {
         die("usage: blindfold register --name <KV_KEY> [--from-env <ENV_VAR>]");
       }
+      // Attestation gate (no-op unless a measurement is pinned): don't seal into
+      // an enclave that doesn't verify.
+      const sealGate = await attestationGate({ skip: !!argv.flags["no-attest"] });
+      if (sealGate.enforced && !sealGate.ok) {
+        die(`attestation gate: ${sealGate.message}. Refusing to seal into an unverified enclave. (bypass: --no-attest, or clear the pin)`);
+      }
+      if (sealGate.enforced) console.log("✓ enclave attestation verified");
       await registerSecret({ name, fromEnv });
       if (fromEnv) {
         console.log(`✓ Registered "${name}" (value read from ${fromEnv} once, then dropped).`);
@@ -478,6 +485,13 @@ async function main(): Promise<void> {
           ? String(argv.flags.socket)
           : path.join(stateDir(), "proxy.sock");
       }
+      // Attestation gate (no-op unless a measurement is pinned): don't route
+      // secrets through an enclave that doesn't verify.
+      const proxyGate = await attestationGate({ skip: !!argv.flags["no-attest"] });
+      if (proxyGate.enforced && !proxyGate.ok) {
+        die(`attestation gate: ${proxyGate.message}. Refusing to start the proxy against an unverified enclave. (bypass: --no-attest, or clear the pin)`);
+      }
+      if (proxyGate.enforced) console.log("✓ enclave attestation verified");
       const handle = await startProxy({ port, secretKey: secret, token, socket });
       console.log(`✓ Blindfold proxy listening at ${handle.url}`);
       if (handle.socket) {
@@ -524,6 +538,16 @@ async function main(): Promise<void> {
         console.log(`  RTMR3 pin:            ${r.pinned ? "✅ matches expected" : "✖ DID NOT MATCH"}`);
       } else if (r.rtmr3s.length) {
         console.log(`  Tip: pin it next time → blindfold attest --expect-rtmr3 ${r.rtmr3s[0]}`);
+      }
+      // `--pin` persists the measurement so seal/proxy auto-gate on it hereafter.
+      if (argv.flags.pin) {
+        const toPin = expectRtmr3 ?? r.rtmr3s[0];
+        if (r.valid && toPin) {
+          writePinnedRtmr3(toPin);
+          console.log(`  ✓ pinned — \`seal\` and \`proxy\` will now verify this measurement first.`);
+        } else {
+          console.log(`  ✗ not pinning: attestation must pass first.`);
+        }
       }
       if (!r.valid || (expectRtmr3 && !r.pinned)) process.exitCode = 1;
       return;
