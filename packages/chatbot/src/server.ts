@@ -41,9 +41,30 @@ const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 const MAX_CONCURRENT_FALLBACKS = Number(process.env.BLINDFOLD_CHATBOT_MAX_FALLBACKS) || 4;
 let inFlightFallbacks = 0;
 
+// Global spend budget on the paid fallback: concurrency alone does NOT bound
+// total cost (H7). Cap the number of metered calls per rolling window.
+const MAX_FALLBACKS_PER_WINDOW = Number(process.env.BLINDFOLD_CHATBOT_MAX_FALLBACKS_PER_WINDOW) || 120;
+const FALLBACK_WINDOW_MS = Number(process.env.BLINDFOLD_CHATBOT_FALLBACK_WINDOW_MS) || 60_000;
+let fallbackWindowStart = Date.now();
+let fallbackWindowCount = 0;
+/** True (and consumes one unit) if the global fallback budget allows another call. */
+function fallbackBudgetOk(): boolean {
+  const now = Date.now();
+  if (now - fallbackWindowStart >= FALLBACK_WINDOW_MS) { fallbackWindowStart = now; fallbackWindowCount = 0; }
+  if (fallbackWindowCount >= MAX_FALLBACKS_PER_WINDOW) return false;
+  fallbackWindowCount++;
+  return true;
+}
+
+// Only trust X-Forwarded-For behind a known proxy (else it's client-spoofable,
+// defeating rate limits, H7). Opt in with BLINDFOLD_CHATBOT_TRUST_PROXY=1.
+const TRUST_PROXY = process.env.BLINDFOLD_CHATBOT_TRUST_PROXY === "1";
+
 function clientIp(req: http.IncomingMessage): string {
-  const xff = req.headers["x-forwarded-for"];
-  if (typeof xff === "string" && xff.length > 0) return (xff.split(",")[0] ?? "").trim();
+  if (TRUST_PROXY) {
+    const xff = req.headers["x-forwarded-for"];
+    if (typeof xff === "string" && xff.length > 0) return (xff.split(",")[0] ?? "").trim();
+  }
   return req.socket.remoteAddress ?? "unknown";
 }
 
@@ -89,7 +110,16 @@ export async function startServer(opts: ServerOptions = {}): Promise<{ url: stri
   const server = http.createServer(async (req, res) => {
     try {
       if (opts.cors) {
-        res.setHeader("Access-Control-Allow-Origin", "*");
+        // Prefer a specific allowlisted origin over `*` (M6): set
+        // BLINDFOLD_CHATBOT_CORS_ORIGIN to a comma-list of allowed origins.
+        const allow = (process.env.BLINDFOLD_CHATBOT_CORS_ORIGIN ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+        const origin = String(req.headers.origin ?? "");
+        if (allow.length === 0) {
+          res.setHeader("Access-Control-Allow-Origin", "*");
+        } else if (origin && allow.includes(origin)) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Vary", "Origin");
+        }
         res.setHeader("Access-Control-Allow-Headers", "content-type");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
       }
@@ -167,11 +197,20 @@ export async function startServer(opts: ServerOptions = {}): Promise<{ url: stri
           res.end(JSON.stringify({ error: `message exceeds ${MAX_MESSAGE_LEN} characters` }));
           return;
         }
-        const history = Array.isArray(body.history) ? body.history.slice(0, MAX_HISTORY_LEN) : [];
+        // Validate each history item (L6): keep only well-formed, length-capped
+        // {role, content} entries so malformed/huge items don't reach downstream.
+        const history = (Array.isArray(body.history) ? body.history : [])
+          .slice(0, MAX_HISTORY_LEN)
+          .filter((h: unknown): h is { role: string; content: string } =>
+            !!h && typeof h === "object" && typeof (h as { content?: unknown }).content === "string")
+          .map((h: { role?: unknown; content: string }) => ({
+            role: h.role === "assistant" || h.role === "system" ? h.role : "user",
+            content: h.content.slice(0, MAX_MESSAGE_LEN),
+          }));
         const req_: ChatRequest = { message, audience: body.audience, history };
-        // Cap concurrent paid LLM fallbacks: when saturated, force the
-        // deterministic KB answer instead of making another metered call.
-        const fallbackAllowed = inFlightFallbacks < MAX_CONCURRENT_FALLBACKS;
+        // Cap concurrent paid LLM fallbacks AND enforce a global per-window spend
+        // budget: when either is exceeded, force the deterministic KB answer.
+        const fallbackAllowed = inFlightFallbacks < MAX_CONCURRENT_FALLBACKS && fallbackBudgetOk();
         if (fallbackAllowed) inFlightFallbacks++;
         try {
           const out: ChatResponse = await engine.ask(req_, { disableLLMFallback: !fallbackAllowed });
@@ -193,10 +232,11 @@ export async function startServer(opts: ServerOptions = {}): Promise<{ url: stri
         req.destroy();
         return;
       }
+      // Keep the detail in the server log only — don't leak internals (M7).
       safeLog("error", { msg: "server_error", error: (e as Error).message });
       if (!res.headersSent) {
         res.writeHead(500, { "content-type": "application/json" });
-        res.end(JSON.stringify({ error: "internal error", detail: (e as Error).message.slice(0, 200) }));
+        res.end(JSON.stringify({ error: "internal error" }));
       }
     }
   });
