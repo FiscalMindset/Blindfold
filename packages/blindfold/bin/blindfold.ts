@@ -20,6 +20,7 @@ import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from 
 import { readSecretLine } from "../src/prompt.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
+import { attest } from "../src/attest.ts";
 import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
@@ -499,6 +500,32 @@ async function main(): Promise<void> {
         await handle.close();
         process.exit(0);
       });
+      return;
+    }
+
+    case "attest": {
+      // Verify the T3 enclave cluster's TDX attestation (chains to Intel's root
+      // CA). Optionally pin RTMR3 (the running code/config measurement).
+      const expectRtmr3 = argv.flags["expect-rtmr3"] ? String(argv.flags["expect-rtmr3"]) : undefined;
+      const r = await attest({ expectRtmr3 });
+      if (argv.flags.json) {
+        console.log(JSON.stringify(r, null, 2));
+        return;
+      }
+      if (!r.available) {
+        console.log(`ℹ️  ${r.nodeUrl} publishes no attestation (mock signer or still bootstrapping).`);
+        return;
+      }
+      console.log(`Attestation for ${r.nodeUrl}`);
+      console.log(`  chain to Intel root:  ${r.valid ? "✅ valid" : "✖ INVALID"}${r.error ? ` (${r.error})` : ""}`);
+      console.log(`  quotes verified:      ${r.validCount}/${r.expectedCount}`);
+      for (const m of r.rtmr3s) console.log(`  RTMR3 (code measure): ${m}`);
+      if (expectRtmr3) {
+        console.log(`  RTMR3 pin:            ${r.pinned ? "✅ matches expected" : "✖ DID NOT MATCH"}`);
+      } else if (r.rtmr3s.length) {
+        console.log(`  Tip: pin it next time → blindfold attest --expect-rtmr3 ${r.rtmr3s[0]}`);
+      }
+      if (!r.valid || (expectRtmr3 && !r.pinned)) process.exitCode = 1;
       return;
     }
 
