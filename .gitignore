@@ -54,3 +54,6 @@ packages/blindfold/assets/
 
 # Interview cheat-sheet (local only)
 interview_cheatsheet.md
+
+# Security audit (local until contract fixes are republished)
+SECURITY_AUDIT.md
