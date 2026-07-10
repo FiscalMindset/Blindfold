@@ -60,7 +60,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 |---|---|
 | `use --name <name> -- <cmd>` | Release + inject the key into one child command only. |
 | `use --name <name> --url <https>` | Quick "does it auth?" check. |
-| `proxy [--port 8787]` | Run the local proxy; agents use `__BLINDFOLD__`. |
+| `proxy [--port 8787] [--auth]` | Run the local proxy; agents use `__BLINDFOLD__`. `--auth` mints a per-session token so only the wrapped agent (not any co-resident process) can use it. |
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
 
 **Lifecycle**
@@ -178,6 +178,27 @@ Provider routes the proxy understands today:
 | Anthropic | `ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic` · `ANTHROPIC_API_KEY=__BLINDFOLD__` |
 | xAI / Grok | `XAI_BASE_URL=http://127.0.0.1:8787/x/v1` · `XAI_API_KEY=__BLINDFOLD__` |
 | Groq | `GROQ_BASE_URL=http://127.0.0.1:8787/groq/v1` · `GROQ_API_KEY=__BLINDFOLD__` |
+
+**Lock the proxy to your agent (`--auth`).** By default the proxy accepts any
+process on your machine. A co-resident process can never *steal* a sealed key (the
+enclave guarantees that), but it could *use* it on allow-listed hosts. On a shared
+machine, add `--auth`:
+
+```bash
+# terminal 1 — mints a per-session token and prints it
+npm run blindfold -- proxy --auth
+#   Auth ON — every request must send header:
+#     x-blindfold-token: <token>
+
+# terminal 2 — hand the token to your agent; every request must carry it
+export BLINDFOLD_PROXY_TOKEN=<token>
+OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-agent.js
+```
+
+`wrap(client, { token })` (or `BLINDFOLD_PROXY_TOKEN` in the env) sends the
+`x-blindfold-token` header automatically; with raw `curl`, add
+`-H "x-blindfold-token: $BLINDFOLD_PROXY_TOKEN"`. `/health` stays open. Without
+`--auth`, behaviour is unchanged.
 
 ### 3b. Pattern B — release-broker (works today, any protocol)
 

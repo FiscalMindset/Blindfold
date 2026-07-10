@@ -25,6 +25,7 @@
  * from the sealed secret — the raw secret never appears in a header on its own.
  */
 import http from "node:http";
+import crypto from "node:crypto";
 import type { AddressInfo } from "node:net";
 import { SENTINEL } from "./constants.ts";
 import { loadBlindfoldEnv } from "./env.ts";
@@ -38,15 +39,35 @@ export interface ProxyOpts {
   port?: number;
   /** Logical name of the secret to substitute. Default: "openai_api_key". */
   secretKey?: string;
+  /**
+   * Per-session auth token. When set (non-empty), every request except
+   * `/health` must carry it in the `x-blindfold-token` header — so only the
+   * process that was handed this token (the agent Blindfold wraps) can use the
+   * proxy, not just any co-resident local process. Falls back to the
+   * `BLINDFOLD_PROXY_TOKEN` env var. Omit/empty ⇒ no auth (back-compat).
+   */
+  token?: string;
 }
 
 // Cap the proxied request body so a huge upload can't exhaust proxy memory.
 const MAX_BODY_BYTES = Number(process.env.BLINDFOLD_MAX_BODY_BYTES) || 5 * 1024 * 1024;
 class PayloadTooLargeError extends Error {}
 
+/** Constant-time string compare (avoids leaking the token via timing). */
+function tokenMatches(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+export const PROXY_TOKEN_HEADER = "x-blindfold-token";
+
 export interface ProxyHandle {
   url: string;
   port: number;
+  /** The active per-session token, if auth is enabled (else undefined). */
+  token?: string;
   close: () => Promise<void>;
 }
 
@@ -54,10 +75,11 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
   const env = loadBlindfoldEnv();
   const port = opts.port ?? env.port ?? 8787;
   const secretKey = opts.secretKey ?? "openai_api_key";
+  const token = (opts.token ?? process.env.BLINDFOLD_PROXY_TOKEN ?? "").trim() || undefined;
   const t3 = await openT3Client(env);
 
   const server = http.createServer((req, res) => {
-    handle(req, res, t3, secretKey, env).catch((e) => {
+    handle(req, res, t3, secretKey, env, token).catch((e) => {
       if (e instanceof PayloadTooLargeError) {
         if (!res.headersSent) res.writeHead(413, { "content-type": "text/plain", "connection": "close" });
         res.end("request body too large");
@@ -79,6 +101,7 @@ export async function startProxy(opts: ProxyOpts = {}): Promise<ProxyHandle> {
       resolve({
         url,
         port: bound,
+        token,
         close: async () => {
           await new Promise<void>((r) => server.close(() => r()));
           await t3.close();
@@ -94,11 +117,25 @@ async function handle(
   t3: T3ClientHandle,
   secretKey: string,
   env: BlindfoldEnv,
+  token?: string,
 ): Promise<void> {
   if (req.url === "/health") {
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ ok: true, mock: env.mock }));
+    res.end(JSON.stringify({ ok: true, mock: env.mock, auth: Boolean(token) }));
     return;
+  }
+
+  // Per-session auth: when a token is configured, only a caller that presents it
+  // may use the proxy. This gates *use* by a co-resident local process — the
+  // enclave still guarantees the key can never be *stolen* either way.
+  if (token) {
+    const provided = String(req.headers[PROXY_TOKEN_HEADER] ?? "");
+    if (!provided || !tokenMatches(provided, token)) {
+      safeLog("warn", { msg: "proxy_unauthorized", path: req.url });
+      res.writeHead(401, { "content-type": "text/plain" });
+      res.end(`unauthorized: missing or invalid ${PROXY_TOKEN_HEADER} header`);
+      return;
+    }
   }
 
   const provider = resolveProvider(req.url ?? "/");
