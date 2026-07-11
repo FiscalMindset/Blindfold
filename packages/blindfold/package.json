@@ -1,8 +1,9 @@
 {
-  "name": "blindfold",
+  "name": "@fiscalmindset/blindfold",
   "version": "0.3.0",
   "type": "module",
   "description": "Make any AI agent's API keys un-leakable, by sealing them inside a Terminal 3 TDX enclave.",
+  "publishConfig": { "access": "public" },
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
