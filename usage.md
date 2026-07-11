@@ -63,6 +63,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | `proxy [--port 8787] [--auth] [--socket [path]]` | Run the local proxy; agents use `__BLINDFOLD__`. `--auth` mints a per-session token so only the wrapped agent (not any co-resident process) can use it. `--socket` binds a unix-domain socket (0600) instead of a TCP port, so only your OS user's processes can connect. |
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
 | `attest [--expect-rtmr3 <b64>] [--json]` | Verify the enclave cluster's TDX attestation (chains to Intel's root CA); optionally pin the RTMR3 code measurement. |
+| `credit [--json]` (alias `balance`) | Show the tenant's Terminal 3 token/credit balance + exhausted flag. A session-authed read — costs no credit, so it works even at 0 balance. |
 
 **Lifecycle**
 | Command | What it does |

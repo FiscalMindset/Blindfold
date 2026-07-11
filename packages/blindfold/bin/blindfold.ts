@@ -21,6 +21,7 @@ const ROUTES: Record<string, Handler> = {
   proxy: handleServe, attest: handleServe, dashboard: handleServe, stats: handleServe, "stats:clear": handleServe,
   publish: handleEnclave, init: handleEnclave, verify: handleEnclave, compat: handleEnclave,
   sealed: handleEnclave, audit: handleEnclave, status: handleEnclave, doctor: handleEnclave, skill: handleEnclave,
+  credit: handleEnclave, balance: handleEnclave,
 };
 
 async function main(): Promise<void> {
@@ -67,6 +68,7 @@ Commands:
   stats                                             CLI summary of proxy usage.
   stats:clear                                       Wipe the usage log.
   doctor                                            Show current mode + config.
+  credit   [--json]                                 Show the tenant's Terminal 3 token/credit balance (no credit cost).
 
 The friendliest path is just:  blindfold init
 

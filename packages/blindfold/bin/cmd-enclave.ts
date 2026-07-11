@@ -18,6 +18,34 @@ import { type Argv, die, assetPath, fingerprint, resolveEnvVar } from "./cli-sha
 
 export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]): Promise<void> {
   switch (cmd) {
+    case "credit":
+    case "balance": {
+      // Show the tenant's token/credit balance (a session-authed read that costs
+      // no credit — works even when exhausted). Avoids discovering "0 credits"
+      // only when a seal/forward fails with a 403.
+      const env = loadBlindfoldEnv();
+      const BASE = 1_000_000; // 1 token = 1,000,000 base units
+      const { openT3Client } = await import("../src/t3-client.ts");
+      const client = await openT3Client(env);
+      try {
+        const b = await client.getBalance();
+        const tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });
+        if (argv.flags.json) { console.log(JSON.stringify(b, null, 2)); return; }
+        console.log(`💳 Terminal 3 credit — ${env.did || "(no tenant)"}  (${env.mock ? "MOCK" : env.t3Env})`);
+        console.log(`  available:  ${b.available.toLocaleString()} base units  (${tok(b.available)} tokens)`);
+        console.log(`  reserved:   ${b.reserved.toLocaleString()} base units`);
+        console.log(`  status:     ${b.creditExhausted ? "⚠ EXHAUSTED" : "✅ ok"}`);
+        if (b.creditExhausted) {
+          console.log(`  Top up testnet credits, then re-check with \`blindfold credit\`:`);
+          console.log(`    https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
+          process.exitCode = 1;
+        }
+      } finally {
+        await client.close();
+      }
+      return;
+    }
+
     case "publish": {
       const wasmPath =
         (argv.flags.wasm as string | undefined) ??
