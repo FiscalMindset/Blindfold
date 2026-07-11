@@ -4,6 +4,7 @@
  * helpers in ./cli-shared.ts. Every action prints what it did, never a secret.
  */
 import { type Argv, parseArgv } from "./cli-shared.ts";
+import { c, head } from "../src/color.ts";
 import { handleAuth } from "./cmd-auth.ts";
 import { handleSecrets } from "./cmd-secrets.ts";
 import { handleLifecycle } from "./cmd-lifecycle.ts";
@@ -22,6 +23,7 @@ const ROUTES: Record<string, Handler> = {
   publish: handleEnclave, init: handleEnclave, verify: handleEnclave, compat: handleEnclave,
   sealed: handleEnclave, audit: handleEnclave, status: handleEnclave, doctor: handleEnclave, skill: handleEnclave,
   credit: handleEnclave, balance: handleEnclave,
+  update: handleEnclave, upgrade: handleEnclave,
 };
 
 async function main(): Promise<void> {
@@ -38,9 +40,9 @@ async function main(): Promise<void> {
 }
 
 function printHelp(): void {
-  console.log(`Blindfold — protect your AI agent's API keys with Terminal 3 enclaves.
+  console.log(`${head("🛡️  Blindfold")} ${c.gray("— protect your AI agent's API keys with Terminal 3 enclaves.")}
 
-Commands:
+${c.bold("Commands:")}
   init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
@@ -69,6 +71,7 @@ Commands:
   stats:clear                                       Wipe the usage log.
   doctor                                            Show current mode + config.
   credit   [--json]                                 Show the tenant's Terminal 3 token/credit balance (no credit cost).
+  update   [--from <path>]                           Update the global blindfold (from npm, or a local repo with --from).
 
 The friendliest path is just:  blindfold init
 

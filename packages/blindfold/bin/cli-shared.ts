@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { c } from "../src/color.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -66,6 +67,6 @@ export function resolveEnvVar(asFlag: string | undefined, command: string | unde
 }
 
 export function die(msg: string): never {
-  console.error(`✖ ${msg}`);
+  console.error(c.red(`✖ ${msg}`));
   process.exit(2);
 }

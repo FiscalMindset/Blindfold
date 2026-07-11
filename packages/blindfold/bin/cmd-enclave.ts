@@ -15,6 +15,7 @@ import { runInit, runVerify } from "../src/init.ts";
 import { runCompat } from "../src/compat.ts";
 import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/sealed-ledger.ts";
 import { type Argv, die, assetPath, fingerprint, resolveEnvVar } from "./cli-shared.ts";
+import { c, ok, bad, warn, head } from "../src/color.ts";
 
 export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]): Promise<void> {
   switch (cmd) {
@@ -31,10 +32,10 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
         const b = await client.getBalance();
         const tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });
         if (argv.flags.json) { console.log(JSON.stringify(b, null, 2)); return; }
-        console.log(`💳 Terminal 3 credit — ${env.did || "(no tenant)"}  (${env.mock ? "MOCK" : env.t3Env})`);
-        console.log(`  available:  ${b.available.toLocaleString()} base units  (${tok(b.available)} tokens)`);
+        console.log(head(`💳 Terminal 3 credit`) + c.gray(` — ${env.did || "(no tenant)"}  (${env.mock ? "MOCK" : env.t3Env})`));
+        console.log(`  available:  ${c.bold(tok(b.available) + " tokens")}  ${c.gray("(" + b.available.toLocaleString() + " base units)")}`);
         console.log(`  reserved:   ${b.reserved.toLocaleString()} base units`);
-        console.log(`  status:     ${b.creditExhausted ? "⚠ EXHAUSTED" : "✅ ok"}`);
+        console.log(`  status:     ${b.creditExhausted ? warn("⚠ EXHAUSTED") : ok("✅ ok")}`);
         if (b.creditExhausted) {
           console.log(`  Top up testnet credits, then re-check with \`blindfold credit\`:`);
           console.log(`    https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
@@ -43,6 +44,46 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
       } finally {
         await client.close();
       }
+      return;
+    }
+
+    case "update":
+    case "upgrade": {
+      // Update the globally-installed blindfold from the repo SOURCE. We do NOT
+      // fall back to `npm i -g blindfold` — that npm name is an UNRELATED package
+      // ("get/set properties using dot syntax strings"), not this project.
+      // Source resolution: --from, then BLINDFOLD_SRC, then a repo checkout at cwd.
+      const { spawnSync } = await import("node:child_process");
+      const run = (cmd: string, args: string[], cwd?: string) =>
+        spawnSync(cmd, args, { stdio: "inherit", cwd });
+      let from = argv.flags.from ? String(argv.flags.from) : (process.env.BLINDFOLD_SRC || "");
+      if (!from) {
+        for (const cand of [path.resolve(process.cwd(), "packages", "blindfold"), process.cwd()]) {
+          try {
+            const pkg = JSON.parse(fs.readFileSync(path.join(cand, "package.json"), "utf8"));
+            if (pkg.name === "blindfold" && pkg.bin) { from = cand; break; }
+          } catch { /* not the package dir */ }
+        }
+      }
+      if (!from) {
+        console.log(warn("Can't update: no Blindfold source found") + c.gray(" (and the npm `blindfold` name is an unrelated package)."));
+        console.log("  Update from your repo checkout — one of:");
+        console.log(c.cyan("    blindfold update --from /path/to/packages/blindfold"));
+        console.log(c.cyan("    cd <repo> && blindfold update"));
+        console.log(c.gray("    (or export BLINDFOLD_SRC=/path/to/packages/blindfold)"));
+        process.exitCode = 1;
+        return;
+      }
+      console.log(head(`↻ Updating global blindfold`) + c.gray(` from ${from}`));
+      if (run("npm", ["run", "build"], from).status !== 0) die("build failed");
+      const pack = spawnSync("npm", ["pack"], { cwd: from, encoding: "utf8" });
+      const tgz = (pack.stdout || "").trim().split("\n").pop() || "";
+      if (!tgz) die("npm pack produced no tarball");
+      const tgzPath = path.join(from, tgz);
+      const inst = run("npm", ["install", "-g", tgzPath]);
+      try { fs.rmSync(tgzPath, { force: true }); } catch { /* ignore */ }
+      if (inst.status !== 0) die("global install failed");
+      console.log(ok(`✓ blindfold updated.`) + c.gray(" Open a NEW shell if the command still looks stale."));
       return;
     }
 

@@ -64,6 +64,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
 | `attest [--expect-rtmr3 <b64>] [--json]` | Verify the enclave cluster's TDX attestation (chains to Intel's root CA); optionally pin the RTMR3 code measurement. |
 | `credit [--json]` (alias `balance`) | Show the tenant's Terminal 3 token/credit balance + exhausted flag. A session-authed read — costs no credit, so it works even at 0 balance. |
+| `update [--from <path>]` (alias `upgrade`) | Update the globally-installed `blindfold` from the repo source (rebuild + reinstall). Auto-detects the repo when run from inside it; `--from` / `BLINDFOLD_SRC` otherwise. Does **not** use npm — the npm `blindfold` name is an unrelated package. |
 
 **Lifecycle**
 | Command | What it does |
