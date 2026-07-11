@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Type-check (tsc --noEmit)
+        run: npx tsc --noEmit -p tsconfig.json
+
       - name: Run demo
         env:
           BLINDFOLD_MOCK: "1"
@@ -33,6 +36,24 @@ jobs:
 
       - name: Provider registry tests
         run: npm run test:providers
+
+      - name: Security feature tests (token / socket / attestation gate)
+        env:
+          BLINDFOLD_MOCK: "1"
+        run: npm run test:security
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: .gitleaks.toml
 
   contract:
     name: Enclave contract (build + auth vectors)
