@@ -17,6 +17,8 @@ import http from "node:http";
 import { startProxy } from "../src/proxy.ts";
 import { wrap } from "../src/wrap.ts";
 import { attestationGate } from "../src/attest.ts";
+import { openT3Client } from "../src/t3-client.ts";
+import { loadBlindfoldEnv } from "../src/env.ts";
 
 process.env.BLINDFOLD_MOCK = "1";
 
@@ -109,4 +111,16 @@ test("attestation gate: opt-in, refuses mock when required, loud bypass", async 
   assert.ok(g.warning && g.warning.length > 0, "bypass emits a warning");
 
   delete process.env.BLINDFOLD_REQUIRE_ATTEST;
+});
+
+test("getBalance returns a well-formed credit balance (mock)", async () => {
+  const client = await openT3Client(loadBlindfoldEnv());
+  try {
+    const b = await client.getBalance();
+    assert.equal(typeof b.available, "number");
+    assert.equal(typeof b.reserved, "number");
+    assert.equal(typeof b.creditExhausted, "boolean");
+  } finally {
+    await client.close();
+  }
 });

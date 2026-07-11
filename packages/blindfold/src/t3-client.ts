@@ -92,6 +92,7 @@ export interface T3Sdk {
     canonicalName: (tail: string) => string;
     executeControl: (functionName: string, input: unknown) => Promise<unknown>;
     tenant: { me: () => Promise<unknown> };
+    token: { getUsage: (opts?: unknown) => Promise<{ balance?: Record<string, unknown> }> };
     maps: {
       create: (input: unknown) => Promise<unknown>;
       update: (name: string, input: unknown) => Promise<unknown>;
@@ -155,8 +156,22 @@ export interface T3ClientHandle {
    * reconcile the local ledger against the enclave (the source of truth).
    */
   verifySecret: (name: string) => Promise<{ present: boolean; length: number; fingerprint: string }>;
+  /**
+   * Read the tenant's token/credit balance (a session-authed read that costs no
+   * credit — works even when the account is exhausted). Powers `blindfold credit`.
+   */
+  getBalance: () => Promise<CreditBalance>;
   /** True if a real T3 round-trip happened during construction. */
   isReal: boolean;
+}
+
+/** Tenant credit balance (base units; 1 token = 1,000,000 base units). */
+export interface CreditBalance {
+  available: number;
+  reserved: number;
+  creditExhausted: boolean;
+  storageDeposit?: number;
+  mock?: boolean;
 }
 
 export async function openT3Client(env: BlindfoldEnv): Promise<T3ClientHandle> {
@@ -341,6 +356,17 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     }
   };
 
+  const getBalance = async (): Promise<CreditBalance> => {
+    const page = await withDeadline(tenant.token.getUsage(), "token.getUsage");
+    const b = (page.balance ?? {}) as Record<string, unknown>;
+    return {
+      available: Number(b.available ?? 0),
+      reserved: Number(b.reserved ?? 0),
+      creditExhausted: Boolean(b.credit_exhausted),
+      storageDeposit: b.storage_deposit != null ? Number(b.storage_deposit) : undefined,
+    };
+  };
+
   return {
     close: async () => {
       /* SDK has no close()  */
@@ -353,6 +379,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     grantEgress,
     setAgentGrant,
     verifySecret,
+    getBalance,
     isReal: true,
   };
 }
@@ -398,6 +425,9 @@ function openMockClient(): T3ClientHandle {
     },
     async verifySecret(name) {
       return { present: true, length: 0, fingerprint: `mock-${name}`.slice(0, 8) };
+    },
+    async getBalance() {
+      return { available: 1_000_000_000, reserved: 0, creditExhausted: false, mock: true };
     },
     isReal: false,
   };
