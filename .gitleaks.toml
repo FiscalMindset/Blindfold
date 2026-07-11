@@ -19,6 +19,7 @@ paths = [
   '''package-lock\.json''',
   '''\.wasm$''',
   '''SECURITY_AUDIT\.md''',           # local-only audit doc (gitignored anyway)
+  '''packages/chatbot/data/''',       # generated KB — indexes code incl. auth.rs AWS test vectors
 ]
 
 # Specific strings that match secret patterns but are public/test data.
