@@ -15,6 +15,7 @@ import { runInit, runVerify } from "../src/init.ts";
 import { runCompat } from "../src/compat.ts";
 import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/sealed-ledger.ts";
 import { type Argv, die, assetPath, fingerprint, resolveEnvVar } from "./cli-shared.ts";
+import { c } from "../src/color.ts";
 
 export async function handleAuth(cmd: string, argv: Argv, cmdArgs: string[]): Promise<void> {
   switch (cmd) {
@@ -82,9 +83,9 @@ export async function handleAuth(cmd: string, argv: Argv, cmdArgs: string[]): Pr
         : process.env.T3N_API_KEY && store === "keychain" ? `set (${keychainBackend()})`
         : store === "file" ? "set (config file, 0600)"
         : "set (env / repo .env)";
-      console.log(`config:  ${cfg}${fs.existsSync(cfg) ? "" : "  (not present)"}`);
-      console.log(`tenant:  ${env.did || "(none — run `blindfold login`)"}`);
-      console.log(`env:     ${env.t3Env}   ·   key: ${keySource}`);
+      console.log(`${c.bold("config:")}  ${c.gray(cfg)}${fs.existsSync(cfg) ? "" : "  (not present)"}`);
+      console.log(`${c.bold("tenant:")}  ${c.cyan(env.did || "(none — run `blindfold login`)")}`);
+      console.log(`${c.bold("env:")}     ${env.t3Env}   ·   key: ${c.green(keySource)}`);
       return;
     }
   }

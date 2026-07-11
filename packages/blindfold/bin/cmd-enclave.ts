@@ -127,7 +127,7 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
         console.log(`Seal one with:  blindfold register --name <KV_KEY>`);
         return;
       }
-      console.log(`Sealed keys  (source: ${defaultSealedLogPath()})\n`);
+      console.log(head("🔐 Sealed keys") + c.gray(`  (source: ${defaultSealedLogPath()})`) + "\n");
       console.log("  WHEN                  NAME                       BYTES  MODE   WHERE");
       console.log("  ────                  ────                       ─────  ────   ─────");
       for (const e of entries) {
@@ -194,7 +194,7 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
     case "status": {
       // One-glance overview: health + sealed inventory + what to do next.
       const env = loadBlindfoldEnv();
-      console.log("🛡️  Blindfold status\n");
+      console.log(head("🛡️  Blindfold status") + "\n");
       console.log(`  mode:    ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL"}   ·   T3 env: ${env.t3Env}`);
       if (env.t3BaseUrl) console.log(`  node:    ${env.t3BaseUrl}  (override)`);
       if (!env.mock) {
@@ -202,9 +202,9 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
           const { openT3Client } = await import("../src/t3-client.ts");
           const client = await openT3Client(env);
           const info = await client.me();
-          console.log(`  tenant:  ✅ ${info.tenant}  (status=${info.status ?? "?"})`);
+          console.log(`  tenant:  ${ok("✅ " + info.tenant)}  (status=${info.status ?? "?"})`);
         } catch (e) {
-          console.log(`  tenant:  ✖ ${(e as Error).message.slice(0, 90)}`);
+          console.log(`  tenant:  ${bad("✖ " + (e as Error).message.slice(0, 90))}`);
           console.log(`           → run \`blindfold doctor\` for a full diagnosis.`);
           process.exitCode = 1;
         }
@@ -225,7 +225,7 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
     }
     case "doctor": {
       const env = loadBlindfoldEnv();
-      console.log("Blindfold doctor:");
+      console.log(head("🩺 Blindfold doctor"));
       console.log(`  mode:               ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL (T3)"}`);
       console.log(`  T3N_API_KEY set:    ${env.t3nApiKey ? "yes" : "NO ✖"}`);
       console.log(`  DID set:            ${env.did ? "yes" : "NO ✖"}`);
@@ -251,9 +251,9 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
       let client;
       try {
         client = await openT3Client(env);
-        console.log(`  auth:               ✅ handshake + authenticate OK`);
+        console.log(`  auth:               ${ok("✅ handshake + authenticate OK")}`);
       } catch (e) {
-        console.log(`  auth:               ✖ ${(e as Error).message}`);
+        console.log(`  auth:               ${bad("✖ " + (e as Error).message)}`);
         console.log(`     → Check T3N_API_KEY is a 0x 32-byte hex private key and DID looks like did:t3n:<hex>.`);
         process.exitCode = 1;
         return;
@@ -273,7 +273,7 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
           console.log(`  ⚠  tenant status is "${info.status}" (not active) — seals/writes may fail.`);
           process.exitCode = 1;
         } else {
-          console.log(`  ✅ Ready to seal & use secrets on this tenant.`);
+          console.log(`  ${ok("✅ Ready to seal & use secrets on this tenant.")}`);
         }
       } catch (e) {
         const msg = (e as Error).message;
