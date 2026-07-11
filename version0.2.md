@@ -59,7 +59,7 @@ globally and run with plain `node` — off the SSD, no repo, no `tsx`.
 
 ```bash
 # From the repo (or once published to npm):
-npm install -g ./packages/blindfold      # or: npm i -g blindfold
+npm install -g ./packages/blindfold      # or: npm i -g @fiscalmindset/blindfold
 
 # One-time setup on any machine:
 blindfold login                          # store tenant creds in ~/.blindfold

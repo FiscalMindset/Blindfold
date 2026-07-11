@@ -13,6 +13,18 @@
 - **Client-side TDX remote attestation** (`blindfold attest`) — verifies the
   enclave's quotes chain to Intel's SGX root CA and pins the RTMR3 code
   measurement; `attest --pin` makes `seal`/`proxy` auto-verify the enclave first.
+- **`blindfold credit`** (alias `balance`) — show the tenant's Terminal 3 token
+  balance + exhausted flag (a session-authed read; costs no credit, works at 0).
+- **`blindfold update`** (alias `upgrade`) — refresh the global install from the
+  repo source (or `@fiscalmindset/blindfold@latest`); never the unrelated bare npm
+  `blindfold` package.
+- **Colored CLI output** — TTY-aware ANSI (plain when piped / in CI); applied to
+  help, errors, and the health commands (status/doctor/whoami/sealed/credit).
+
+### Packaging
+- Package renamed to **`@fiscalmindset/blindfold`** (command stays `blindfold`).
+  The bare npm name `blindfold` is an unrelated, deprecated package, so publish
+  and `npm i -g` must use the scoped name.
 
 ### Security (self-audit remediation)
 - **Enclave contract v0.5.6** (published, id 476): the sentinel is substituted
