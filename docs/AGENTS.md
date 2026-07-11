@@ -85,11 +85,14 @@ blindfold init     [--seed KV:ENV]... [--start]   Zero-knowledge bootstrap. The 
 blindfold verify                                   Handshake + auth round-trip against T3 testnet.
 blindfold compat   [--json]                        Scan local box for agent CLIs.
 blindfold register --name <K> [--from-env <ENV>]  Seal a secret. Prompts (no echo) if --from-env omitted; piped stdin also works.
-blindfold proxy    [--port 8787] [--secret …]     Local OpenAI-shaped proxy.
+blindfold proxy    [--port 8787] [--auth] [--socket [path]]  Local OpenAI-shaped proxy. --auth = per-session token; --socket = 0600 unix socket.
+blindfold attest   [--expect-rtmr3 <b64>] [--pin] [--json]   Verify the enclave's TDX attestation (Intel root CA); --pin gates seal/proxy on the code measurement.
+blindfold credit   [--json]                       Show the tenant's Terminal 3 token/credit balance (no credit cost).
 blindfold publish  [--wasm <path>]                Manually publish the WASM (init does this automatically).
 blindfold dashboard [--port 8799]                  Live HTML usage dashboard.
 blindfold stats    | stats:clear                  CLI usage summary / wipe.
 blindfold doctor                                   Show mode + config. Exit 1 if REAL is missing creds.
+blindfold update   [--from <path>]                Update the global install (repo source, else @fiscalmindset/blindfold@latest).
 ```
 
 Mocked behaviour is opt-in only: `BLINDFOLD_MOCK=1`. Otherwise, REAL mode is the only mode.
