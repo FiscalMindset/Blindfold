@@ -17,7 +17,7 @@ import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { loadBlindfoldEnv, loadEnvFromFile, pluckSecret } from "./env.ts";
 import { recordSealed } from "./sealed-ledger.ts";
-import { openT3Client } from "./t3-client.ts";
+import { openT3Client, type T3Sdk } from "./t3-client.ts";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
@@ -317,7 +317,7 @@ function collectSeedPlan(opts: InitOpts): Array<{ name: string; fromEnv: string 
 /** Fresh-tenant scaffolding: claim, create secrets + authorised-hosts maps. Idempotent. */
 async function ensureTenantScaffolding(env: ReturnType<typeof loadBlindfoldEnv>): Promise<void> {
   // Use raw SDK access since openT3Client doesn't expose maps/tenant.
-  const sdk = (await import("@terminal3/t3n-sdk")) as any;
+  const sdk = (await import("@terminal3/t3n-sdk")) as unknown as T3Sdk;
   sdk.setEnvironment(env.t3Env);
   const baseUrl = sdk.NODE_URLS[env.t3Env];
   const addr = sdk.eth_get_address(env.t3nApiKey);
@@ -337,7 +337,7 @@ async function ensureTenantScaffolding(env: ReturnType<typeof loadBlindfoldEnv>)
 }
 
 async function grantContractReads(env: ReturnType<typeof loadBlindfoldEnv>, contractId: number): Promise<void> {
-  const sdk = (await import("@terminal3/t3n-sdk")) as any;
+  const sdk = (await import("@terminal3/t3n-sdk")) as unknown as T3Sdk;
   sdk.setEnvironment(env.t3Env);
   const baseUrl = sdk.NODE_URLS[env.t3Env];
   const addr = sdk.eth_get_address(env.t3nApiKey);

@@ -29,7 +29,7 @@ export class T3TimeoutError extends Error {}
 function withDeadline<T>(promise: Promise<T>, label: string, ms = T3_TIMEOUT_MS): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);
-    if (typeof (timer as any).unref === "function") (timer as any).unref();
+    if (typeof timer.unref === "function") timer.unref();
     promise.then(
       (v) => { clearTimeout(timer); resolve(v); },
       (e) => { clearTimeout(timer); reject(e); },
@@ -72,20 +72,30 @@ function saveEgressHosts(did: string, hosts: string[]): void {
   });
 }
 
-/** Loaded SDK module shape (subset of the real @terminal3/t3n-sdk exports). */
-interface T3Sdk {
+/** Loaded SDK module shape (the subset of @terminal3/t3n-sdk that Blindfold
+ *  actually calls). Exported so init.ts shares the same typed boundary instead
+ *  of casting the dynamic import to `any`. */
+export interface T3Sdk {
   setEnvironment: (env: "testnet" | "production") => void;
   loadWasmComponent: () => Promise<unknown>;
   eth_get_address: (privKey: string) => string;
   metamask_sign: (address: string, _: undefined, privKey: string) => unknown;
   createEthAuthInput: (address: string) => unknown;
+  /** Optional control-plane helper; present on newer SDKs, guarded at the call site. */
+  getScriptVersion?: (baseUrl: string, scriptPath: string) => Promise<unknown>;
   T3nClient: new (cfg: unknown) => {
     handshake: () => Promise<unknown>;
     authenticate: (input: unknown) => Promise<unknown>;
+    execute: (input: unknown) => Promise<unknown>;
   };
   TenantClient: new (cfg: unknown) => {
     canonicalName: (tail: string) => string;
     executeControl: (functionName: string, input: unknown) => Promise<unknown>;
+    tenant: { me: () => Promise<unknown> };
+    maps: {
+      create: (input: unknown) => Promise<unknown>;
+      update: (name: string, input: unknown) => Promise<unknown>;
+    };
     contracts: {
       register: (input: { tail: string; version: string; wasm: Uint8Array }) => Promise<unknown>;
       execute: (tail: string, input: { version: string; functionName: string; input?: unknown }) => Promise<unknown>;
@@ -189,8 +199,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     environment: env.t3Env,
     baseUrl,
     tenantDid: env.did,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    t3n: t3n as any,
+    t3n,
   });
 
   const seedSecret = async (name: string, value: string): Promise<void> => {
@@ -276,8 +285,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
   };
 
   const me = async (): Promise<{ tenant: string; status?: string }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const info = (await (tenant as any).tenant.me()) as Record<string, unknown>;
+    const info = (await tenant.tenant.me()) as Record<string, unknown>;
     return { tenant: String(info.tenant ?? ""), status: info.status as string | undefined };
   };
 
@@ -285,12 +293,10 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
   // this tenant's contract functions for the given hosts. Empty functions+hosts
   // means revoke (scripts: []).
   const agentAuthUpdate = async (agentDid: string, hosts: string[], functions: string[]): Promise<void> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anySdk = sdk as any;
     let ucv = "0.1.0";
-    if (typeof anySdk.getScriptVersion === "function") {
+    if (typeof sdk.getScriptVersion === "function") {
       try {
-        const v = await anySdk.getScriptVersion(baseUrl, "tee:user/contracts");
+        const v = await sdk.getScriptVersion(baseUrl, "tee:user/contracts");
         if (typeof v === "string" && /^\d/.test(v)) ucv = v;
       } catch {
         /* fall back to 0.1.0 */
@@ -307,8 +313,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
       functions: revoking ? ["forward"] : functions,
       allowedHosts: revoking ? [] : hosts,
     }];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (t3n as any).execute({
+    await t3n.execute({
       script_name: "tee:user/contracts",
       script_version: ucv,
       function_name: "agent-auth-update",
