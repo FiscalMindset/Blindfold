@@ -127,8 +127,8 @@ The `contract_id` will be different for you. Note it down if you like — `blind
 Put the key in `.env` temporarily:
 
 ```bash
-echo "deepgram_api_key=REDACTED-DEEPGRAM-KEY-REVOKED" >> .env
-# (use your real Deepgram key — the one above is from the writer's test setup)
+echo "deepgram_api_key=<YOUR_DEEPGRAM_KEY>" >> .env
+# (use your real Deepgram key here — never commit a real value)
 ```
 
 Seal it in one shot:
