@@ -1,0 +1,31 @@
+# Blindfold — gitleaks configuration.
+# Blocks real secrets from being committed (see .githooks/pre-commit).
+# Ironic-but-important: this is the tool that seals keys; a real key must never
+# land in the repo. Extend the built-in rules, then allowlist known-safe values.
+
+title = "Blindfold gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known-safe values: public certs, published test vectors, placeholders"
+
+# Files that legitimately contain long base64 / high-entropy data that is NOT secret.
+paths = [
+  '''assets/logo\.png''',
+  '''docs/assets/logo\.png''',        # C2PA content-authenticity certs embedded in the PNG
+  '''(^|/)node_modules/''',
+  '''package-lock\.json''',
+  '''\.wasm$''',
+  '''SECURITY_AUDIT\.md''',           # local-only audit doc (gitignored anyway)
+]
+
+# Specific strings that match secret patterns but are public/test data.
+regexes = [
+  '''__BLINDFOLD__''',                                                      # the sentinel placeholder
+  '''<YOUR_[A-Z0-9_]+>''',                                                  # doc placeholders
+  '''e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',  # SHA256 of "" (auth.rs)
+  '''f4780e2d9f65fa895f9c67b32ce1baf0b0d8a43505a000a1a9e090d414db404d''',  # AWS SigV4 test vector (auth.rs)
+  '''5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31''',  # AWS SigV4 test vector (auth.rs)
+]

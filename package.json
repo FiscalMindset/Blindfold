@@ -8,6 +8,9 @@
     "demo"
   ],
   "scripts": {
+    "hooks": "git config core.hooksPath .githooks",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "secrets:scan": "gitleaks git --redact --no-banner --config .gitleaks.toml",
     "build:contract": "bash scripts/build-contract.sh",
     "setup": "tsx packages/blindfold/bin/blindfold.ts init",
     "blindfold": "tsx packages/blindfold/bin/blindfold.ts",

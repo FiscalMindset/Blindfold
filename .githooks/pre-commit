@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Blindfold pre-commit — block secrets from being committed (gitleaks).
+# Wired via `git config core.hooksPath .githooks` (done by `npm run hooks`
+# or the root `prepare` script).
+set -euo pipefail
+
+# Chain to a user-global pre-commit hook if one exists (we override
+# core.hooksPath per-repo, so respect any global hook the user relies on).
+GLOBAL_HOOK="${HOME}/.git-hooks/pre-commit"
+SELF="$(cd "$(dirname "$0")" && pwd)/pre-commit"
+if [ -x "$GLOBAL_HOOK" ] && [ "$GLOBAL_HOOK" != "$SELF" ]; then
+  "$GLOBAL_HOOK" || exit $?
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠️  gitleaks not installed — secret scan SKIPPED." >&2
+  echo "    Install it so commits are protected:  brew install gitleaks" >&2
+  exit 0
+fi
+
+echo "🔍 gitleaks: scanning staged changes for secrets…"
+if ! gitleaks git --staged --redact --no-banner --config .gitleaks.toml; then
+  {
+    echo ""
+    echo "✖ Commit blocked: a secret was detected in your staged changes."
+    echo "  • Don't commit real keys — seal them instead:  blindfold register --name <NAME>"
+    echo "  • False positive? add it to the allowlist in .gitleaks.toml"
+    echo "  • Bypass once (NOT recommended):  git commit --no-verify"
+  } >&2
+  exit 1
+fi
+echo "✓ gitleaks: no secrets in staged changes."
