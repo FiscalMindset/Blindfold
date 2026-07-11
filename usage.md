@@ -64,7 +64,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | `export --name <name> [--as <VAR>]` | CI-only: release into `$GITHUB_ENV`, masked in logs. |
 | `attest [--expect-rtmr3 <b64>] [--json]` | Verify the enclave cluster's TDX attestation (chains to Intel's root CA); optionally pin the RTMR3 code measurement. |
 | `credit [--json]` (alias `balance`) | Show the tenant's Terminal 3 token/credit balance + exhausted flag. A session-authed read — costs no credit, so it works even at 0 balance. |
-| `update [--from <path>]` (alias `upgrade`) | Update the globally-installed `blindfold` from the repo source (rebuild + reinstall). Auto-detects the repo when run from inside it; `--from` / `BLINDFOLD_SRC` otherwise. Does **not** use npm — the npm `blindfold` name is an unrelated package. |
+| `update [--from <path>]` (alias `upgrade`) | Update the globally-installed `blindfold`. Prefers the repo source (rebuild + reinstall) when reachable; otherwise `npm i -g @fiscalmindset/blindfold@latest`. Never the bare `blindfold` npm name (an unrelated package). |
 
 **Lifecycle**
 | Command | What it does |
@@ -87,7 +87,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 ### Install (any OS)
 
 ```bash
-npm install -g blindfold        # or: npm i -g ./packages/blindfold from a clone
+npm install -g @fiscalmindset/blindfold   # or: npm i -g ./packages/blindfold from a clone
 blindfold login                 # tenant DID + key → OS credential store
 blindfold doctor                # confirm; then use `blindfold` from any directory
 ```
@@ -102,7 +102,7 @@ and says so. `~/.blindfold/config.json` holds only the non-secret DID + settings
 - The global install **auto-adds** `%APPDATA%\npm` to your user PATH. **Open a
   new terminal** afterward so `blindfold` is recognized. (If it still isn't, add
   that folder to PATH manually, or run via the shim `%APPDATA%\npm\blindfold.cmd`.)
-- `git` isn't required to *use* Blindfold; a normal `npm i -g blindfold` works.
+- `git` isn't required to *use* Blindfold; a normal `npm i -g @fiscalmindset/blindfold` works (once published).
 - To store the key in the **Credential Manager**, run `blindfold login` in an
   **interactive desktop terminal** — over SSH/non-interactive sessions Windows
   returns `1312` (no logon session) and Blindfold falls back to the `0600` file.

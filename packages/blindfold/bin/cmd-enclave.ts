@@ -49,10 +49,11 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
 
     case "update":
     case "upgrade": {
-      // Update the globally-installed blindfold from the repo SOURCE. We do NOT
-      // fall back to `npm i -g blindfold` — that npm name is an UNRELATED package
-      // ("get/set properties using dot syntax strings"), not this project.
-      // Source resolution: --from, then BLINDFOLD_SRC, then a repo checkout at cwd.
+      // Update the globally-installed blindfold. Prefer the repo SOURCE if one is
+      // reachable (dev). Otherwise fall back to the SCOPED npm package
+      // (@fiscalmindset/blindfold) — never the bare `blindfold` name, which is an
+      // UNRELATED package. Source resolution: --from, BLINDFOLD_SRC, repo at cwd.
+      const PKG = "@fiscalmindset/blindfold";
       const { spawnSync } = await import("node:child_process");
       const run = (cmd: string, args: string[], cwd?: string) =>
         spawnSync(cmd, args, { stdio: "inherit", cwd });
@@ -61,17 +62,25 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
         for (const cand of [path.resolve(process.cwd(), "packages", "blindfold"), process.cwd()]) {
           try {
             const pkg = JSON.parse(fs.readFileSync(path.join(cand, "package.json"), "utf8"));
-            if (pkg.name === "blindfold" && pkg.bin) { from = cand; break; }
+            if ((pkg.name === PKG || pkg.name === "blindfold") && pkg.bin?.blindfold) { from = cand; break; }
           } catch { /* not the package dir */ }
         }
       }
       if (!from) {
-        console.log(warn("Can't update: no Blindfold source found") + c.gray(" (and the npm `blindfold` name is an unrelated package)."));
-        console.log("  Update from your repo checkout — one of:");
-        console.log(c.cyan("    blindfold update --from /path/to/packages/blindfold"));
-        console.log(c.cyan("    cd <repo> && blindfold update"));
-        console.log(c.gray("    (or export BLINDFOLD_SRC=/path/to/packages/blindfold)"));
-        process.exitCode = 1;
+        // No local source → update from the published scoped package.
+        console.log(head("↻ Updating global blindfold from npm") + c.gray(` (${PKG}@latest)…`));
+        const r = run("npm", ["install", "-g", `${PKG}@latest`]);
+        if (r.status !== 0) {
+          console.log("");
+          console.log(bad("npm update failed") + c.gray(" — not published yet, or offline."));
+          console.log("  Update from your repo checkout instead — one of:");
+          console.log(c.cyan("    blindfold update --from /path/to/packages/blindfold"));
+          console.log(c.cyan("    cd <repo> && blindfold update"));
+          console.log(c.gray("    (or export BLINDFOLD_SRC=/path/to/packages/blindfold)"));
+          process.exitCode = 1;
+          return;
+        }
+        console.log(ok("✓ blindfold updated to the latest published version."));
         return;
       }
       console.log(head(`↻ Updating global blindfold`) + c.gray(` from ${from}`));
