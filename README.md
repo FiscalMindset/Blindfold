@@ -21,6 +21,20 @@ npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 
 </div>
 
+<!-- ────────────────────────────────────────────────────────────────────────
+  SEO / discovery keywords (hidden — rendered invisibly, indexed by search):
+  Blindfold · @fiscalmindset/blindfold · protect AI agent API keys · stop AI
+  agents leaking API keys · prompt-injection-proof secrets · secret management
+  for AI agents · API key vault for LLM agents · sealed API keys · un-leakable
+  API keys · Terminal 3 · Intel TDX · confidential computing · TEE · secure
+  enclave · trusted execution environment · OpenAI / Anthropic / Stripe / GitHub
+  key protection · MCP server secrets · Claude Code · Cursor · Cline · OpenCode ·
+  coding agent security · npm i -g @fiscalmindset/blindfold · blindfold signup ·
+  local proxy · __BLINDFOLD__ sentinel · in-enclave substitution · release
+  broker · egress allowlist · key rotation · remote attestation (RTMR3) ·
+  keychain-stored tenant key · self-serve onboarding · open source · MIT.
+───────────────────────────────────────────────────────────────────────── -->
+
 ---
 
 > **What's new (v0.4):**
@@ -33,20 +47,55 @@ npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 >
 > **Full command list** (`login`, `logout`, `whoami`, `register`, `use`, `proxy`, `attest`, `grant`, `share`, `revoke`, `rotate`, `rollback`, `versions`, `migrate`, `status`, `sealed`, `audit`, `export`, `credit`, `dashboard`, `doctor`, `verify`, `compat`, `publish`, `update`, `skill`): see the **[Usage Guide → Command reference](usage.md#command-reference-all-of-them)**.
 
-<details>
-<summary><b>📑 Table of contents</b></summary>
+<details open>
+<summary><b>📑 &nbsp;Table of contents</b></summary>
+<br/>
 
-- [📦 Installation](#installation) · [⚡ Quickstart](#quickstart)
-- [Plain-English: what's happening](#plain-english-whats-actually-happening-here)
-- [The one-line adoption](#the-one-line-adoption)
-- [The attack, and why other fixes fail](#the-attack-and-why-every-other-fix-fails) · [How Blindfold fixes it](#how-blindfold-fixes-it)
-- [How Terminal 3 is used here](#how-terminal-3-is-used-here)
-- [Proof of blindness — the demo](#proof-of-blindness--the-side-by-side-demo)
-- [Two integration styles](#two-integration-styles) · [Supported integrations](#supported-integrations)
-- [CLI at a glance](#cli-at-a-glance) · [Agent skill](#agent-skill--let-your-coding-agent-seal-keys-for-you)
-- [Cookbook (clone → working)](#cookbook--every-command-from-clone-to-working-with-expected-output)
-- [Real T3 mode — what works today](#real-t3-mode--what-works-today) · [Status](#status)
-- Guides: [Usage](usage.md) · [Examples](EXAMPLES.md) · [Teams](TEAMS.md) · [FAQ](FAQ.md)
+<table>
+<tr>
+<td valign="top" width="25%">
+
+**🚀 Get started**
+
+[📦 Installation](#installation)<br/>
+[⚡ Quickstart](#quickstart)<br/>
+[✍️ One-line adoption](#the-one-line-adoption)
+
+</td>
+<td valign="top" width="25%">
+
+**🧠 How it works**
+
+[💡 Plain-English](#plain-english-whats-actually-happening-here)<br/>
+[💀 The attack](#the-attack-and-why-every-other-fix-fails)<br/>
+[🛡️ How Blindfold fixes it](#how-blindfold-fixes-it)<br/>
+[🔒 How Terminal 3 is used](#how-terminal-3-is-used-here)
+
+</td>
+<td valign="top" width="25%">
+
+**🛠️ Use it**
+
+[🧪 Proof — the demo](#proof-of-blindness--the-side-by-side-demo)<br/>
+[🔌 Integration styles](#two-integration-styles)<br/>
+[🧩 Supported integrations](#supported-integrations)<br/>
+[⌨️ CLI at a glance](#cli-at-a-glance)<br/>
+[🤖 Agent skill](#agent-skill--let-your-coding-agent-seal-keys-for-you)
+
+</td>
+<td valign="top" width="25%">
+
+**📚 Reference**
+
+[📖 Cookbook](#cookbook--every-command-from-clone-to-working-with-expected-output)<br/>
+[✅ Real T3 mode](#real-t3-mode--what-works-today)<br/>
+[📊 Status](#status)<br/>
+<sub>Guides:</sub> [Usage](usage.md) · [Examples](EXAMPLES.md)<br/>
+[Teams](TEAMS.md) · [FAQ](FAQ.md) · [Contributing](CONTRIBUTING.md)
+
+</td>
+</tr>
+</table>
 
 </details>
 
@@ -912,7 +961,7 @@ Open issues we'd love a real T3 engineer to confirm are in [`docs/02-terminal3-a
 
 ## Status
 
-This is a **hackathon-stage demo** focused on the structural security claim. The architecture is complete and the demo is reproducible end-to-end in mock mode. Items explicitly outside v0.1 scope (rotation, streaming, multi-user delegation, richer policy CLI) are listed in `docs/03-architecture.md §7`.
+**Beta — published on npm** as [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold) (v0.4). The full pipeline is verified live end-to-end against Terminal 3 testnet — seal, proxy substitution, in-enclave egress, and self-serve `signup`. Tenants run on **testnet** today (no production SLA yet), so treat it as beta rather than a production secret store. Roadmap items (streaming, richer policy CLI, production tenants) are in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
@@ -934,8 +983,6 @@ This is a **hackathon-stage demo** focused on the structural security claim. The
 ## License
 
 MIT — do what you want; if it helps you, tell us.
-
-Built for the Terminal 3 hackathon, 2026.
 
 ---
 
