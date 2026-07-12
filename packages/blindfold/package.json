@@ -1,6 +1,6 @@
 {
   "name": "@fiscalmindset/blindfold",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "Make any AI agent's API keys un-leakable, by sealing them inside a Terminal 3 TDX enclave.",
   "license": "MIT",
