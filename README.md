@@ -17,7 +17,7 @@ npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 
 <br/>
 
-### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+### 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [System Design](system_design.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 
