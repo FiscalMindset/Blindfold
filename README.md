@@ -288,7 +288,29 @@ flowchart LR
 - The Blindfold Proxy on your machine **never has the key** — its only inputs are the agent's HTTP request and a sentinel string `__BLINDFOLD__`.
 - The contract reads the key from KV **inside TDX memory**, substitutes it into the headers, makes the call, and returns the response. The plaintext key exists only on one stack frame, inside the enclave, for the duration of one call.
 
-Architecture in detail: [`docs/03-architecture.md`](docs/03-architecture.md).
+<details>
+<summary><b>Step-by-step: one request through the proxy (sequence)</b></summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as 🤖 Agent
+    participant P as Proxy
+    participant E as 🔒 Enclave
+    participant U as Upstream API
+    A->>P: request with Authorization Bearer __BLINDFOLD__
+    Note over P: overwrite Authorization with the sentinel,<br/>match URL prefix to provider host and secret
+    P->>E: ForwardRequest, sentinel only
+    Note over E: read secret from the map,<br/>replace __BLINDFOLD__ with the real key,<br/>apply the auth scheme
+    E->>U: real HTTPS request from inside TDX
+    U-->>E: response
+    E-->>P: response, sealed secret redacted
+    P-->>A: response — the key never crossed back out
+```
+
+</details>
+
+**Full architecture** — 11 diagrams (context, components, all three secret paths, signup, attestation, trust boundaries, ledger, lifecycle): [`system_design.md`](system_design.md). Original writeup: [`docs/03-architecture.md`](docs/03-architecture.md).
 
 ---
 

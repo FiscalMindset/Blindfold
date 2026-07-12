@@ -22,6 +22,8 @@ export type Intent =
   | "signup_self_serve"
   | "install_from_npm"
   | "signup_vs_login"
+  | "system_architecture"
+  | "three_secret_paths"
   | "one_line_change"
   | "is_production_ready"
   // Concepts

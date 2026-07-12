@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-07-12",
-  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-11) + extraction pipeline (2026-07-12)",
+  "generatedAt": "2026-07-13",
+  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-11) + extraction pipeline (2026-07-12) + extraction pipeline (2026-07-12)",
   "entries": [
     {
       "id": "kb-001",
@@ -20125,6 +20125,67 @@
       ],
       "confidence": 0.7,
       "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-system-architecture",
+      "intent": "system_architecture",
+      "audience": [
+        "user",
+        "founder",
+        "developer",
+        "enterprise",
+        "researcher",
+        "general"
+      ],
+      "question": "How is Blindfold architected / how does the whole system work?",
+      "shortAnswer": "Client side: the CLI, a local sentinel proxy, and a Terminal 3 SDK wrapper. Server side: a Rust→WASM contract (`blindfold-proxy`) running inside an Intel TDX enclave, holding your secrets map and enforcing an egress allowlist. Your agent only ever sends the placeholder `__BLINDFOLD__`; the real key is substituted inside the enclave. Full diagrams are in system_design.md.",
+      "longAnswer": "## System architecture\n\n**Client side (`packages/blindfold`)** — all treated as *untrusted for secrets*:\n- `bin/blindfold.ts` — CLI dispatcher.\n- `src/proxy.ts` — the local sentinel proxy; overwrites any `Authorization` with `Bearer __BLINDFOLD__` and routes by URL prefix.\n- `src/providers.ts` — maps a URL prefix → upstream host + sealed-secret name + auth scheme (bearer/basic/sigv4/webhook).\n- `src/t3-client.ts` — wraps `@terminal3/t3n-sdk` (auth, seed, forward, release, delete, balance).\n- `src/sealed-ledger.ts` — a metadata-only, HMAC hash-chained record of what's sealed.\n\n**Server side (Terminal 3, Intel TDX)**:\n- `contract/` — a Rust→WASM contract published as `blindfold-proxy`. Its `forward` function substitutes the sealed secret *inside* the enclave and makes the outbound call; `release-to-tenant` returns plaintext to the authenticated tenant.\n- The tenant's `secrets` map holds the canonical key value — the only place it lives.\n- An egress allowlist (`agent-auth-update`) denies any host you haven't granted.\n\n**The flow:** agent → local proxy (sees only the sentinel) → enclave `forward` (swaps sentinel for the real key, calls the API) → response back. The plaintext key exists only inside the enclave, for one call. See **system_design.md** for the full set of diagrams (context, components, sequence flows, signup, attestation, trust boundaries, ledger, lifecycle).",
+      "links": [
+        {
+          "label": "system_design.md",
+          "url": "system_design.md",
+          "type": "code"
+        },
+        {
+          "label": "ARCHITECTURE.md",
+          "url": "ARCHITECTURE.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "system_design.md",
+        "packages/blindfold/src/proxy.ts",
+        "contract/src/forward.rs"
+      ],
+      "confidence": 0.97,
+      "lastVerified": "2026-07-13"
+    },
+    {
+      "id": "kb-three-secret-paths",
+      "intent": "three_secret_paths",
+      "audience": [
+        "developer",
+        "enterprise",
+        "researcher",
+        "general",
+        "user"
+      ],
+      "question": "What are the three ways a sealed secret gets used (proxy vs release vs register)?",
+      "shortAnswer": "1) Proxy/forward — the key is substituted INSIDE the enclave, so your agent never holds it (strongest). 2) Release broker — the plaintext is returned to YOUR local process for one call (protects the agent's context, not your process). 3) Seed/register — the value enters the enclave once, at seal time. Pick per workload; see the Cost section.",
+      "longAnswer": "## The three secret paths\n\nBlindfold uses a sealed secret in three ways, with different security postures:\n\n| Path | Where plaintext appears | Guarantee | Use for |\n|---|---|---|---|\n| **Proxy / forward** | only inside the enclave | strongest — the agent never holds it | agent HTTP calls, autonomous agents |\n| **Release broker** | your local process, briefly | protects the agent's *context*, not your process | `blindfold use`, non-HTTP protocols, batch |\n| **Seed / register** | your process once, at seal time | unavoidable — the value must enter the enclave once | one-time setup |\n\n**Proxy** (`proxy.ts` → contract `forward`): the agent sends `Bearer __BLINDFOLD__`; the enclave swaps it for the real key and makes the call. **Release** (`release.ts` → contract `release-to-tenant`): hands the plaintext to your process for one command — cheaper for bursts (release once, reuse for N calls), but the value lives in your memory for that window. **Register** (`register.ts`): the single line that ever sees plaintext, sealing the value via `map-entry-set`. See system_design.md §4 for sequence diagrams of each.",
+      "links": [
+        {
+          "label": "system_design.md#4--the-three-secret-paths",
+          "url": "system_design.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "system_design.md",
+        "packages/blindfold/src/release.ts"
+      ],
+      "confidence": 0.96,
+      "lastVerified": "2026-07-13"
     }
   ]
 }
