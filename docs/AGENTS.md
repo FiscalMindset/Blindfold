@@ -86,6 +86,7 @@ blindfold init     [--seed KV:ENV]... [--start]   Zero-knowledge bootstrap. The 
 blindfold verify                                   Handshake + auth round-trip against T3 testnet.
 blindfold compat   [--json]                        Scan local box for agent CLIs.
 blindfold register --name <K> [--from-env <ENV>]  Seal a secret. Prompts (no echo) if --from-env omitted; piped stdin also works.
+blindfold delete   --name <K> [--yes]             Remove a sealed secret: empties the value in the enclave (current tenant) AND removes it from the ledger, re-chaining so `audit` stays valid (ledger backed up first). Alias: `remove`. Use when you sealed the wrong thing.
 blindfold proxy    [--port 8787] [--auth] [--socket [path]]  Local OpenAI-shaped proxy. --auth = per-session token; --socket = 0600 unix socket.
 blindfold attest   [--expect-rtmr3 <b64>] [--pin] [--json]   Verify the enclave's TDX attestation (Intel root CA); --pin gates seal/proxy on the code measurement.
 blindfold credit   [--json]                       Show the tenant's Terminal 3 token/credit balance (no credit cost).

@@ -50,6 +50,7 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 | Command | What it does |
 |---|---|
 | `register --name <name> [--from-env <VAR>]` | Seal a secret. Without `--from-env` it prompts (hidden). |
+| `delete --name <name> [--yes]` | Remove a sealed secret — empties it in the enclave and removes it from the ledger (re-chained; backup kept). Alias `remove`. Use if you sealed the wrong thing. |
 | `sealed` | Local ledger of sealed keys (metadata only). |
 | `status` | Mode, tenant health, and the sealed-secrets list. |
 | `audit` | Reconcile the ledger against the enclave — what's actually usable now. |
