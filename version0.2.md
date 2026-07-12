@@ -58,7 +58,7 @@ globally and run with plain `node` — off the SSD, no repo, no `tsx`.
 ## Install & use (the new flow)
 
 ```bash
-# From the repo (or once published to npm):
+# From npm (published) or a repo clone:
 npm install -g ./packages/blindfold      # or: npm i -g @fiscalmindset/blindfold
 
 # One-time setup on any machine:

@@ -6,6 +6,8 @@
 
 ## 1. Now (shipped)
 
+- ✅ **Published on npm** — [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold) (`npm i -g`), MIT.
+- ✅ **Self-serve onboarding** — `blindfold signup` mints a funded Terminal 3 testnet tenant (key generated locally, email-verified, self-admitted), no manual token claim. Verified live on a second machine.
 - ✅ **TDX + Rust + WASM contract** with in-enclave substitution (`contract/src/forward.rs`).
 - ✅ **TypeScript SDK + CLI** (`packages/blindfold/`).
 - ✅ **OpenAI-shaped local proxy** with 12 first-class providers across 6 industries.

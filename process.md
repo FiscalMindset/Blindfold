@@ -1,6 +1,6 @@
 # The Process — first time using Blindfold, end to end
 
-> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+> **What's new (v0.4):** **published on npm** as [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold), and **self-serve onboarding** — `blindfold signup --email you@x.com` mints a funded Terminal 3 testnet tenant with no manual token claim. Plus (v0.2/v0.3): installable global CLI (`npm i -g`, state in `~/.blindfold`); tenant key in the **OS keychain** via `blindfold login`; Discord webhook support (contract v0.5.5). See `CHANGELOG.md`.
 
 
 > Written for someone opening this repo cold. Two real examples (Deepgram + Grok). Every command + every expected output. ~10 minutes total.
@@ -66,6 +66,22 @@ You'll see two agents run the same prompt-injection attack. Agent A (no Blindfol
 
 ## 4. Get T3 credentials (one-time, ~30 sec)
 
+**Easiest — self-serve (recommended):** let Blindfold mint a tenant for you, no
+manual token claim:
+
+```bash
+npm i -g @fiscalmindset/blindfold
+blindfold signup --email you@example.com
+# generates your tenant key locally (→ OS keychain, never printed), verifies your
+# email by an emailed code, and self-admits a funded testnet tenant. Then:
+blindfold doctor      # tenant active
+blindfold credit      # token balance
+```
+
+One email binds to one tenant (Gmail `+aliases` give fresh identities). Skip to
+§5 once `doctor` shows the tenant active.
+
+**Manual alternative** — claim the credentials yourself:
 Visit https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens, claim, copy two values:
 
 - `T3N_API_KEY` — 64 hex chars prefixed with `0x` (it's an Ethereum-style private key)

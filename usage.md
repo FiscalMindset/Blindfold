@@ -87,7 +87,9 @@ If `doctor` says `mode: MOCK` or any creds are `NO ✖`, fix that first by runni
 ### Install (any OS)
 
 ```bash
-npm install -g @fiscalmindset/blindfold   # or: npm i -g ./packages/blindfold from a clone
+npm install -g @fiscalmindset/blindfold   # published on npm; or: npm i -g ./packages/blindfold from a clone
+blindfold signup --email you@x.com   # NEW-USER path: self-serve, mints a funded testnet tenant
+#   — or, if you already have Terminal 3 credentials:
 blindfold login                 # tenant DID + key → OS credential store
 blindfold doctor                # confirm; then use `blindfold` from any directory
 ```
@@ -102,7 +104,7 @@ and says so. `~/.blindfold/config.json` holds only the non-secret DID + settings
 - The global install **auto-adds** `%APPDATA%\npm` to your user PATH. **Open a
   new terminal** afterward so `blindfold` is recognized. (If it still isn't, add
   that folder to PATH manually, or run via the shim `%APPDATA%\npm\blindfold.cmd`.)
-- `git` isn't required to *use* Blindfold; a normal `npm i -g @fiscalmindset/blindfold` works (once published).
+- `git` isn't required to *use* Blindfold; a normal `npm i -g @fiscalmindset/blindfold` works (it's published on npm).
 - To store the key in the **Credential Manager**, run `blindfold login` in an
   **interactive desktop terminal** — over SSH/non-interactive sessions Windows
   returns `1312` (no logon session) and Blindfold falls back to the `0600` file.
