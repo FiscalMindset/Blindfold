@@ -7,6 +7,14 @@
 ## [Unreleased] — Defense-in-depth + full security-audit remediation
 
 ### Added
+- **`blindfold signup`** — self-serve onboarding. On a machine with no
+  credentials, `npm i -g` + `blindfold signup --email you@x.com` mints a
+  brand-new Terminal 3 testnet tenant end-to-end: generates a tenant key
+  locally (keychain, never printed), eth-authenticates, verifies the email by
+  emailed code, and self-admits (`becomeDevTenant`) to mint welcome credits
+  (~20,000 tokens on the current testnet dial). Surfaces wrong-code, expired,
+  and email-already-owned distinctly. Testnet-only; one email binds to one
+  tenant. *Verified live on a second (Windows) machine.*
 - **Per-session proxy token** (`proxy --auth`) — only the wrapped agent can use
   the proxy (constant-time checked); **unix-domain socket** mode (`proxy --socket`,
   `0600`) so only your OS user can connect, usable by SDKs via `wrap({ socket })`.

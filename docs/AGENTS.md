@@ -81,6 +81,7 @@ tests/smtp-demo.md                       Permanent record of the without/with SM
 ## The CLI commands
 
 ```
+blindfold signup   [--email <addr>] [--first/--last]  Self-serve onboarding: mint a brand-new Terminal 3 testnet tenant from nothing. Generates a key locally, eth-authenticates, verifies the email by OTP, and self-admits (`becomeDevTenant`) to mint welcome credits. Testnet-only. One email = one tenant (use a fresh/+alias email per tenant).
 blindfold init     [--seed KV:ENV]... [--start]   Zero-knowledge bootstrap. The preferred onramp.
 blindfold verify                                   Handshake + auth round-trip against T3 testnet.
 blindfold compat   [--json]                        Scan local box for agent CLIs.

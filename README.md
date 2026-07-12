@@ -21,6 +21,7 @@
 
 > **What's new (v0.2 / v0.3 + webhook):**
 > - **Installable CLI** — `npm i -g @fiscalmindset/blindfold` (or `npm i -g ./packages/blindfold` from a clone) gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency). Keep it current with `blindfold update`.
+> - **`blindfold signup`** — self-serve onboarding: mint a brand-new, funded Terminal 3 testnet tenant from nothing (`npm i -g` + one command). Verifies your email by code and stores the generated key in the OS keychain — never printed. No manual token claim.
 > - **`blindfold login`** — store tenant creds in `~/.blindfold`, with the tenant key in the **OS keychain** (macOS/Linux), not a plaintext file. Then `blindfold …` works anywhere.
 > - **Webhook support** — a `webhook` auth scheme (contract v0.5.5) + a `/discord` proxy provider let an agent post to a webhook **without ever holding the URL**. See [`examples/discord-webhook/`](examples/discord-webhook/).
 >
@@ -562,9 +563,23 @@ npm install
 # Expected: added N packages in Xs (no error)
 ```
 
-### B. Claim T3 credentials (one-time, free, ~30s)
+### B. Get a Terminal 3 tenant
 
-Visit https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens and copy `T3N_API_KEY` (0x… 64 hex) and `DID` (did:t3n:…). Then:
+**Fastest (self-serve, ~30s):** let Blindfold mint one for you — no manual token claim:
+
+```bash
+npm i -g @fiscalmindset/blindfold      # or: npm i -g ./packages/blindfold from a clone
+blindfold signup --email you@example.com
+# → generates your tenant key locally (stored in the OS keychain, never printed),
+#   emails you a code, and self-admits a funded testnet tenant (~20,000 tokens).
+#   One email = one tenant; use a fresh address (Gmail +aliases work) per tenant.
+blindfold doctor                        # ✅ Ready to seal & use secrets
+blindfold credit                        # see your token balance
+```
+
+**Manual alternative:** claim credentials yourself at
+https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens
+and copy `T3N_API_KEY` (0x… 64 hex) and `DID` (did:t3n:…). Then:
 
 ```bash
 cat >> .env <<'EOF'

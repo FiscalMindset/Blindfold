@@ -15,7 +15,7 @@ import { handleEnclave } from "./cmd-enclave.ts";
 type Handler = (cmd: string, argv: Argv, cmdArgs: string[]) => Promise<void>;
 
 const ROUTES: Record<string, Handler> = {
-  login: handleAuth, logout: handleAuth, whoami: handleAuth,
+  signup: handleAuth, login: handleAuth, logout: handleAuth, whoami: handleAuth,
   register: handleSecrets, use: handleSecrets, export: handleSecrets,
   rotate: handleLifecycle, rollback: handleLifecycle, versions: handleLifecycle, migrate: handleLifecycle,
   grant: handleTenant, share: handleTenant, revoke: handleTenant,
@@ -43,6 +43,7 @@ function printHelp(): void {
   console.log(`${head("🛡️  Blindfold")} ${c.gray("— protect your AI agent's API keys with Terminal 3 enclaves.")}
 
 ${c.bold("Commands:")}
+  signup   [--email <you@x.com>]                    Self-serve: create a Terminal 3 testnet tenant from scratch. Generates a key locally, verifies your email by code, and mints welcome credits — no manual provisioning. Then run doctor + register.
   init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
   verify                                            Handshake + auth against T3 (smoke test).
   compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
