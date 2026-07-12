@@ -6948,5 +6948,2949 @@
       "scripts/test-v5-release.ts"
     ],
     "confidence": 0.88
+  },
+  "471dbdc9d93b0990": {
+    "intent": "code_docs_01_problem_analysis_md_1_the_setup_what_an_ai_agent_actually_is",
+    "question": "What does 1. The setup: what an \"AI agent\" actually is do in docs/01-problem-analysis.md?",
+    "shortAnswer": "An AI agent is a loop",
+    "longAnswer": "An AI agent is a loop\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "docs/01-problem-analysis.md"
+    ],
+    "confidence": 0.5
+  },
+  "082d0bc112a353d6": {
+    "intent": "code_docs_01_problem_analysis_md_3_3_guardrails_prompt_injection_classifiers_inp",
+    "question": "What does 3.3 Guardrails / prompt-injection classifiers / input filters do in docs/01-problem-analysis.md?",
+    "shortAnswer": "\"Scan the incoming text and refuse to act on suspicious instructions",
+    "longAnswer": "\"Scan the incoming text and refuse to act on suspicious instructions\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "docs/01-problem-analysis.md"
+    ],
+    "confidence": 0.5
+  },
+  "3312d0a83397c99f": {
+    "intent": "code_docs_01_problem_analysis_md_6_what_this_means_for_the_rest_of_the_project",
+    "question": "What does 6. What this means for the rest of the project do in docs/01-problem-analysis.md?",
+    "shortAnswer": "- Step 2 will examine **Terminal 3** specifically: how `http-with-placeholders` actually performs the in-enclave substitution, how secrets get into the enclave in the first place, and which T3 API cal",
+    "longAnswer": "- Step 2 will examine **Terminal 3** specifically: how `http-with-placeholders` actually performs the in-enclave substitution, how secrets get into the enclave in the first place, and which T3 API cal\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "docs/01-problem-analysis.md"
+    ],
+    "confidence": 0.5
+  },
+  "5fbb0cf80cbfac18": {
+    "intent": "code_docs_05_compatibility_md_05_compatibility_where_blindfold_works_and_where_i",
+    "question": "What does 05 — Compatibility: Where Blindfold Works (and Where It Doesn't) do in docs/05-compatibility.md?",
+    "shortAnswer": "> The short version: Blindfold protects **any tool that lets you set a base URL and uses a user-supplied API key**",
+    "longAnswer": "> The short version: Blindfold protects **any tool that lets you set a base URL and uses a user-supplied API key**\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/05-compatibility.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "docs/05-compatibility.md"
+    ],
+    "confidence": 0.5
+  },
+  "e6484fd33b2eaaf7": {
+    "intent": "code_readme_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exa",
+    "question": "What does 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in README.md?",
+    "shortAnswer": "</div>",
+    "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `README.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "README.md"
+    ],
+    "confidence": 0.5
+  },
+  "72b23ea674bc3628": {
+    "intent": "code_faq_md__blindfold_faq",
+    "question": "What does ❓ Blindfold FAQ do in FAQ.md?",
+    "shortAnswer": "> **What's new (v0",
+    "longAnswer": "> **What's new (v0\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `FAQ.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "FAQ.md"
+    ],
+    "confidence": 0.5
+  },
+  "5f7d3e98974838df": {
+    "intent": "code_usage_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exam",
+    "question": "What does 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; **[Usage Guide](usage.md)** &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in usage.md?",
+    "shortAnswer": "</div>",
+    "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "f4e00aadd27ee672": {
+    "intent": "code_usage_md_command_reference_all_of_them_",
+    "question": "What does Command reference (all of them) do in usage.md?",
+    "shortAnswer": "> Run any command with `blindfold <cmd>` (global install) or",
+    "longAnswer": "> Run any command with `blindfold <cmd>` (global install) or\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "fbcd8c812a30a222": {
+    "intent": "code_usage_md_install_any_os_",
+    "question": "What does Install (any OS) do in usage.md?",
+    "shortAnswer": "```bash",
+    "longAnswer": "```bash\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "aaa52e289e5d948d": {
+    "intent": "code_usage_md_windows_notes",
+    "question": "What does Windows notes do in usage.md?",
+    "shortAnswer": "- The global install **auto-adds** `%APPDATA%\\npm` to your user PATH",
+    "longAnswer": "- The global install **auto-adds** `%APPDATA%\\npm` to your user PATH\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "99ae8db0261fa96a": {
+    "intent": "code_usage_md_terminal_2_hand_the_token_to_your_agent_every_request_must_carry_i",
+    "question": "What does terminal 2 — hand the token to your agent; every request must carry it do in usage.md?",
+    "shortAnswer": "export BLINDFOLD_PROXY_TOKEN=<token>",
+    "longAnswer": "export BLINDFOLD_PROXY_TOKEN=<token>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "14a9946922a0db59": {
+    "intent": "code_usage_md_call_it_",
+    "question": "What does call it: do in usage.md?",
+    "shortAnswer": "curl --unix-socket ~/",
+    "longAnswer": "curl --unix-socket ~/\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "06f172011df1cae8": {
+    "intent": "code_usage_md_verify_the_enclave_before_you_trust_it_attest_",
+    "question": "What does Verify the enclave before you trust it (`attest`) do in usage.md?",
+    "shortAnswer": "Don't just *trust* that Terminal 3 runs a genuine TDX enclave — **verify** it",
+    "longAnswer": "Don't just *trust* that Terminal 3 runs a genuine TDX enclave — **verify** it\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "0ae43fa8a2dc67a4": {
+    "intent": "code_usage_md_tip_pin_it_next_time_blindfold_attest_expect_rtmr3_b6mn_adhhd_",
+    "question": "What does Tip: pin it next time → blindfold attest --expect-rtmr3 B6mn+/ADHhD... do in usage.md?",
+    "shortAnswer": "```",
+    "longAnswer": "```\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "96c016821d1e24f2": {
+    "intent": "code_usage_md_if_the_enclave_ever_changes_fails_the_command_aborts_before_sealin",
+    "question": "What does if the enclave ever changes / fails: the command aborts before sealing. do in usage.md?",
+    "shortAnswer": "```",
+    "longAnswer": "```\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "usage.md"
+    ],
+    "confidence": 0.5
+  },
+  "d6b2cc79942b4b2e": {
+    "intent": "code_examples_md_see_also",
+    "question": "What does See also do in EXAMPLES.md?",
+    "shortAnswer": "- **[Usage Guide](usage",
+    "longAnswer": "- **[Usage Guide](usage\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `EXAMPLES.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "EXAMPLES.md"
+    ],
+    "confidence": 0.5
+  },
+  "d3e88c2488cb9788": {
+    "intent": "code_contributing_md_chatbot",
+    "question": "What does Chatbot do in CONTRIBUTING.md?",
+    "shortAnswer": "npx tsx packages/chatbot/bin/chatbot",
+    "longAnswer": "npx tsx packages/chatbot/bin/chatbot\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "CONTRIBUTING.md"
+    ],
+    "confidence": 0.5
+  },
+  "9eedc69bf040830a": {
+    "intent": "code_contributing_md_add_a_chatbot_intent",
+    "question": "What does Add a chatbot intent do in CONTRIBUTING.md?",
+    "shortAnswer": "1",
+    "longAnswer": "1\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "CONTRIBUTING.md"
+    ],
+    "confidence": 0.5
+  },
+  "6ce4dcfc71e49f00": {
+    "intent": "code_contributing_md_add_a_chatbot_kb_entry_hand_curated_",
+    "question": "What does Add a chatbot KB entry (hand-curated) do in CONTRIBUTING.md?",
+    "shortAnswer": "1",
+    "longAnswer": "1\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "CONTRIBUTING.md"
+    ],
+    "confidence": 0.5
+  },
+  "4fbb72c81111d3f8": {
+    "intent": "code_contributing_md_or_via_the_cli_wrapper",
+    "question": "What does Or via the CLI wrapper do in CONTRIBUTING.md?",
+    "shortAnswer": "npx tsx packages/chatbot/bin/chatbot",
+    "longAnswer": "npx tsx packages/chatbot/bin/chatbot\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "CONTRIBUTING.md"
+    ],
+    "confidence": 0.5
+  },
+  "b1126287f48a71f5": {
+    "intent": "code_contributing_md_before_you_open_a_pr",
+    "question": "What does Before you open a PR do in CONTRIBUTING.md?",
+    "shortAnswer": "- [ ] `BLINDFOLD_MOCK=1 npm run test:report` → **9/9 ✅**",
+    "longAnswer": "- [ ] `BLINDFOLD_MOCK=1 npm run test:report` → **9/9 ✅**\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "CONTRIBUTING.md"
+    ],
+    "confidence": 0.5
+  },
+  "cf8e2c73970aefb9": {
+    "intent": "code_teams_md__blindfold_for_teams",
+    "question": "What does 👥 Blindfold for Teams do in TEAMS.md?",
+    "shortAnswer": "> **What's new (v0",
+    "longAnswer": "> **What's new (v0\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "TEAMS.md"
+    ],
+    "confidence": 0.5
+  },
+  "1d85aa72f48815b1": {
+    "intent": "code_teams_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exam",
+    "question": "What does 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; **[Teams](TEAMS.md)** &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in TEAMS.md?",
+    "shortAnswer": "</div>",
+    "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "TEAMS.md"
+    ],
+    "confidence": 0.5
+  },
+  "314efb5d7cd4a965": {
+    "intent": "code_teams_md_see_also",
+    "question": "What does See also do in TEAMS.md?",
+    "shortAnswer": "- **[Usage Guide](usage",
+    "longAnswer": "- **[Usage Guide](usage\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "TEAMS.md"
+    ],
+    "confidence": 0.5
+  },
+  "006fba9a369630a6": {
+    "intent": "code_packages_blindfold_src_attest_ts_attest_ts",
+    "question": "What does attest.ts do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "Auto-extracted summary for attest.ts.",
+    "longAnswer": "Auto-extracted summary for attest.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "44760965c6c1b7a2": {
+    "intent": "code_packages_blindfold_src_attest_ts_v",
+    "question": "What does v do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const v = obj[PIN_FIELD];",
+    "longAnswer": "const v = obj[PIN_FIELD];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "1427c7d54054c3b8": {
+    "intent": "code_packages_blindfold_src_attest_ts_cfg",
+    "question": "What does cfg do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const cfg = configPath();",
+    "longAnswer": "const cfg = configPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "dbce1da20f55dbd7": {
+    "intent": "code_packages_blindfold_src_attest_ts_attestsdk",
+    "question": "What does AttestSdk do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "interface AttestSdk {",
+    "longAnswer": "interface AttestSdk {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c82a40db4606d059": {
+    "intent": "code_packages_blindfold_src_attest_ts_attestresult",
+    "question": "What does AttestResult do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "export interface AttestResult {",
+    "longAnswer": "export interface AttestResult {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "1263de82cf60adc8": {
+    "intent": "code_packages_blindfold_src_attest_ts_attestopts",
+    "question": "What does AttestOpts do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "export interface AttestOpts {",
+    "longAnswer": "export interface AttestOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "a3ec898dbd07ce27": {
+    "intent": "code_packages_blindfold_src_attest_ts_loadattestsdk",
+    "question": "What does loadAttestSdk do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "async function loadAttestSdk(): Promise<AttestSdk> {",
+    "longAnswer": "async function loadAttestSdk(): Promise<AttestSdk> {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "9007ebcc1a2a2ebe": {
+    "intent": "code_packages_blindfold_src_attest_ts_r",
+    "question": "What does r do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const r = await sdk",
+    "longAnswer": "const r = await sdk\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "24ab9b1fb3684a19": {
+    "intent": "code_packages_blindfold_src_attest_ts_result",
+    "question": "What does result do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const result: AttestResult = {",
+    "longAnswer": "const result: AttestResult = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "16c51acc68b9b537": {
+    "intent": "code_packages_blindfold_src_attest_ts_gateresult",
+    "question": "What does GateResult do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "export interface GateResult {",
+    "longAnswer": "export interface GateResult {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f491fb45c9a46e95": {
+    "intent": "code_packages_blindfold_src_attest_ts_required",
+    "question": "What does required do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const required = Boolean(pinned) || process",
+    "longAnswer": "const required = Boolean(pinned) || process\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "40642fa02e9c9db6": {
+    "intent": "code_packages_blindfold_src_attest_ts_warning",
+    "question": "What does warning do in packages/blindfold/src/attest.ts?",
+    "shortAnswer": "const warning = ok && !pinned",
+    "longAnswer": "const warning = ok && !pinned\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/attest.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f0c0eaf00b93af47": {
+    "intent": "code_packages_blindfold_src_compat_ts_envline",
+    "question": "What does envLine do in packages/blindfold/src/compat.ts?",
+    "shortAnswer": "const envLine = Object",
+    "longAnswer": "const envLine = Object\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/compat.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/compat.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4bbecb2e5f5e01d9": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_dashboard_ts",
+    "question": "What does dashboard.ts do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "Auto-extracted summary for dashboard.ts.",
+    "longAnswer": "Auto-extracted summary for dashboard.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "a5cd4a7a19909f95": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_svg",
+    "question": "What does svg do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "const svg = `<svg xmlns=\"http://www",
+    "longAnswer": "const svg = `<svg xmlns=\"http://www\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5f5ee83f012b0739": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_counters",
+    "question": "What does counters do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "const counters: Record<string, number> = {};",
+    "longAnswer": "const counters: Record<string, number> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "833f3f24b0e019d5": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_chain",
+    "question": "What does chain do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "const chain = verifyLedgerChain();",
+    "longAnswer": "const chain = verifyLedgerChain();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "fbb0abf767096a7a": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_env_path",
+    "question": "What does ENV_PATH do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "const ENV_PATH = defaultEnvPath();",
+    "longAnswer": "const ENV_PATH = defaultEnvPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "bc12bed04379cb5f": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_html",
+    "question": "What does HTML do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "const HTML = `<!DOCTYPE html>",
+    "longAnswer": "const HTML = `<!DOCTYPE html>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0dc15ecff3a92701": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_frame",
+    "question": "What does frame do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "function frame(now){",
+    "longAnswer": "function frame(now){\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "03c1d38bde029109": {
+    "intent": "code_packages_blindfold_src_dashboard_ts_renderdonut",
+    "question": "What does renderDonut do in packages/blindfold/src/dashboard.ts?",
+    "shortAnswer": "function renderDonut(ev){",
+    "longAnswer": "function renderDonut(ev){\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/dashboard.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d477e1882e0e51f2": {
+    "intent": "code_packages_blindfold_src_env_ts_env_ts",
+    "question": "What does env.ts do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "Auto-extracted summary for env.ts.",
+    "longAnswer": "Auto-extracted summary for env.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5896147a689878a7": {
+    "intent": "code_packages_blindfold_src_env_ts_src_relative_root",
+    "question": "What does SRC_RELATIVE_ROOT do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const SRC_RELATIVE_ROOT = path",
+    "longAnswer": "const SRC_RELATIVE_ROOT = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "1e1d0267d7b6f2f3": {
+    "intent": "code_packages_blindfold_src_env_ts_reporoot",
+    "question": "What does repoRoot do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "export function repoRoot(): string {",
+    "longAnswer": "export function repoRoot(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f27578dd710cd9e7": {
+    "intent": "code_packages_blindfold_src_env_ts_parent",
+    "question": "What does parent do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const parent = path",
+    "longAnswer": "const parent = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "13dc342e5edfd260": {
+    "intent": "code_packages_blindfold_src_env_ts_configpath",
+    "question": "What does configPath do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "export function configPath(): string {",
+    "longAnswer": "export function configPath(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "40c25fb85a1a0211": {
+    "intent": "code_packages_blindfold_src_env_ts_legacy",
+    "question": "What does legacy do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const legacy = path",
+    "longAnswer": "const legacy = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c1ac799470ec68bf": {
+    "intent": "code_packages_blindfold_src_env_ts_islocal",
+    "question": "What does isLocal do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const isLocal = [\"localhost\", \"127",
+    "longAnswer": "const isLocal = [\"localhost\", \"127\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5d3a8a6f7f393d09": {
+    "intent": "code_packages_blindfold_src_env_ts_fd",
+    "question": "What does fd do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const fd = fs",
+    "longAnswer": "const fd = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c1e6488a6f0acd8e": {
+    "intent": "code_packages_blindfold_src_env_ts_st",
+    "question": "What does st do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const st = fs",
+    "longAnswer": "const st = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "2500bc40517bd775": {
+    "intent": "code_packages_blindfold_src_env_ts_st",
+    "question": "What does st do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const st = fs",
+    "longAnswer": "const st = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "70e56510fe74f0aa": {
+    "intent": "code_packages_blindfold_src_env_ts_obj",
+    "question": "What does obj do in packages/blindfold/src/env.ts?",
+    "shortAnswer": "const obj = JSON",
+    "longAnswer": "const obj = JSON\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/env.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4af03ee2af4ffcd6": {
+    "intent": "code_packages_blindfold_src_init_ts_v",
+    "question": "What does v do in packages/blindfold/src/init.ts?",
+    "shortAnswer": "const v = await ask(prompt);",
+    "longAnswer": "const v = await ask(prompt);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/init.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/init.ts"
+    ],
+    "confidence": 0.5
+  },
+  "ca032070449cf957": {
+    "intent": "code_packages_blindfold_src_keychain_ts_keychain_ts",
+    "question": "What does keychain.ts do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "Auto-extracted summary for keychain.ts.",
+    "longAnswer": "Auto-extracted summary for keychain.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "cf00902ed6fcdc65": {
+    "intent": "code_packages_blindfold_src_keychain_ts_r",
+    "question": "What does r do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "const r = spawnSync(finder, [cmd], { stdio: \"ignore\" });",
+    "longAnswer": "const r = spawnSync(finder, [cmd], { stdio: \"ignore\" });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0d54f998d0f0be60": {
+    "intent": "code_packages_blindfold_src_keychain_ts_win_cs",
+    "question": "What does WIN_CS do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "const WIN_CS = `",
+    "longAnswer": "const WIN_CS = `\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "33578c37f854b42c": {
+    "intent": "code_packages_blindfold_src_keychain_ts_winps",
+    "question": "What does winPS do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "function winPS(op: \"set\" | \"get\" | \"delete\", target: string, secret?: string): { status: number | null; stdout: string } {",
+    "longAnswer": "function winPS(op: \"set\" | \"get\" | \"delete\", target: string, secret?: string): { status: number | null; stdout: string } {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "92f1b138429e4d20": {
+    "intent": "code_packages_blindfold_src_keychain_ts_keychainavailable",
+    "question": "What does keychainAvailable do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "export function keychainAvailable(): boolean {",
+    "longAnswer": "export function keychainAvailable(): boolean {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "56ecf7a6c4d0c933": {
+    "intent": "code_packages_blindfold_src_keychain_ts_keychainbackend",
+    "question": "What does keychainBackend do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "export function keychainBackend(): string {",
+    "longAnswer": "export function keychainBackend(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "bd4533035a11d7d0": {
+    "intent": "code_packages_blindfold_src_keychain_ts_r",
+    "question": "What does r do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "const r = spawnSync(\"secret-tool\", [\"store\", \"--label=blindfold\", \"service\", SERVICE, \"account\", account], { input: secret, stdio: [\"pipe\", \"ignore\", \"ignore\"] });",
+    "longAnswer": "const r = spawnSync(\"secret-tool\", [\"store\", \"--label=blindfold\", \"service\", SERVICE, \"account\", account], { input: secret, stdio: [\"pipe\", \"ignore\", \"ignore\"] });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "a6c8005ce0a4c77e": {
+    "intent": "code_packages_blindfold_src_keychain_ts_r",
+    "question": "What does r do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "const r = winPS(\"get\", winTarget(account));",
+    "longAnswer": "const r = winPS(\"get\", winTarget(account));\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "03a128aafce6a163": {
+    "intent": "code_packages_blindfold_src_keychain_ts_r",
+    "question": "What does r do in packages/blindfold/src/keychain.ts?",
+    "shortAnswer": "const r = spawnSync(\"secret-tool\", [\"clear\", \"service\", SERVICE, \"account\", account], { stdio: \"ignore\" });",
+    "longAnswer": "const r = spawnSync(\"secret-tool\", [\"clear\", \"service\", SERVICE, \"account\", account], { stdio: \"ignore\" });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/keychain.ts"
+    ],
+    "confidence": 0.5
+  },
+  "79b58ee65b663a2f": {
+    "intent": "code_packages_blindfold_src_migrate_ts_eq",
+    "question": "What does eq do in packages/blindfold/src/migrate.ts?",
+    "shortAnswer": "const eq = line",
+    "longAnswer": "const eq = line\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/migrate.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/migrate.ts"
+    ],
+    "confidence": 0.5
+  },
+  "050de2407a7508e4": {
+    "intent": "code_packages_blindfold_src_migrate_ts_key",
+    "question": "What does key do in packages/blindfold/src/migrate.ts?",
+    "shortAnswer": "const key = eq > 0 ? raw",
+    "longAnswer": "const key = eq > 0 ? raw\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/migrate.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/migrate.ts"
+    ],
+    "confidence": 0.5
+  },
+  "116ab10f32e8a6ab": {
+    "intent": "code_packages_blindfold_src_prompt_ts_readoneline",
+    "question": "What does readOneLine do in packages/blindfold/src/prompt.ts?",
+    "shortAnswer": "function readOneLine(stdin: NodeJS",
+    "longAnswer": "function readOneLine(stdin: NodeJS\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/prompt.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/prompt.ts"
+    ],
+    "confidence": 0.5
+  },
+  "59d62d7e2857b755": {
+    "intent": "code_packages_blindfold_src_providers_ts_providers_ts",
+    "question": "What does providers.ts do in packages/blindfold/src/providers.ts?",
+    "shortAnswer": "Auto-extracted summary for providers.ts.",
+    "longAnswer": "Auto-extracted summary for providers.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/providers.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/providers.ts"
+    ],
+    "confidence": 0.5
+  },
+  "357b185d5fee09cf": {
+    "intent": "code_packages_blindfold_src_providers_ts_forwardauth",
+    "question": "What does ForwardAuth do in packages/blindfold/src/providers.ts?",
+    "shortAnswer": "export type ForwardAuth =",
+    "longAnswer": "export type ForwardAuth =\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/providers.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/providers.ts"
+    ],
+    "confidence": 0.5
+  },
+  "da3674c2975ab60a": {
+    "intent": "code_packages_blindfold_src_proxy_ts_proxy_ts",
+    "question": "What does proxy.ts do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "Auto-extracted summary for proxy.ts.",
+    "longAnswer": "Auto-extracted summary for proxy.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "448810736ffee3cc": {
+    "intent": "code_packages_blindfold_src_proxy_ts_proxyopts",
+    "question": "What does ProxyOpts do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "export interface ProxyOpts {",
+    "longAnswer": "export interface ProxyOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "a0347327f585c71e": {
+    "intent": "code_packages_blindfold_src_proxy_ts_proxyhandle",
+    "question": "What does ProxyHandle do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "export interface ProxyHandle {",
+    "longAnswer": "export interface ProxyHandle {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "8909b82fba8b37cf": {
+    "intent": "code_packages_blindfold_src_proxy_ts_socketpath",
+    "question": "What does socketPath do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const socketPath = opts",
+    "longAnswer": "const socketPath = opts\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c9e9ac2bd731b083": {
+    "intent": "code_packages_blindfold_src_proxy_ts_server",
+    "question": "What does server do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const server = http",
+    "longAnswer": "const server = http\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "8e4d24f7a81adefc": {
+    "intent": "code_packages_blindfold_src_proxy_ts_onlistening",
+    "question": "What does onListening do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const onListening = () => {",
+    "longAnswer": "const onListening = () => {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "cc148364e5ada56c": {
+    "intent": "code_packages_blindfold_src_proxy_ts_handle",
+    "question": "What does handle do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "async function handle(",
+    "longAnswer": "async function handle(\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0c223ae9e042a0f5": {
+    "intent": "code_packages_blindfold_src_proxy_ts_provided",
+    "question": "What does provided do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const provided = String(req",
+    "longAnswer": "const provided = String(req\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "ff866be422280d58": {
+    "intent": "code_packages_blindfold_src_proxy_ts_startedat",
+    "question": "What does startedAt do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const startedAt = Date",
+    "longAnswer": "const startedAt = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "66f9abe4badcd938": {
+    "intent": "code_packages_blindfold_src_proxy_ts_latency",
+    "question": "What does latency do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const latency = Date",
+    "longAnswer": "const latency = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "54bdc5aa8b355bd5": {
+    "intent": "code_packages_blindfold_src_proxy_ts_arm",
+    "question": "What does arm do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const arm = () => {",
+    "longAnswer": "const arm = () => {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "70f876f1163aa431": {
+    "intent": "code_packages_blindfold_src_proxy_ts_out",
+    "question": "What does out do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const out: Record<string, string> = {};",
+    "longAnswer": "const out: Record<string, string> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "67a3f110a3874bfa": {
+    "intent": "code_packages_blindfold_src_proxy_ts_msg",
+    "question": "What does msg do in packages/blindfold/src/proxy.ts?",
+    "shortAnswer": "const msg = err?",
+    "longAnswer": "const msg = err?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/proxy.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4196da20d5bdbabd": {
+    "intent": "code_packages_blindfold_src_release_ts_release_ts",
+    "question": "What does release.ts do in packages/blindfold/src/release.ts?",
+    "shortAnswer": "Auto-extracted summary for release.ts.",
+    "longAnswer": "Auto-extracted summary for release.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/release.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/release.ts"
+    ],
+    "confidence": 0.5
+  },
+  "216413001126ac54": {
+    "intent": "code_packages_blindfold_src_release_ts_key",
+    "question": "What does key do in packages/blindfold/src/release.ts?",
+    "shortAnswer": "const key = `${env",
+    "longAnswer": "const key = `${env\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/release.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/release.ts"
+    ],
+    "confidence": 0.5
+  },
+  "b7f4edc720fed95b": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_sealed_ledger_ts",
+    "question": "What does sealed-ledger.ts do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "Auto-extracted summary for sealed-ledger.ts.",
+    "longAnswer": "Auto-extracted summary for sealed-ledger.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "e6e16f6d5095489d": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_defaultsealedlogpath",
+    "question": "What does defaultSealedLogPath do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "export function defaultSealedLogPath(): string {",
+    "longAnswer": "export function defaultSealedLogPath(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "02a9747091d5c178": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_key",
+    "question": "What does key do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "const key = randomBytes(32);",
+    "longAnswer": "const key = randomBytes(32);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "e9dcfaefa00bdf0f": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_chained",
+    "question": "What does chained do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "const chained: SealedEntry = {",
+    "longAnswer": "const chained: SealedEntry = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f359a4af40e6f640": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_key",
+    "question": "What does key do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "const key = ledgerKey();",
+    "longAnswer": "const key = ledgerKey();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "bccdfa1f3708ddd0": {
+    "intent": "code_packages_blindfold_src_sealed_ledger_ts_expected",
+    "question": "What does expected do in packages/blindfold/src/sealed-ledger.ts?",
+    "shortAnswer": "const expected = key ? createHmac(\"sha256\", key)",
+    "longAnswer": "const expected = key ? createHmac(\"sha256\", key)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/sealed-ledger.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0fe778839f7d1884": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_t3_client_ts",
+    "question": "What does t3-client.ts do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "Auto-extracted summary for t3-client.ts.",
+    "longAnswer": "Auto-extracted summary for t3-client.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "61524bd5d1d08dcc": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_timer",
+    "question": "What does timer do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);",
+    "longAnswer": "const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "7528107a6e53635a": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_p",
+    "question": "What does p do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const p = egressCachePath();",
+    "longAnswer": "const p = egressCachePath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0803ae0206704929": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_existing",
+    "question": "What does existing do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const existing = Array",
+    "longAnswer": "const existing = Array\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "a43e4edcff8248df": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_t3sdk",
+    "question": "What does T3Sdk do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "export interface T3Sdk {",
+    "longAnswer": "export interface T3Sdk {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "fa839e408356aa48": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_raw",
+    "question": "What does raw do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const raw = (await withDeadline(tenant",
+    "longAnswer": "const raw = (await withDeadline(tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "80dc263c8bfedb03": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_r",
+    "question": "What does r do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const r = (await withDeadline(tenant",
+    "longAnswer": "const r = (await withDeadline(tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "54d742974c2fd334": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_direct",
+    "question": "What does direct do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const direct = decodeSecret(",
+    "longAnswer": "const direct = decodeSecret(\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "ee5caeb4d1ff126f": {
+    "intent": "code_packages_blindfold_src_t3_client_ts_u",
+    "question": "What does u do in packages/blindfold/src/t3-client.ts?",
+    "shortAnswer": "const u = new URL(url);",
+    "longAnswer": "const u = new URL(url);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.5
+  },
+  "e88f63d7b93b326b": {
+    "intent": "code_packages_blindfold_src_usage_log_ts_usage_log_ts",
+    "question": "What does usage-log.ts do in packages/blindfold/src/usage-log.ts?",
+    "shortAnswer": "Auto-extracted summary for usage-log.ts.",
+    "longAnswer": "Auto-extracted summary for usage-log.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/usage-log.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f97be860003cb246": {
+    "intent": "code_packages_blindfold_src_usage_log_ts_size",
+    "question": "What does size do in packages/blindfold/src/usage-log.ts?",
+    "shortAnswer": "const size = fs",
+    "longAnswer": "const size = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/usage-log.ts"
+    ],
+    "confidence": 0.5
+  },
+  "24bd8900752b2bb0": {
+    "intent": "code_packages_blindfold_src_usage_log_ts_dir",
+    "question": "What does dir do in packages/blindfold/src/usage-log.ts?",
+    "shortAnswer": "const dir = path",
+    "longAnswer": "const dir = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/usage-log.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4df91228a9dcbdce": {
+    "intent": "code_packages_blindfold_src_usage_log_ts_events",
+    "question": "What does events do in packages/blindfold/src/usage-log.ts?",
+    "shortAnswer": "const events = text",
+    "longAnswer": "const events = text\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/usage-log.ts"
+    ],
+    "confidence": 0.5
+  },
+  "58b715ad33c92469": {
+    "intent": "code_packages_blindfold_src_versions_ts_versions_ts",
+    "question": "What does versions.ts do in packages/blindfold/src/versions.ts?",
+    "shortAnswer": "Auto-extracted summary for versions.ts.",
+    "longAnswer": "Auto-extracted summary for versions.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/versions.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/versions.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c2fe4baa79e9c6b3": {
+    "intent": "code_packages_blindfold_src_versions_ts_versionkeyfor",
+    "question": "What does versionKeyFor do in packages/blindfold/src/versions.ts?",
+    "shortAnswer": "export function versionKeyFor(name: string, stampMs: number): string {",
+    "longAnswer": "export function versionKeyFor(name: string, stampMs: number): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/versions.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/versions.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4e5d309c5bd15db3": {
+    "intent": "code_packages_blindfold_src_wrap_ts_wrap_ts",
+    "question": "What does wrap.ts do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "Auto-extracted summary for wrap.ts.",
+    "longAnswer": "Auto-extracted summary for wrap.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f8743899d5dfceb1": {
+    "intent": "code_packages_blindfold_src_wrap_ts_wrapopts",
+    "question": "What does WrapOpts do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "export interface WrapOpts {",
+    "longAnswer": "export interface WrapOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "90fe1b08d187d047": {
+    "intent": "code_packages_blindfold_src_wrap_ts_proxy_token_header",
+    "question": "What does PROXY_TOKEN_HEADER do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "const PROXY_TOKEN_HEADER = \"x-blindfold-token\";",
+    "longAnswer": "const PROXY_TOKEN_HEADER = \"x-blindfold-token\";\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "37eb615e5827daf6": {
+    "intent": "code_packages_blindfold_src_wrap_ts_respheaders",
+    "question": "What does respHeaders do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "const respHeaders = new Headers();",
+    "longAnswer": "const respHeaders = new Headers();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "84debcc3ba33424f": {
+    "intent": "code_packages_blindfold_src_wrap_ts_body",
+    "question": "What does body do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "const body = init?",
+    "longAnswer": "const body = init?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "977b166dc68107b4": {
+    "intent": "code_packages_blindfold_src_wrap_ts_socket",
+    "question": "What does socket do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "const socket = (opts",
+    "longAnswer": "const socket = (opts\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "4b11c83672e4adf2": {
+    "intent": "code_packages_blindfold_src_wrap_ts_headers",
+    "question": "What does headers do in packages/blindfold/src/wrap.ts?",
+    "shortAnswer": "const headers = new Headers(init?",
+    "longAnswer": "const headers = new Headers(init?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/src/wrap.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5417b05cd534e0a4": {
+    "intent": "code_packages_blindfold_bin_blindfold_ts_blindfold_ts",
+    "question": "What does blindfold.ts do in packages/blindfold/bin/blindfold.ts?",
+    "shortAnswer": "Auto-extracted summary for blindfold.ts.",
+    "longAnswer": "Auto-extracted summary for blindfold.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/blindfold.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/blindfold.ts"
+    ],
+    "confidence": 0.5
+  },
+  "ae54d577289161a7": {
+    "intent": "code_packages_blindfold_bin_blindfold_ts_routes",
+    "question": "What does ROUTES do in packages/blindfold/bin/blindfold.ts?",
+    "shortAnswer": "const ROUTES: Record<string, Handler> = {",
+    "longAnswer": "const ROUTES: Record<string, Handler> = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/blindfold.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/blindfold.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c8ff99646508a796": {
+    "intent": "code_packages_blindfold_bin_cli_shared_ts_cli_shared_ts",
+    "question": "What does cli-shared.ts do in packages/blindfold/bin/cli-shared.ts?",
+    "shortAnswer": "Auto-extracted summary for cli-shared.ts.",
+    "longAnswer": "Auto-extracted summary for cli-shared.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cli-shared.ts"
+    ],
+    "confidence": 0.5
+  },
+  "83a4ae7aeb308b77": {
+    "intent": "code_packages_blindfold_bin_cli_shared_ts_next",
+    "question": "What does next do in packages/blindfold/bin/cli-shared.ts?",
+    "shortAnswer": "const next = argv[i + 1];",
+    "longAnswer": "const next = argv[i + 1];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cli-shared.ts"
+    ],
+    "confidence": 0.5
+  },
+  "12a965c97da74fba": {
+    "intent": "code_packages_blindfold_bin_cli_shared_ts_tool_env",
+    "question": "What does TOOL_ENV do in packages/blindfold/bin/cli-shared.ts?",
+    "shortAnswer": "const TOOL_ENV: Record<string, string> = {",
+    "longAnswer": "const TOOL_ENV: Record<string, string> = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cli-shared.ts"
+    ],
+    "confidence": 0.5
+  },
+  "49df7d9de866ee88": {
+    "intent": "code_packages_blindfold_bin_cli_shared_ts_die",
+    "question": "What does die do in packages/blindfold/bin/cli-shared.ts?",
+    "shortAnswer": "export function die(msg: string): never {",
+    "longAnswer": "export function die(msg: string): never {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cli-shared.ts"
+    ],
+    "confidence": 0.5
+  },
+  "2d983ad3d65fd173": {
+    "intent": "code_packages_blindfold_bin_cmd_auth_ts_cmd_auth_ts",
+    "question": "What does cmd-auth.ts do in packages/blindfold/bin/cmd-auth.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-auth.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-auth.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.5
+  },
+  "341c4008ca6e38d4": {
+    "intent": "code_packages_blindfold_bin_cmd_auth_ts_cfg",
+    "question": "What does cfg do in packages/blindfold/bin/cmd-auth.ts?",
+    "shortAnswer": "const cfg = configPath();",
+    "longAnswer": "const cfg = configPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.5
+  },
+  "0e125034ddeb34ed": {
+    "intent": "code_packages_blindfold_bin_cmd_auth_ts_inkeychain",
+    "question": "What does inKeychain do in packages/blindfold/bin/cmd-auth.ts?",
+    "shortAnswer": "const inKeychain = triedKeychain && keychainSet(did, key);",
+    "longAnswer": "const inKeychain = triedKeychain && keychainSet(did, key);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5de5313c882e3c51": {
+    "intent": "code_packages_blindfold_bin_cmd_auth_ts_cfg",
+    "question": "What does cfg do in packages/blindfold/bin/cmd-auth.ts?",
+    "shortAnswer": "const cfg = configPath();",
+    "longAnswer": "const cfg = configPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d32d2dad000ef100": {
+    "intent": "code_packages_blindfold_bin_cmd_auth_ts_keysource",
+    "question": "What does keySource do in packages/blindfold/bin/cmd-auth.ts?",
+    "shortAnswer": "const keySource = !env",
+    "longAnswer": "const keySource = !env\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.5
+  },
+  "6c15dc2a433e3295": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_cmd_enclave_ts",
+    "question": "What does cmd-enclave.ts do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-enclave.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-enclave.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "22329520d70e7f5b": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_seedarr",
+    "question": "What does seedArr do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const seedArr = Array",
+    "longAnswer": "const seedArr = Array\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "89c03492a1d95570": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_entries",
+    "question": "What does entries do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const entries = readSealed();",
+    "longAnswer": "const entries = readSealed();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d0ff79ecbcae681d": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_where",
+    "question": "What does where do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const where = e",
+    "longAnswer": "const where = e\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "3f6dff2f030096e2": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_latest",
+    "question": "What does latest do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const latest = new Map<string, (typeof realEntries)[number]>();",
+    "longAnswer": "const latest = new Map<string, (typeof realEntries)[number]>();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "3f31b78ecae8615f": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_v",
+    "question": "What does v do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const v = await client",
+    "longAnswer": "const v = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "edf7c542465278f3": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_info",
+    "question": "What does info do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const info = await client",
+    "longAnswer": "const info = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d3f84dd08e6bde1f": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_latest",
+    "question": "What does latest do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const latest = new Map<string, (typeof entries)[number]>();",
+    "longAnswer": "const latest = new Map<string, (typeof entries)[number]>();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "72a217f02ba89ec9": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_env",
+    "question": "What does env do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const env = loadBlindfoldEnv();",
+    "longAnswer": "const env = loadBlindfoldEnv();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d1482efd39e5f6ef": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_mehex",
+    "question": "What does meHex do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const meHex = info",
+    "longAnswer": "const meHex = info\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "22ab43b987dc42e1": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_msg",
+    "question": "What does msg do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const msg = (e as Error)",
+    "longAnswer": "const msg = (e as Error)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "8d4a3b0c905018a3": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_all",
+    "question": "What does all do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const all = !!argv",
+    "longAnswer": "const all = !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "addace8ddd65ce6b": {
+    "intent": "code_packages_blindfold_bin_cmd_enclave_ts_locations",
+    "question": "What does locations do in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "const locations = [",
+    "longAnswer": "const locations = [\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.5
+  },
+  "cbaa76fa7d490013": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_cmd_lifecycle_ts",
+    "question": "What does cmd-lifecycle.ts do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-lifecycle.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-lifecycle.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5339fbd4742859c3": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_vkey",
+    "question": "What does vKey do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const vKey = versionKeyFor(name, Date",
+    "longAnswer": "const vKey = versionKeyFor(name, Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "dbbdc6c5620de28a": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_now",
+    "question": "What does now do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const now = await client",
+    "longAnswer": "const now = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "9d2dcff0cb791c0a": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_sel",
+    "question": "What does sel do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const sel = versions",
+    "longAnswer": "const sel = versions\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "455c07f929c7d1c2": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_restored",
+    "question": "What does restored do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const restored = await client",
+    "longAnswer": "const restored = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "6075eefbfb46b567": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_list",
+    "question": "What does list do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const list = readVersions(name);",
+    "longAnswer": "const list = readVersions(name);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "05ccc2562b4a9926": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_when",
+    "question": "What does when do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const when = v",
+    "longAnswer": "const when = v\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "482f95e3d5dbb4da": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_toseal",
+    "question": "What does toSeal do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const toSeal = plan",
+    "longAnswer": "const toSeal = plan\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "6156bf37ba189b11": {
+    "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_results",
+    "question": "What does results do in packages/blindfold/bin/cmd-lifecycle.ts?",
+    "shortAnswer": "const results = await runMigrate({ keep });",
+    "longAnswer": "const results = await runMigrate({ keep });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-lifecycle.ts"
+    ],
+    "confidence": 0.5
+  },
+  "95f90ea5665723f0": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_cmd_secrets_ts",
+    "question": "What does cmd-secrets.ts do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-secrets.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-secrets.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "8949a163693678c2": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_sealgate",
+    "question": "What does sealGate do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const sealGate = await attestationGate({ skip: !!argv",
+    "longAnswer": "const sealGate = await attestationGate({ skip: !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "ae1bcd6dd54bf79d": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_asvar",
+    "question": "What does asVar do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const asVar = name",
+    "longAnswer": "const asVar = name\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "f55d544557ad1dd5": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_value",
+    "question": "What does value do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const value = await release(name, { via: \"use\" }); // plaintext, kept local; never printed",
+    "longAnswer": "const value = await release(name, { via: \"use\" }); // plaintext, kept local; never printed\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c7087cf09fb53bc0": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_islocal",
+    "question": "What does isLocal do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const isLocal = [\"localhost\", \"127",
+    "longAnswer": "const isLocal = [\"localhost\", \"127\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "93b7e633289173e3": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_res",
+    "question": "What does res do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const res = await fetch(url, {",
+    "longAnswer": "const res = await fetch(url, {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "114d91844c20c585": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_child",
+    "question": "What does child do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const child = spawn(cmdArgs[0]!, cmdArgs",
+    "longAnswer": "const child = spawn(cmdArgs[0]!, cmdArgs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "1a7bea27be23cd51": {
+    "intent": "code_packages_blindfold_bin_cmd_secrets_ts_value",
+    "question": "What does value do in packages/blindfold/bin/cmd-secrets.ts?",
+    "shortAnswer": "const value = await release(name, { via: \"export\" });",
+    "longAnswer": "const value = await release(name, { via: \"export\" });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-secrets.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5a7c739feac26d8d": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_cmd_serve_ts",
+    "question": "What does cmd-serve.ts do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-serve.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-serve.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "5ddd9c1463fbc7db": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_secret",
+    "question": "What does secret do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const secret = argv",
+    "longAnswer": "const secret = argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "cd7a7c6c49c62918": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_proxygate",
+    "question": "What does proxyGate do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const proxyGate = await attestationGate({ skip: !!argv",
+    "longAnswer": "const proxyGate = await attestationGate({ skip: !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d33acbe1b33b14e1": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_handle",
+    "question": "What does handle do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const handle = await startProxy({ port, secretKey: secret, token, socket });",
+    "longAnswer": "const handle = await startProxy({ port, secretKey: secret, token, socket });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "3e49680ee5507fd9": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_r",
+    "question": "What does r do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const r = await attest({ expectRtmr3, noCache: true }); // CLI check is always fresh",
+    "longAnswer": "const r = await attest({ expectRtmr3, noCache: true }); // CLI check is always fresh\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "715d8561d2ba8de4": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_topin",
+    "question": "What does toPin do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const toPin = expectRtmr3 ?? r",
+    "longAnswer": "const toPin = expectRtmr3 ?? r\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "69bd815c4c6e60f7": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_handle",
+    "question": "What does handle do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const handle = await startDashboard({ port });",
+    "longAnswer": "const handle = await startDashboard({ port });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "8a5c76e564f3b189": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_byprovider",
+    "question": "What does byProvider do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const byProvider: Record<string, number> = {};",
+    "longAnswer": "const byProvider: Record<string, number> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "530f851af52cb598": {
+    "intent": "code_packages_blindfold_bin_cmd_serve_ts_total",
+    "question": "What does total do in packages/blindfold/bin/cmd-serve.ts?",
+    "shortAnswer": "const total = events",
+    "longAnswer": "const total = events\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-serve.ts"
+    ],
+    "confidence": 0.5
+  },
+  "9a0c82a447533333": {
+    "intent": "code_packages_blindfold_bin_cmd_tenant_ts_cmd_tenant_ts",
+    "question": "What does cmd-tenant.ts do in packages/blindfold/bin/cmd-tenant.ts?",
+    "shortAnswer": "Auto-extracted summary for cmd-tenant.ts.",
+    "longAnswer": "Auto-extracted summary for cmd-tenant.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-tenant.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d26b804ae2e8d6eb": {
+    "intent": "code_packages_blindfold_bin_cmd_tenant_ts_authorized",
+    "question": "What does authorized do in packages/blindfold/bin/cmd-tenant.ts?",
+    "shortAnswer": "const authorized = await client",
+    "longAnswer": "const authorized = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-tenant.ts"
+    ],
+    "confidence": 0.5
+  },
+  "9d12e166db9d9517": {
+    "intent": "code_packages_blindfold_bin_cmd_tenant_ts_client",
+    "question": "What does client do in packages/blindfold/bin/cmd-tenant.ts?",
+    "shortAnswer": "const client = await openT3Client(env);",
+    "longAnswer": "const client = await openT3Client(env);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-tenant.ts"
+    ],
+    "confidence": 0.5
+  },
+  "06b25202f78f0dbe": {
+    "intent": "code_packages_blindfold_bin_cmd_tenant_ts_client",
+    "question": "What does client do in packages/blindfold/bin/cmd-tenant.ts?",
+    "shortAnswer": "const client = await openT3Client(env);",
+    "longAnswer": "const client = await openT3Client(env);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-tenant.ts"
+    ],
+    "confidence": 0.5
+  },
+  "69186d56a1e0eb8a": {
+    "intent": "code_contract_src_auth_rs_base64_std",
+    "question": "What does base64_std do in contract/src/auth.rs?",
+    "shortAnswer": "pub fn base64_std(input: &[u8]) -> String {",
+    "longAnswer": "pub fn base64_std(input: &[u8]) -> String {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/auth.rs`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "contract/src/auth.rs"
+    ],
+    "confidence": 0.5
+  },
+  "325b7ee1d7082516": {
+    "intent": "code_contract_src_auth_rs_base64_matches_known_values",
+    "question": "What does base64_matches_known_values do in contract/src/auth.rs?",
+    "shortAnswer": "fn base64_matches_known_values() {",
+    "longAnswer": "fn base64_matches_known_values() {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/auth.rs`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "contract/src/auth.rs"
+    ],
+    "confidence": 0.5
+  },
+  "a5b6da6bb0685507": {
+    "intent": "code_contract_src_forward_rs_build_headers",
+    "question": "What does build_headers do in contract/src/forward.rs?",
+    "shortAnswer": "fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, String)>, String> {",
+    "longAnswer": "fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, String)>, String> {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/forward.rs`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "contract/src/forward.rs"
+    ],
+    "confidence": 0.5
+  },
+  "ba80bcca630bb21c": {
+    "intent": "code_scripts_demo_smtp_ts_transporter",
+    "question": "What does transporter do in scripts/demo-smtp.ts?",
+    "shortAnswer": "const transporter = nodemailer",
+    "longAnswer": "const transporter = nodemailer\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/demo-smtp.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/demo-smtp.ts"
+    ],
+    "confidence": 0.5
+  },
+  "67abf582a05fd419": {
+    "intent": "code_scripts_demo_smtp_ts_info",
+    "question": "What does info do in scripts/demo-smtp.ts?",
+    "shortAnswer": "const info = await transporter",
+    "longAnswer": "const info = await transporter\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/demo-smtp.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/demo-smtp.ts"
+    ],
+    "confidence": 0.5
+  },
+  "196e368303391258": {
+    "intent": "code_scripts_grant_egress_ts_msg",
+    "question": "What does msg do in scripts/grant-egress.ts?",
+    "shortAnswer": "const msg = (e as Error)",
+    "longAnswer": "const msg = (e as Error)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/grant-egress.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/grant-egress.ts"
+    ],
+    "confidence": 0.5
+  },
+  "33ccc7a0e2849b06": {
+    "intent": "code_scripts_init_tenant_ts_r",
+    "question": "What does r do in scripts/init-tenant.ts?",
+    "shortAnswer": "const r = await tenant",
+    "longAnswer": "const r = await tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/init-tenant.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/init-tenant.ts"
+    ],
+    "confidence": 0.5
+  },
+  "c2d471e1a86d43a1": {
+    "intent": "code_scripts_run_tests_ts_deadline",
+    "question": "What does deadline do in scripts/run-tests.ts?",
+    "shortAnswer": "const deadline = Date",
+    "longAnswer": "const deadline = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/run-tests.ts"
+    ],
+    "confidence": 0.5
+  },
+  "2c488f8e22b20d57": {
+    "intent": "code_scripts_run_tests_ts_chunks",
+    "question": "What does chunks do in scripts/run-tests.ts?",
+    "shortAnswer": "const chunks: Buffer[] = [];",
+    "longAnswer": "const chunks: Buffer[] = [];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/run-tests.ts"
+    ],
+    "confidence": 0.5
+  },
+  "2db9c7b6cec72c8c": {
+    "intent": "code_scripts_run_tests_ts_req",
+    "question": "What does req do in scripts/run-tests.ts?",
+    "shortAnswer": "const req = http",
+    "longAnswer": "const req = http\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/run-tests.ts"
+    ],
+    "confidence": 0.5
+  },
+  "d56c68388f01c86d": {
+    "intent": "code_scripts_run_tests_ts_block",
+    "question": "What does block do in scripts/run-tests.ts?",
+    "shortAnswer": "const block = [",
+    "longAnswer": "const block = [\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/run-tests.ts"
+    ],
+    "confidence": 0.5
+  },
+  "b433ae89de5d7558": {
+    "intent": "code_scripts_seal_via_working_key_ts_len",
+    "question": "What does len do in scripts/seal-via-working-key.ts?",
+    "shortAnswer": "const len = got?",
+    "longAnswer": "const len = got?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/seal-via-working-key.ts`",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "scripts/seal-via-working-key.ts"
+    ],
+    "confidence": 0.5
+  },
+  "15790abd1cb8aa30": {
+    "intent": "get_terminal3_tenant",
+    "question": "How do I get a Terminal 3 tenant quickly using Blindfold?",
+    "shortAnswer": "Use the self-serve signup command `blindfold signup --email you@example.com` which mints a tenant for you in about 30 seconds without manual token claiming.",
+    "longAnswer": "Install Blindfold globally with `npm i -g @fiscalmindset/blindfold` (or from a local clone with `npm i -g ./packages/blindfold`), then run `blindfold signup --email you@example.com`. This self-serve method takes approximately 30 seconds and automatically mints a Terminal 3 tenant for you — no manual token claim required.",
+    "audience": [
+      "user",
+      "developer"
+    ],
+    "sources": [
+      "README.md:B. Get a Terminal 3 tenant",
+      "README.md"
+    ],
+    "confidence": 0.95
+  },
+  "dde61beaf4e578ab": {
+    "intent": "check_blindfold_status",
+    "question": "How do I verify that Blindfold is properly configured and ready to use?",
+    "shortAnswer": "Run `blindfold doctor` to check if Blindfold is ready to seal and use secrets. This command verifies your T3N_API_KEY and DID credentials are properly configured in your environment.",
+    "longAnswer": "The `blindfold doctor` command performs a readiness check for Blindfold. It verifies that your credentials are properly set up:\n\n- **T3N_API_KEY**: A 64-character hex value (format: `0x...`)\n- **DID**: A T3N decentralized identifier (format: `did:t3n:...`)\n\nIf credentials aren't configured, you can claim them manually at https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens and add them to your `.env` file:\n\n```bash\ncat >> .env <<'EOF'\nT3N_API_KEY=0xYOUR_HEX_HERE\nDID=did:t3n:YOUR_HEX_HERE\nEOF\n```\n\nYou can also run `blindfold credit` to check your token balance.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "README.md:One email = one tenant; use a fresh address (Gmail +aliases work) per tenant.",
+      "README.md"
+    ],
+    "confidence": 0.85
+  },
+  "04027e70dd62053a": {
+    "intent": "list_blindfold_cli_commands",
+    "question": "What CLI commands does Blindfold provide?",
+    "shortAnswer": "Blindfold provides commands for onboarding (signup, init), verification (verify, attest), secret management (register), proxying (proxy), and utility operations (credit, dashboard, stats, doctor, update).",
+    "longAnswer": "## Blindfold CLI Commands\n\n### Onboarding & Setup\n- `blindfold signup [--email <addr>] [--first/--last]` — Self-serve onboarding: mint a new Terminal 3 testnet tenant. Generates a key locally, eth-authenticates, verifies email by OTP, and self-admits to mint welcome credits. Testnet-only.\n- `blindfold init [--seed KV:ENV]... [--start]` — Zero-knowledge bootstrap. The preferred onramp.\n\n### Verification\n- `blindfold verify` — Handshake + auth round-trip against T3 testnet.\n- `blindfold attest [--expect-rtmr3 <b64>] [--pin] [--json]` — Verify the enclave's TDX attestation (Intel root CA); --pin gates seal/proxy on the code measurement.\n\n### Secret Management\n- `blindfold register --name <K> [--from-env <ENV>]` — Seal a secret. Prompts (no echo) if --from-env omitted; piped stdin also works.\n\n### Proxy & Compatibility\n- `blindfold proxy [--port 8787] [--auth] [--socket [path]]` — Local OpenAI-shaped proxy. --auth = per-session token; --socket = 0600 unix socket.\n- `blindfold compat [--json]` — Scan local box for agent CLIs.\n\n### Utilities\n- `blindfold credit [--json]` — Show tenant's Terminal 3 token/credit balance (no credit cost).\n- `blindfold publish [--wasm <path>]` — Manually publish WASM (init does this automatically).\n- `blindfold dashboard [--port 8799]` — Live HTML usage dashboard.\n- `blindfold stats | stats:clear` — CLI usage summary / wipe.\n- `blindfold doctor` — Show mode + config. Exit 1 if REAL is missing creds.\n- `blindfold update [--from <path>]` — Update global install (repo source, else @fiscalmindset/blindfold@latest).\n\n### Modes\nMocked behaviour is opt-in only: `BLINDFOLD_MOCK=1`. Otherwise, REAL mode is the only mode.",
+    "audience": [
+      "user",
+      "developer"
+    ],
+    "sources": [
+      "docs/AGENTS.md:The CLI commands",
+      "docs/AGENTS.md"
+    ],
+    "confidence": 0.95
+  },
+  "64058036fd8a8c62": {
+    "intent": "whats_new_v0_2_v0_3",
+    "question": "What are the new features in Blindfold v0.2 and v0.3?",
+    "shortAnswer": "Blindfold v0.2/v0.3 introduces npm global installation via `npm i -g @fiscalmindset/blindfold`, self-serve signup/login with OS keychain storage for tenant credentials, webhook support with a /discord proxy provider, and layered proxy access with TDX attestation that verifies the enclave against Intel's root CA.",
+    "longAnswer": "## New Features in Blindfold v0.2/v0.3\n\n### Installation\n- **npm global install**: `npm i -g @fiscalmindset/blindfold` provides a global `blindfold` CLI that runs from any directory\n- State is stored in `~/.blindfold` (no repo/SSD dependency)\n- Keep current with `blindfold update`\n\n### Self-Serve Onboarding\n- **`blindfold signup`**: Mint a brand-new, funded Terminal 3 testnet tenant from nothing\n  - Verifies email by code\n  - Stores generated key in OS keychain — never printed\n  - No manual token claim required\n- **`blindfold login`**: Store tenant credentials in `~/.blindfold` with the tenant key in the OS keychain (macOS/Linux), not plaintext\n\n### Webhook Support\n- `webhook` auth scheme (contract v0.5.5)\n- `/discord` proxy provider lets an agent post to a webhook **without ever holding the URL**\n- See [`examples/discord-webhook/`](examples/discord-webhook/)\n\n### Layered Proxy Access + Attestation\n- `proxy --auth`: Mints a per-session token\n- `proxy --socket`: Binds a `0600` unix socket\n- `blindfold attest`: Verifies the enclave's TDX quotes against Intel's root CA\n- `--pin` flag gates seal/proxy on the code measurement\n- `blindfold credit`: Shows the tenant's Terminal 3 balance",
+    "audience": [
+      "user",
+      "developer"
+    ],
+    "sources": [
+      "README.md:What's new (v0.2 / v0.3 + webhook)",
+      "README.md"
+    ],
+    "confidence": 0.95
+  },
+  "60bcab6c30150ab4": {
+    "intent": "install_blindfold",
+    "question": "How do I install Blindfold and create a new account?",
+    "shortAnswer": "Install Blindfold globally via npm with `npm install -g @fiscalmindset/blindfold`, then run `blindfold signup --email <your-email>` to create a self-serve account that automatically mints a funded testnet tenant.",
+    "longAnswer": "## Installation\n\nInstall Blindfold globally using npm:\n\n```bash\nnpm install -g @fiscalmindset/blindfold\n```\n\nAlternatively, from a local clone:\n\n```bash\nnpm i -g ./packages/blindfold\n```\n\n## New User Signup\n\nAfter installation, create your account:\n\n```bash\nblindfold signup --email you@x.com\n```\n\nThis self-serve command automatically mints a funded testnet tenant for you.",
+    "audience": [
+      "user"
+    ],
+    "sources": [
+      "usage.md:Install (any OS)",
+      "usage.md"
+    ],
+    "confidence": 0.95
+  },
+  "4e027ff35f8d6125": {
+    "intent": "how_credentials_are_stored",
+    "question": "How does Blindfold store credentials and what credential stores are supported?",
+    "shortAnswer": "Blindfold stores credentials in the OS credential store — macOS Keychain, Linux libsecret (secret-tool), or Windows Credential Manager. If none is available or in non-interactive sessions, it falls back to a 0600 file. The config.json file holds only non-secret DID and settings.",
+    "longAnswer": "## Credential Storage\n\nBlindfold uses the OS-native credential store for secure credential management:\n\n| OS | Credential Store |\n|----|------------------|\n| macOS | Keychain |\n| Linux | libsecret (`secret-tool`) |\n| Windows | Credential Manager |\n\n### Commands\n- `blindfold login` — stores tenant DID + key in the OS credential store\n- `blindfold doctor` — confirms credentials are valid; after this, `blindfold` works from any directory\n\n### Fallback Behavior\nIf no credential store is available (or in non-interactive sessions), `login` falls back to a `0600` file and reports this.\n\n### Config File\n`~/.blindfold/config.json` holds only non-secret configuration: the DID and settings. Secrets are never stored here.",
+    "audience": [
+      "user",
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "usage.md:— or, if you already have Terminal 3 credentials:",
+      "usage.md"
+    ],
+    "confidence": 0.95
+  },
+  "d9ef335c3b1a4519": {
+    "intent": "what_does_color_utility_do",
+    "question": "What does the color utility in color.ts provide?",
+    "shortAnswer": "The `c` object exports ANSI escape code constants for terminal text styling (bold, dim, red, green, yellow, blue, magenta, cyan, gray) via a `wrap()` helper. Colors are conditionally enabled based on TTY detection and user preference.",
+    "longAnswer": "The `c` object in `packages/blindfold/src/color.ts` provides a mapping of color/style names to ANSI escape code values:\n\n```typescript\nexport const c = {\n  bold: wrap(\"1\"),\n  dim: wrap(\"2\"),\n  red: wrap(\"31\"),\n  green: wrap(\"32\"),\n  yellow: wrap(\"33\"),\n  blue: wrap(\"34\"),\n  magenta: wrap(\"35\"),\n  cyan: wrap(\"36\"),\n  gray: wrap(\"90\"),\n};\n```\n\nThe `wrap()` function (defined elsewhere in the file) wraps the codes with ANSI escape sequence delimiters. The comment `/** Whether color output is active (TTY + not disabled). */` indicates that color output is automatically disabled when output is not a TTY or when the user has disabled colors, ensuring clean output for non-interactive contexts like logs or CI pipelines.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/src/color.ts:1-14",
+      "packages/blindfold/src/color.ts"
+    ],
+    "confidence": 0.85
+  },
+  "ffc3baeb29fb0c90": {
+    "intent": "signup_options_key_persistence_callback",
+    "question": "What is the purpose of the `onKeyReady` callback in `SignupOptions`?",
+    "shortAnswer": "The `onKeyReady` callback is invoked immediately after email verification and DID confirmation, but BEFORE the self-admit commit executes. This ordering is critical: it allows the caller to persist the key to stable storage so that a failed self-admit commit never strands a live, email-bound tenant with an unrecoverable key.",
+    "longAnswer": "The `SignupOptions` interface in `packages/blindfold/src/t3-client.ts` defines the `onKeyReady` callback with signature:\n\n```typescript\nonKeyReady?: (key: string, did: string) => void | Promise<void>;\n```\n\n**Security-critical ordering**: The callback fires at the instant the email is verified and the DID is confirmed real — but **before** the self-admit commit that could still fail. This two-phase pattern ensures:\n\n1. The key is persisted externally (e.g., to disk, a KMS, or a backup mechanism).\n2. If the subsequent self-admit commit fails, the tenant still has a recoverable key bound to their email.\n3. Without this callback, a failed commit would leave a live tenant with an unrecoverable key, creating a denial-of-service scenario.\n\nThe callback receives both the raw `key` and the associated `did` string, enabling the caller to store them together atomically.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:SignupOptions",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.95
+  },
+  "005ecb7f8d6055b8": {
+    "intent": "credit_balance_interface_structure",
+    "question": "What does the CreditBalance interface represent in the T3 client?",
+    "shortAnswer": "CreditBalance is an interface representing a Terminal 3 tenant's credit state, tracking available credits, reserved amounts, and whether credits are exhausted. It includes optional fields for storage deposits and mock/test data.",
+    "longAnswer": "The `CreditBalance` interface in `packages/blindfold/src/t3-client.ts` defines the credit state model for a T3 tenant:\n\n```typescript\nexport interface CreditBalance {\n  available: number;       // Spendable credit balance\n  reserved: number;        // Credits locked for pending operations\n  creditExhausted: boolean; // Whether tenant has run out of credits\n  storageDeposit?: number; // Optional storage deposit amount\n  mock?: boolean;          // Indicates test/mock data\n}\n```\n\nThe interface also documents the self-serve signup flow via the `becomeDevTenant` function (testnet self-admit), and notes that signup throws when the email already belongs to an existing T3 tenant — T3 refuses to reparent an owned email onto a fresh DID.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:CreditBalance",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.9
+  },
+  "b95e2f4e4fe7a939": {
+    "intent": "what_does_verify_do_in_signup",
+    "question": "What does the verify step do in Blindfold's signup flow?",
+    "shortAnswer": "The verify step calls `t3n.otpVerify()` with the emailed OTP code and channel, handles merge suggestions for already-taken emails by throwing `SignupEmailTakenError`, validates OTP status (failed/expired) with user-friendly error messages, and triggers the `onKeyReady` callback to persist the generated key and DID before the admit step.",
+    "longAnswer": "In `packages/blindfold/src/t3-client.ts`, the `verify` chunk performs OTP verification after the user receives a code via email:\n\n```typescript\nconst verify = await t3n.otpVerify({ otpCode: code, request: channel });\n```\n\n**Merge handling**: If `verify.mergeSuggestion` exists, the email is already bound to an existing DID. The code throws `SignupEmailTakenError` with the existing DID, allowing the caller to offer account merge:\n```typescript\nif (verify.mergeSuggestion) {\n  throw new SignupEmailTakenError(opts.email, verify.mergeSuggestion.existingDid);\n}\n```\n\n**OTP failure handling**: Checks for `otp_failed` or `otp_expired` statuses and throws descriptive errors with retry instructions.\n\n**Key persistence**: The critical security property — after successful verification, the email is bound to the DID and the generated key controls it. The code calls `opts.onKeyReady(key, did)` to let the caller persist this credential *before* the admit step, ensuring the tenant's credential is never burned even if admit fails:\n```typescript\nif (opts.onKeyReady) await opts.onKeyReady(key, did);\n```",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:verify",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.95
+  },
+  "0e67e2eeaa047bd2": {
+    "intent": "what_does_signup_result_contain_and_key_handling",
+    "question": "What does SignupResult contain and what are the security requirements for the key?",
+    "shortAnswer": "SignupResult contains the tenant's secp256k1 private key, DID, address, environment (testnet/production), and admission status. The key is the ONLY secret this function produces and must be stored in the OS keychain — it MUST NOT be printed or logged, following the same handling rules as a sealed key.",
+    "longAnswer": "## SignupResult Interface\n\nLocated in `packages/blindfold/src/t3-client.ts`, this interface represents the result of provisioning a Terminal 3 testnet tenant end-to-end:\n\n```typescript\nexport interface SignupResult {\n  key: string;           // 0x..., secp256k1 private key\n  did: string;           // eth-derived DID\n  address: string;       // Ethereum address\n  env: \"testnet\" | \"production\";\n  admitStatus: string;   // \"admitted\" | \"already-admitted\" | \"refused\" | \"unknown\"\n  grantedCredits?: string;\n  refusedReason?: string;\n  refusedDetail?: string;\n}\n```\n\n## Key Security Property\n\nThe `key` field is the **ONLY secret** produced by the provisioning function. Per the JSDoc comment:\n\n> The caller must store it in the OS keychain and MUST NOT print or log it — same handling rule as a sealed key.\n\n## Provisioning Flow (3 Steps)\n\n1. **Generate** a fresh secp256k1 key locally (tenant's identity)\n2. **eth-authenticate** with it (yields eth-derived DID required by becomeDevTenant)\n3. **Prove email via OTP** and self-admit (`becomeDevTenant: true`), which mints operator-configured welcome credits\n\nThe generated key is returned so the caller can persist it to the keychain; it never leaves the process otherwise.\n\n**Note:** Testnet-only — production refuses self-admit.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:SignupResult (lines 1-17)",
+      "packages/blindfold/src/t3-client.ts:provisioning comment (lines 19-30)",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.95
+  },
+  "60a13a2b168004df": {
+    "intent": "tenant_admission_status_mapping",
+    "question": "What does the admit chunk do in t3-client.ts?",
+    "shortAnswer": "This code extracts tenant admission data from the T3 client result and maps it to a structured response object, exposing admission status, granted credits, and refusal details with safe optional chaining.",
+    "longAnswer": "The `admit` chunk extracts the `tenantAdmit` field from the T3 client response and transforms it into a normalized return object. It maps:\n\n- `admitStatus`: The admission status from `admit?.status`, defaulting to `\"unknown\"` if absent\n- `grantedCredits`: Credits granted to the tenant (if admitted)\n- `refusedReason`: The reason for refusal (if rejected)\n- `refusedDetail`: Additional refusal details (if rejected)\n\nThe code uses optional chaining (`?.`) and nullish coalescing (`??`) to safely handle missing fields, ensuring the return object always has defined keys even when the underlying data is incomplete.\n\n```typescript\nconst admit = result.tenantAdmit;\nreturn {\n  key,\n  did,\n  address,\n  env: opts.env,\n  admitStatus: admit?.status ?? \"unknown\",\n  grantedCredits: admit?.grantedCredits,\n  refusedReason: admit?.reason,\n  refusedDetail: admit?.detail,\n};\n```",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:admit chunk",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.9
+  },
+  "14b338481f1b4f86": {
+    "intent": "what_does_t3_client_return",
+    "question": "What does the T3 client return and how does getBalance work?",
+    "shortAnswer": "The T3 client returns an object with methods for secret management, contract interaction, and balance queries. The getBalance function extracts available, reserved, creditExhausted, and storageDeposit fields from a page.balance object, applying Number() conversions to numeric fields and Boolean() to credit_exhausted.",
+    "longAnswer": "The T3 client factory returns an object exposing these methods:\n\n- `close`: A no-op async function (comment: \"SDK has no close()\")\n- `seedSecret`, `releaseSecret`, `verifySecret`: Secret management\n- `invokeForward`, `registerContract`: Contract interaction\n- `me`, `grantEgress`, `setAgentGrant`: Agent/identity management\n- `getBalance`: Queries balance from a page object\n- `isReal: true`: Flag indicating real (non-mock) client\n\nThe `getBalance` function destructures `page.balance` and maps fields:\n```typescript\nconst b = (page.balance ?? {}) as Record<string, unknown>;\nreturn {\n  available: Number(b.available ?? 0),\n  reserved: Number(b.reserved ?? 0),\n  creditExhausted: Boolean(b.credit_exhausted),\n  storageDeposit: b.storage_deposit != null ? Number(b.storage_deposit) : undefined,\n};\n```\nNote: `storageDeposit` returns `undefined` (not 0) when null, preserving distinction between unset and zero values.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/src/t3-client.ts:getBalance-return-object",
+      "packages/blindfold/src/t3-client.ts"
+    ],
+    "confidence": 0.85
+  },
+  "718eac7b15c52dcb": {
+    "intent": "what_does_routes_mapping_do",
+    "question": "What does the ROUTES mapping do in Blindfold's CLI?",
+    "shortAnswer": "The ROUTES constant maps CLI command names to handler functions, dispatching incoming commands to the appropriate handler based on the route key. Commands are grouped by functional domain: auth, secrets, lifecycle, tenant, serve, and enclave operations.",
+    "longAnswer": "The `ROUTES` object in `packages/blindfold/bin/blindfold.ts` is a `Record<string, Handler>` that serves as the central command dispatcher for Blindfold's CLI. Each key is a command name (e.g., `login`, `rotate`, `publish`) and its value is the handler function that processes that command.\n\n**Handler groupings:**\n- `handleAuth`: signup, login, logout, whoami\n- `handleSecrets`: register, use, export\n- `handleLifecycle`: rotate, rollback, versions, migrate\n- `handleTenant`: grant, share, revoke\n- `handleServe`: proxy, attest, dashboard, stats, stats:clear\n- `handleEnclave`: publish, init, verify, compat, sealed, audit, status, doctor, skill, credit, balance, update, upgrade\n\nThe routing is flat with no path hierarchy—single-level command names map directly to handlers. The `stats:clear` key demonstrates that colon-separated subcommands are supported as string keys.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/blindfold.ts:ROUTES",
+      "packages/blindfold/bin/blindfold.ts"
+    ],
+    "confidence": 0.95
+  },
+  "2f088bd9b1ee995b": {
+    "intent": "credential_storage_strategy",
+    "question": "How does saveTenantCredentials() store tenant API keys in cmd-auth.ts?",
+    "shortAnswer": "saveTenantCredentials() prefers OS keychain storage for the tenant API key, falling back to a 0600-permissioned config file. It writes DID and environment to the config file in both cases, tracking which storage backend was used via T3N_API_KEY_STORE.",
+    "longAnswer": "The `saveTenantCredentials(did, key, env, forceFile)` function in `packages/blindfold/bin/cmd-auth.ts` implements a two-tier credential storage strategy:\n\n1. **Keychain-first**: If `keychainAvailable()` returns true and `forceFile` is false, it calls `keychainSet(did, key)` to store the API key in the OS keychain (e.g., macOS Keychain, Windows Credential Manager, or Linux libsecret).\n2. **File fallback**: If keychain is unavailable or fails, the key is stored directly in the config file as `T3N_API_KEY`.\n\nThe config file at `configPath()` (via `loadBlindfoldEnv`) is written with mode `0o600` (owner read/write only), and a best-effort `chmod` is applied. The function returns `{ inKeychain, triedKeychain, cfg }` so callers know which storage was used.\n\n```typescript\nconst triedKeychain = !forceFile && keychainAvailable();\nconst inKeychain = triedKeychain && keychainSet(did, key);\nif (inKeychain) {\n  merged.T3N_API_KEY_STORE = \"keychain\";\n  delete merged.T3N_API_KEY;\n} else {\n  merged.T3N_API_KEY = key;\n  merged.T3N_API_KEY_STORE = \"file\";\n}\nfs.writeFileSync(cfg, JSON.stringify(merged, null, 2), { mode: 0o600 });\n```\n\nThis is shared by both `login` and `signup` command handlers.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials:19-45",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "84819f19f0f35aee": {
+    "intent": "credential_storage_preference",
+    "question": "How does inKeychain determine where to store T3N credentials?",
+    "shortAnswer": "The code checks if a DID's key exists in the system keychain via keychainSet(). If found, it stores the credential reference as 'keychain' and deletes the raw API key. Otherwise it falls back to storing the raw key in a file, marked as 'file' store.",
+    "longAnswer": "The `inKeychain` logic implements a two-tier credential storage preference in `cmd-auth.ts`. When a DID+key pair is registered:\n\n1. **Keychain check**: `keychainSet(did, key)` is called to test if the credential exists in the OS keychain (e.g., macOS Keychain, Windows Credential Manager, libsecret on Linux).\n2. **If in keychain**: Sets `merged.T3N_API_KEY_STORE = \"keychain\"` and deletes `merged.T3N_API_KEY` from the config file — the raw key is never written to disk.\n3. **If not in keychain**: Falls back to file storage with `merged.T3N_API_KEY = key` and `merged.T3N_API_KEY_STORE = \"file\"`.\n\n**Security hardening**: The config file is written with `mode: 0o600` (owner read/write only) and a best-effort `fs.chmodSync(cfg, 0o600)` is applied afterward to ensure restrictive permissions even if the mkdir/write doesn't honor the mode flag.\n\nThe function returns `{ inKeychain, triedKeychain, cfg }` so callers know which storage backend was used and the path to the config file.",
+    "audience": [
+      "developer",
+      "researcher"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:keychainSet() call and merged config assignment",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "117b9ea9aebcf181": {
+    "intent": "describe_blindfold_cli_commands",
+    "question": "What commands does the Blindfold CLI support?",
+    "shortAnswer": "The Blindfold CLI provides commands for managing secrets in T3 enclaves, including registration, usage, rotation, migration, proxy management, attestation, and team sharing.",
+    "longAnswer": "The `printHelp()` function in `packages/blindfold/bin/blindfold.ts` documents all Blindfold CLI commands:\n\n**Secret Management:**\n- `register --name <KV_KEY> [--from-env <ENV_VAR>]` — Seal a secret into the enclave (one-time). Reads from `process.env` with `--from-env` or prompts terminal with no echo (preferred, never touches disk/history). Accepts piped stdin.\n- `use --name <secret> [--as <ENV>] -- <cmd>` — Release a sealed secret and run `<cmd>` with it injected as `$ENV` for that command only (never back in your env). `--as` auto-detects known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Also supports `--url <https>` for quick auth checks.\n- `rotate --name <secret> [--from-env <ENV_VAR>]` — Replace a sealed secret's value, snapshots old value for rollback, shows before/after fingerprints (never the value).\n- `export --name <secret> [--as <ENV_VAR>]` — CI-only: release a sealed secret into `$GITHUB_ENV` for later steps (masked in logs). Used by the Blindfold GitHub Action.\n- `rollback --name <secret> [--to <fp|iso-ts>]` — Restore a previous value snapshotted by rotate (most recent by default).\n- `versions [--name <secret>]` — List snapshots available to roll back to (metadata only).\n\n**Setup & Provisioning:**\n- `signup [--email <you@x.com>]` — Self-serve: create a Terminal 3 testnet tenant. Generates a key locally, verifies email by code, mints welcome credits — no manual provisioning.\n- `init [--seed KV:ENV]... [--start]` — One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.\n- `verify` — Handshake + auth against T3 (smoke test).\n- `publish [--wasm path/to/blindfold_proxy.wasm]` — Publish the Rust→WASM contract (one-time).\n\n**Migration:**\n- `migrate [--dry-run] [--keep]` — Seal EVERY secret in .env in one shot, then remove plaintext lines (backup kept). `--dry-run` previews; `--keep` comments lines instead of deleting. Skips T3 creds + config.\n\n**Proxy & Attestation:**\n- `proxy [--port 8787] [--auth] [--socket [path]]` — Run the local OpenAI-shaped proxy. `--auth` mints a per-session token; `--socket` binds a 0600 unix socket (only your OS user can connect).\n- `attest [--expect-rtmr3 <b64>] [--pin] [--json]` — Verify the enclave's TDX attestation (chains to Intel's root CA). `--pin` records RTMR3 so seal/proxy auto-verify it first.\n\n**Access Control:**\n- `grant --host <host>[,<host2>...]` — Authorize the contract to call these hosts (required before proxy/in-enclave path can reach them). E.g. `--host api.openai.com`\n- `share --to <agent-did> --host <host>[,...]` — Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive plaintext (forward only, least privilege).\n- `revoke --to <agent-did>` — Remove a teammate's access. Immediate and complete — nobody holds a raw key copy.\n\n**Observability:**\n- `status` — One-glance overview: mode, tenant health, and list of sealed secrets.\n- `sealed` — List sealed keys — metadata only (name, byte-length, when, where). Never the value.\n- `audit` — Verify the ledger's tamper-evident hash-chain AND reconcile it against the enclave (source of truth) — flags drift/missing/tampering.\n- `dashboard [--port 8799]` — Live HTML dashboard of proxy usage.\n- `stats` — CLI summary of proxy usage.\n- `stats:clear` — Wipe the usage log.\n\n**Agent Integration:**\n- `compat [--json]` — Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.\n- `skill install [--global|--cursor|--opencode|--cline|--all]` — Install the Blindfold agent skill so your coding agent handles secrets safely. Default: this project.\n- `skill uninstall` — Remove all installed skill files.\n\n**Utilities:**\n- `doctor` — Show current mode + config.\n- `credit [--json]` — Show the tenant's Terminal 3 token/credit balance (no credit cost).\n- `update [--from <path>]` — Update the global blindfold (from npm, or a local repo with `--from`).",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/blindfold.ts:1-50",
+      "packages/blindfold/bin/blindfold.ts"
+    ],
+    "confidence": 1
+  },
+  "3394c6e02f62c06b": {
+    "intent": "tenant_email_signup_flow",
+    "question": "How does the tenant signup process handle email input and validation?",
+    "shortAnswer": "The signup flow retrieves email from the `--email` flag or prompts interactively, validates it with a regex, then creates a Terminal 3 testnet tenant. A secp256k1 tenant key is generated locally and stored in the keychain — never printed to stdout.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the email is sourced from `argv.flags.email` if provided, otherwise the user is prompted with `readLine()`. The input is trimmed and validated against `/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/`; invalid input calls `die()`. On success, a `blindfold signup` header is printed indicating a Terminal 3 testnet tenant is being created for the email. The console output notes that a fresh secp256k1 key is generated locally and stored in the keychain — it is never printed. Comments indicate T3's Level-1 self-admit requires a first + last name on the profile, defaulting from the email local part (minus any `+tag`) so signup stays a single prompt; `--first`/`--last` flags override this default.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:email chunk (lines 1-9)",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "a0991072698d3f1e": {
+    "intent": "preset_otp_authentication_flow",
+    "question": "How does presetOtp work in the authentication flow?",
+    "shortAnswer": "presetOtp captures an OTP from the --otp CLI flag, allowing non-interactive signup. It is used by getOtpCode() which returns the preset value if available, otherwise prompts the user interactively. The saved credentials are captured via onKeyReady for recovery reporting.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the `presetOtp` variable is initialized from the `--otp` CLI flag:\n\n```typescript\nconst presetOtp = argv.flags.otp ? String(argv.flags.otp).trim() : \"\";\n```\n\nThis value is consumed inside the `getOtpCode` async function passed to `signupTenant`:\n\n```typescript\ngetOtpCode: async () => {\n  if (presetOtp) return presetOtp;\n  process.stderr.write(c.yellow(`  A verification code was emailed to ${email}.\\n`));\n  return (await readLine(\"  Enter the code: \")).trim();\n},\n```\n\nIf `--otp` was provided, the function returns it immediately, enabling fully non-interactive signup. Otherwise, it prompts the user to enter the emailed code.\n\nThe `saved` variable captures the result of `onKeyReady`, which is called the moment the email verifies. This allows both the success and post-verify-failure paths to report where the key landed, and ensures a failed self-admit never strands an unrecoverable key.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:1-30",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "eb7837e0cdb9ba85": {
+    "intent": "what_happens_after_tenant_admission",
+    "question": "What does the Blindfold CLI output after a tenant is admitted, and where is the tenant key stored?",
+    "shortAnswer": "After tenant admission, the CLI prints whether the tenant was 'created' or 'confirmed (already registered)', reports where the tenant key is stored (keychain or config file with 0600 permissions), and shows whether welcome credits were minted. The tenant key is never printed to stdout — a deliberate security property.",
+    "longAnswer": "The `verb` variable is set conditionally: if `res.admitStatus === \"already-admitted\"`, it becomes `\"confirmed (already registered)\"`; otherwise it is `\"created\"`. The tenant key storage location depends on `inKeychain`: if true, it uses the system's keychain backend (via `keychainBackend()`); if false, it falls back to the config file path (`cfg`) with Unix permissions `0600`. The comment `// never printed` documents that the private key is deliberately excluded from stdout — a security property ensuring the key is never exposed. Welcome credits (`res.grantedCredits`) are minted only if the testnet dial is non-zero; otherwise a yellow warning suggests running `blindfold credit` to check the balance.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:verb block",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.85
+  },
+  "f08c05c302251f56": {
+    "intent": "how_tenant_credentials_saved_after_signup_failure",
+    "question": "How does Blindfold handle tenant credential storage when signup fails after email verification?",
+    "shortAnswer": "When email verification succeeds but self-admit fails (e.g., unfunded tenant), Blindfold preserves the tenant key and DID in either the system keychain or a file with 0600 permissions, depending on the `--file` flag. The user is directed to `blindfold credit` or a fresh `blindfold signup` to recover.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the signup flow distinguishes between two failure modes:\n\n1. **Email verified + self-admit failed**: The tenant key is already saved (to keychain or file) before the admit call. The error message shows where credentials live: `keychainBackend()` (e.g., macOS Keychain, Windows Credential Manager) if `inKeychain` is true, or `${s.cfg} (0600)` for a file. The process exits with code 1 but credentials are **not lost**.\n\n2. **Signup completely refused**: `res.admitStatus === \"refused\"` triggers a `die()` with the refusal reason/detail.\n\nThe `saveTenantCredentials(res.did, res.key, env, Boolean(argv.flags.file))` call at the bottom handles the happy path, returning `{ inKeychain, cfg }` which is reused on retry.\n\n```typescript\nconst { inKeychain, cfg } = saved ?? saveTenantCredentials(res.did, res.key, env, Boolean(argv.flags.file));\n```\n\nThe 0600 file permission ensures the private key is readable only by the owner — a one-file plaintext path security property.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and error handling block",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "fa1f28de869e2fa8": {
+    "intent": "credential_storage_fallback",
+    "question": "How does Blindfold store tenant credentials and what are the storage options?",
+    "shortAnswer": "Blindfold stores tenant credentials (DID + key) preferring the OS keychain, falling back to a mode-0600 file when no keychain exists or write fails (e.g., err 1312 in non-interactive sessions). The `--file` flag forces file storage.",
+    "longAnswer": "In `cmd-auth.ts`, the `saveTenantCredentials(did, key, env, forceFile)` call handles credential persistence with a security-conscious fallback chain:\n\n1. **Primary**: OS keychain (via `keychainBackend()`) — the tenant key is stored securely in the system credential store, leaving only non-secret DID + settings in the config file.\n2. **Fallback**: A `0600`-mode file (readable only by the owner) when:\n   - No OS keychain is detected (`triedKeychain` is false)\n   - Keychain write fails with err 1312 (common in non-interactive/ssh sessions)\n   - The `--file` flag is explicitly passed\n\nThe `inKeychain` boolean returned by `saveTenantCredentials` indicates which storage was used. The key is never printed to stdout — only a confirmation that it is \"stored\" is shown.\n\n```typescript\nconst { inKeychain, triedKeychain, cfg } = saveTenantCredentials(did, key, env, Boolean(argv.flags.file));\nconsole.log(`✓ Saved tenant key to ${inKeychain ? `the ${keychainBackend()}` : `${cfg} (mode 0600)`}`);\n```\n\nAfter saving, Blindfold works from any directory because the credential lookup resolves the stored path.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and console output (lines ~env determination and credential save block)",
+      "packages/blindfold/bin/cmd-auth.ts"
+    ],
+    "confidence": 0.95
+  },
+  "76b8fccf610f6192": {
+    "intent": "how_credit_command_queries_t3_balance",
+    "question": "How does the `credit` command in cmd-enclave.ts query the tenant's T3 credit balance?",
+    "shortAnswer": "The `credit` command loads the Blindfold environment, opens a T3 client via `openT3Client`, calls `client.getBalance()` to retrieve available and reserved base units, then formats and displays the balance with a warning if credits are exhausted. It costs no credit since it's a session-authed read.",
+    "longAnswer": "The `credit` (aliased as `balance`) command in `packages/blindfold/bin/cmd-enclave.ts` implements a read-only balance check that avoids the pitfall of discovering zero credits only when a seal/forward fails with a 403.\n\n**Flow:**\n1. `loadBlindfoldEnv()` reads tenant config (DID, mock flag, t3Env)\n2. `openT3Client(env)` from `../src/t3-client.ts` opens a session-authenticated connection\n3. `client.getBalance()` returns `{ available, reserved, creditExhausted }` where units are base units (1 token = 1,000,000 base)\n4. Output formats with `tok()` helper: `tok(n)` = `(n / 1_000_000).toLocaleString()`\n5. If `creditExhausted` is true, prints a warning and exits with code 1\n\n```typescript\nconst BASE = 1_000_000;\nconst client = await openT3Client(env);\nconst b = await client.getBalance();\nconst tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });\n```\n\nThe command works even when credits are exhausted because it is a session-authed read that costs no credit.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:handleEnclave:credit/balance case (lines ~20-50)",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.95
+  },
+  "05773d80079ecb51": {
+    "intent": "display_credit_status",
+    "question": "How does the credit display work in blindfold's tok helper?",
+    "shortAnswer": "The `tok` helper converts base units to human-readable tokens with up to 6 decimal places using `toLocaleString`. The credit status command displays available tokens (via `tok`), reserved base units, and an exhausted/ok status indicator.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the `tok` function is defined as:\n\n```typescript\nconst tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });\n```\n\nIt divides base units by `BASE` (a constant representing the smallest token unit) and formats the result with locale-aware thousands separators and up to 6 decimal places. The credit display shows:\n\n- **available**: tokens via `tok(b.available)` plus raw base units in gray\n- **reserved**: raw base units only\n- **status**: `⚠ EXHAUSTED` (red) or `✅ ok` (green) based on `b.creditExhausted`\n\nWhen exhausted, it prints a link to the token request docs and sets `process.exitCode = 1`.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:tok helper (line ~1), credit display block",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.95
+  },
+  "b3e3988937c47331": {
+    "intent": "pkg_discovery_and_npm_fallback",
+    "question": "How does cmd-enclave.ts discover the blindfold package and when does it fall back to npm?",
+    "shortAnswer": "The code searches candidate directories for a local package.json where pkg.name matches the PKG constant or 'blindfold' and pkg.bin.blindfold exists. If no local installation is found, it falls back to updating from the published scoped npm package.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the code performs a local package discovery loop:\n\n1. Iterates through candidate directories (`cand`)\n2. Reads `package.json` from each candidate\n3. Checks if `pkg.name === PKG || pkg.name === 'blindfold'` AND `pkg.bin?.blindfold` is defined\n4. If matched, sets `from = cand` and breaks\n\nIf no local installation is found (`!from`), it logs a message and falls back to updating from npm:\n```\nconsole.log(head(\"↻ Updating global blindfold from npm\") + c.gray(` (${PKG}@latest)…`));\n```\n\nThis implements a local-first, npm-fallback strategy for the blindfold CLI installation.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:pkg",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.85
+  },
+  "22cfeb3a71ea9db8": {
+    "intent": "what_does_blindfold_update_do",
+    "question": "What does the blindfold update command do?",
+    "shortAnswer": "The update command first attempts to install the latest published blindfold version via npm install -g. If that fails (package not published or offline), it falls back to building from a local repo checkout using the --from flag, BLINDFOLD_SRC env var, or running from within the repo.",
+    "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the `r` variable captures the result of `run(\"npm\", [\"install\", \"-g\", \\`${PKG}@latest\\`])`. If npm install fails (non-zero status), the command prints a helpful error with three fallback options:\n\n1. `blindfold update --from /path/to/packages/blindfold` — specify a local path\n2. `cd <repo> && blindfold update` — run from repo root\n3. `export BLINDFOLD_SRC=/path/to/packages/blindfold` — set environment variable\n\nIf npm install succeeds, it prints `✓ blindfold updated to the latest published version.` and returns. Otherwise, it sets `process.exitCode = 1` and returns early.\n\nWhen updating from a local path (the `from` variable is set), it runs `npm run build` in that directory via `run(\"npm\", [\"run\", \"build\"], from)`. If the build fails, it calls `die(\"build failed\")`.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:1-17",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.95
+  },
+  "320c2760a89f6640": {
+    "intent": "what_does_inst_update_handler_do",
+    "question": "What does the `inst` case handler do in cmd-enclave.ts?",
+    "shortAnswer": "The `inst` handler performs a global npm install of a blindfold package tarball, then cleans up the tarball file and reports success or failure to the user.",
+    "longAnswer": "The `inst` case handler implements the blindfold CLI update/install flow:\n\n1. **Install**: Runs `npm install -g <tgzPath>` to globally install the blindfold package tarball\n2. **Cleanup**: Removes the temporary `.tgz` file using `fs.rmSync` with `force: true` (errors ignored)\n3. **Error handling**: If `inst.status !== 0`, calls `die(\"global install failed\")` to exit with an error\n4. **Success message**: Logs `✓ blindfold updated.` in green, followed by a gray hint: \"Open a NEW shell if the command still looks stale.\"\n\nThe shell restart hint is necessary because global npm binaries are resolved at shell startup, so the new version won't be in PATH until a fresh shell is opened.\n\n```typescript\nconst inst = run(\"npm\", [\"install\", \"-g\", tgzPath]);\ntry { fs.rmSync(tgzPath, { force: true }); } catch { /* ignore */ }\nif (inst.status !== 0) die(\"global install failed\");\nconsole.log(ok(`✓ blindfold updated.`) + c.gray(\" Open a NEW shell if the command still looks stale.\"));\n```",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:inst case handler",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.95
+  },
+  "cdfa16832b66029f": {
+    "intent": "what_does_doctor_env_check_do",
+    "question": "What does the doctor command check in packages/blindfold/bin/cmd-enclave.ts?",
+    "shortAnswer": "The doctor command validates the Blindfold environment by checking mode (MOCK vs REAL), required credentials (T3N_API_KEY and DID), and performs a live handshake + authenticate + me call to verify the T3 client can connect and the key has an associated tenant.",
+    "longAnswer": "The `doctor` function in `cmd-enclave.ts` performs environment diagnostics:\n\n1. **Mode detection**: Reads `env.mock` to distinguish MOCK (`BLINDFOLD_MOCK=1`) from REAL (T3) mode.\n2. **Credential checks**: Verifies `env.t3nApiKey` and `env.did` are present. If REAL mode lacks either, it exits with code 1 and prints a setup wizard hint.\n3. **Live authentication** (REAL mode only):\n   - Calls `openT3Client(env)` from `../src/t3-client.ts`\n   - Catches the \"key authenticates but has no tenant\" case, which the T3 server otherwise returns as a bare HTTP 500\n   - Prints specific error guidance if auth fails (checks for 0x 32-byte hex private key format and `did:t3n:<hex>` format)\n\nThe `loadBlindfoldEnv()` call populates: `mock`, `t3nApiKey`, `did`, `t3Env`, `t3BaseUrl`, and `port`.",
+    "audience": [
+      "developer",
+      "enterprise"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:1-30 (env loading and credential validation)",
+      "packages/blindfold/bin/cmd-enclave.ts:31-45 (live T3 client authentication)",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.95
+  },
+  "8cdd4740317ada06": {
+    "intent": "what_does_info_command_display",
+    "question": "What does the info command display in cmd-enclave.ts?",
+    "shortAnswer": "The info command calls `client.me()` to retrieve the current tenant's information and displays the tenant name with its status. On failure, it shows an error message (truncated to 90 characters) and suggests running `blindfold doctor` for diagnosis.",
+    "longAnswer": "The `info` command (part of the enclave subcommand in `cmd-enclave.ts`) performs the following:\n\n1. Calls `client.me()` to fetch the authenticated tenant's profile\n2. Displays the tenant name using the `ok()` helper (green checkmark) with the status value (falling back to `\"?\"` if undefined)\n3. On error, displays the error message using the `bad()` helper (red X), truncates it to 90 characters, and sets `process.exitCode = 1`\n\n```typescript\nconst info = await client.me();\nconsole.log(`  tenant:  ${ok(\"✅ \" + info.tenant)}  (status=${info.status ?? \"?\"})`);\n```\n\nThe `blindfold doctor` reference is a diagnostic subcommand users can run when the info check fails.",
+    "audience": [
+      "developer"
+    ],
+    "sources": [
+      "packages/blindfold/bin/cmd-enclave.ts:info chunk (chunk 11 of 17)",
+      "packages/blindfold/bin/cmd-enclave.ts"
+    ],
+    "confidence": 0.7
   }
 }
