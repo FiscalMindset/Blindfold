@@ -1,15 +1,22 @@
 {
   "name": "@fiscalmindset/blindfold",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Make any AI agent's API keys un-leakable, by sealing them inside a Terminal 3 TDX enclave.",
+  "license": "MIT",
+  "author": "FiscalMindset",
+  "homepage": "https://github.com/FiscalMindset/Blindfold#readme",
+  "repository": { "type": "git", "url": "git+https://github.com/FiscalMindset/Blindfold.git", "directory": "packages/blindfold" },
+  "bugs": { "url": "https://github.com/FiscalMindset/Blindfold/issues" },
+  "keywords": ["ai", "agent", "api-key", "secrets", "security", "prompt-injection", "tee", "tdx", "confidential-computing", "terminal3", "enclave"],
   "publishConfig": { "access": "public" },
-  "main": "src/index.ts",
+  "main": "./dist/lib/index.mjs",
+  "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./proxy": "./src/proxy.ts",
-    "./register": "./src/register.ts",
-    "./wrap": "./src/wrap.ts"
+    ".": { "types": "./src/index.ts", "import": "./dist/lib/index.mjs" },
+    "./proxy": { "types": "./src/proxy.ts", "import": "./dist/lib/proxy.mjs" },
+    "./register": { "types": "./src/register.ts", "import": "./dist/lib/register.mjs" },
+    "./wrap": { "types": "./src/wrap.ts", "import": "./dist/lib/wrap.mjs" }
   },
   "bin": {
     "blindfold": "dist/cli.mjs"
@@ -20,11 +27,14 @@
     "src",
     "assets",
     "postinstall.mjs",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "start": "tsx bin/blindfold.ts",
-    "build": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk && node copy-assets.mjs",
+    "build": "npm run build:cli && npm run build:lib && node copy-assets.mjs",
+    "build:cli": "esbuild bin/blindfold.ts --bundle --platform=node --format=esm --target=node18 --outfile=dist/cli.mjs --external:@terminal3/t3n-sdk",
+    "build:lib": "esbuild src/index.ts src/proxy.ts src/register.ts src/wrap.ts --bundle --platform=node --format=esm --target=node18 --outdir=dist/lib --out-extension:.js=.mjs --external:@terminal3/t3n-sdk",
     "prepare": "npm run build",
     "postinstall": "node postinstall.mjs"
   },
