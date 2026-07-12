@@ -45,7 +45,7 @@ npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 >
 > - **Layered proxy access + attestation** — `proxy --auth` mints a per-session token, `proxy --socket` binds a `0600` unix socket, and `blindfold attest` verifies the enclave's TDX quotes against Intel's root CA (with `--pin` to gate seal/proxy on the code measurement). `blindfold credit` shows the tenant's Terminal 3 balance.
 >
-> **Full command list** (`login`, `logout`, `whoami`, `register`, `use`, `proxy`, `attest`, `grant`, `share`, `revoke`, `rotate`, `rollback`, `versions`, `migrate`, `status`, `sealed`, `audit`, `export`, `credit`, `dashboard`, `doctor`, `verify`, `compat`, `publish`, `update`, `skill`): see the **[Usage Guide → Command reference](usage.md#command-reference-all-of-them)**.
+> **Full command list** (`signup`, `login`, `logout`, `whoami`, `register`, `use`, `delete`, `proxy`, `attest`, `grant`, `share`, `revoke`, `rotate`, `rollback`, `versions`, `migrate`, `status`, `sealed`, `audit`, `export`, `credit`, `dashboard`, `doctor`, `verify`, `compat`, `publish`, `update`, `skill`): see the **[Usage Guide → Command reference](usage.md#command-reference-all-of-them)**. Every command also has `blindfold <command> --help`.
 
 <details open>
 <summary><b>📑 &nbsp;Table of contents</b></summary>
@@ -494,6 +494,7 @@ blindfold register --name X --from-env X    # seal a single secret (then delete 
 blindfold use   --name X -- <command>       # USE it with any tool, no code (auto-maps gh→GH_TOKEN, …)
 blindfold use   --name X --url <https>      # quick "does it still auth?" check
 blindfold rotate --name X --from-env X      # replace a secret's value (snapshots the old one for rollback)
+blindfold delete --name X                   # remove a sealed secret (empties enclave + ledger; e.g. sealed the wrong thing)
 blindfold rollback --name X                 # restore the previous value if a rotation was wrong
 blindfold grant  --host api.openai.com      # authorize the contract to call a host (needed for the proxy/enclave path)
 blindfold share  --to <did> --host <host>   # let a teammate's agent USE your keys (forward only — never the plaintext)

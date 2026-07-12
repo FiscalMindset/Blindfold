@@ -43,6 +43,7 @@ You're working in (or with) Blindfold — a Terminal 3 TDX-enclave wrapper that 
 | `npm run dashboard` | live HTML dashboard at `http://127.0.0.1:8799` | n/a (UI) |
 | `blindfold register --name <K>` | interactive seal (no echo) | ⚠ tell user to run in their terminal |
 | `printf 'V' \| blindfold register --name <K>` | piped seal (value briefly in this process) | ⚠ only if user already pasted value |
+| `blindfold delete --name <K> [--yes]` | remove a sealed secret (empties enclave + ledger, re-chained) | ⚠ destructive — confirm first; tell user to run it |
 
 ## Seal once, use forever (no re-seal per session)
 
@@ -114,6 +115,18 @@ tenant `active`) and `blindfold credit` (token balance). After that they can
 > ```
 >
 > It'll prompt for the value with input hidden (no echo, no shell history). Paste your `sk_live_…` there, press Enter. Once done, paste me the output of `blindfold sealed` so I can verify it landed in the right place.
+
+### "I sealed the wrong thing / want to remove a sealed secret"
+
+Use `blindfold delete --name <secret>` (alias `remove`). It empties the value in
+the enclave (current tenant) and removes the entry from the local ledger,
+re-chaining so `blindfold audit` still passes (the old ledger is backed up).
+Propose it for the user to run; it prompts for confirmation (`--yes` skips).
+
+**Critical:** if the value they mis-sealed was a *real* credential (e.g. they put
+an API key in the `--name` field), deleting it here does NOT un-expose it — tell
+them to **revoke/rotate that key at its provider**, then re-seal correctly
+(`--name` is a short label; the value is prompted hidden).
 
 ### "Seal / use a webhook URL (Discord, Slack, …)"
 
