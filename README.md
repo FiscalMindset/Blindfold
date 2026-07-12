@@ -79,6 +79,7 @@ npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 [🧪 Proof — the demo](#proof-of-blindness--the-side-by-side-demo)<br/>
 [🔌 Integration styles](#two-integration-styles)<br/>
 [🧩 Supported integrations](#supported-integrations)<br/>
+[💸 Cost — when to use it](#cost)<br/>
 [⌨️ CLI at a glance](#cli-at-a-glance)<br/>
 [🤖 Agent skill](#agent-skill--let-your-coding-agent-seal-keys-for-you)
 
@@ -481,6 +482,46 @@ verified against AWS's published test vectors. Live end-to-end demos:
 [`examples/gemini/`](examples/gemini/), [`examples/stripe/`](examples/stripe/),
 [`examples/prompt-injection/`](examples/prompt-injection/). Full architecture and
 impact writeup: [`integration-stack.md`](integration-stack.md).
+
+---
+
+<a id="cost"></a>
+
+## 💸 Cost — when to use the enclave (and when not to)
+
+Every time a key is *used*, it's a metered Terminal 3 enclave operation — a real
+(tiny) cost, unlike reading a plaintext env var. That's the trade-off of
+confidential compute: an `env` var is free but leakable; an enclave-substituted
+key costs a fraction but **can't leak**.
+
+**How small?** Measured live: **~20 tokens per operation** (a `use`/release or a
+proxy forward). The self-serve `signup` grant (~20,000 tokens) is roughly
+**1,000 secret-uses**, free, on testnet.
+
+Whether that's cheap depends on **frequency × value**:
+
+| Key | Fit |
+|---|---|
+| Deploy tokens, Stripe/payment keys, admin creds, keys handed to **autonomous agents** — used occasionally, catastrophic if leaked | ✅ **Ideal** — the cost is a rounding error next to a breach |
+| A key hit **thousands of times a second**, low value per call | ⚠️ Per-call enclave cost adds up — use the pattern below |
+
+**Three levers to keep it cheap:**
+
+1. **Release once, reuse.** `release()` hands the plaintext to *your* process —
+   cache it for a burst/session and pay **one op for N calls** instead of N ops.
+   *(Trade-off: the key sits in your memory for that window — your choice, per
+   workload.)*
+2. **Seal selectively.** Only route the keys that would hurt if leaked through
+   the enclave; leave low-value, high-frequency traffic alone.
+3. **Proxy where it matters.** The per-call proxy gives the strongest guarantee —
+   spend the ~20 tokens where the guarantee is worth it, and release-and-reuse
+   where volume dominates.
+
+**Bottom line:** for the high-value secrets Blindfold is built for — the ones you
+hand to AI agents — ~20 tokens per use is trivial insurance against a leak that
+could cost thousands. It's not meant to wrap every low-value call at massive
+scale; for that, release-and-reuse collapses the cost. And on testnet, you build
+for free.
 
 ---
 
