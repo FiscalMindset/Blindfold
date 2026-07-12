@@ -64,6 +64,43 @@ export async function readSecretLine(prompt: string): Promise<string> {
   });
 }
 
+/**
+ * Read one visible line from stdin (echo on). For non-secret prompts like an
+ * emailed OTP code, where hiding the input would just confuse the user.
+ */
+export async function readLine(prompt: string): Promise<string> {
+  process.stderr.write(prompt);
+  const stdin = process.stdin;
+  if (!stdin.isTTY) return await readOneLine(stdin);
+  return await new Promise<string>((resolve, reject) => {
+    let buf = "";
+    stdin.resume();
+    stdin.setEncoding("utf8");
+    const cleanup = (): void => {
+      stdin.removeListener("data", onData);
+      stdin.pause();
+    };
+    const onData = (chunk: string | Buffer): void => {
+      const s = typeof chunk === "string" ? chunk : chunk.toString("utf8");
+      for (const ch of s) {
+        if (ch === "\r" || ch === "\n") {
+          process.stderr.write("\n");
+          cleanup();
+          resolve(buf);
+          return;
+        }
+        if (ch === "") { // Ctrl+C
+          cleanup();
+          reject(new Error("aborted"));
+          return;
+        }
+        buf += ch;
+      }
+    };
+    stdin.on("data", onData);
+  });
+}
+
 function readOneLine(stdin: NodeJS.ReadStream): Promise<string> {
   return new Promise((resolve, reject) => {
     let buf = "";

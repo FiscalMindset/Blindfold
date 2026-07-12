@@ -15,7 +15,7 @@
  * The SDK is loaded lazily so MOCK mode works on machines that haven't
  * installed it. REAL mode requires `@terminal3/t3n-sdk` (optionalDep).
  */
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type { BlindfoldEnv, ForwardRequest, ForwardResponse } from "./types.ts";
@@ -85,8 +85,22 @@ export interface T3Sdk {
   getScriptVersion?: (baseUrl: string, scriptPath: string) => Promise<unknown>;
   T3nClient: new (cfg: unknown) => {
     handshake: () => Promise<unknown>;
+    /** Returns the caller's DID (eth-derived, when authenticated with an eth key). */
     authenticate: (input: unknown) => Promise<unknown>;
     execute: (input: unknown) => Promise<unknown>;
+    /** Dispatch a one-time code to a contact (email/sms) on the authed session. */
+    otpRequest: (input: { emailChannel?: { emailAddress: string }; smsChannel?: { phoneNumber: string } }) =>
+      Promise<{ status?: string; isNewProfile?: boolean; expiresAtSec?: number }>;
+    /**
+     * Redeem the code and bind the contact to the authenticated DID. Returns
+     * `status: "otp_failed" | "otp_expired"` as DATA (no throw) on a bad code,
+     * and a `mergeSuggestion` when the contact already belongs to another DID.
+     */
+    otpVerify: (input: { otpCode: string; request: { emailChannel?: { emailAddress: string }; smsChannel?: { phoneNumber: string } } }) =>
+      Promise<{ status?: string; did?: string; mergeSuggestion?: { existingDid: string; currentDid: string } }>;
+    /** Commit Level-1 profile; with `becomeDevTenant` self-admits + mints welcome credits. */
+    submitUserInput: (input: { profile: Record<string, unknown>; becomeDevTenant?: boolean }) =>
+      Promise<{ tenantAdmit?: { status?: string; grantedCredits?: string; reason?: string; detail?: string } }>;
   };
   TenantClient: new (cfg: unknown) => {
     canonicalName: (tail: string) => string;
@@ -172,6 +186,129 @@ export interface CreditBalance {
   creditExhausted: boolean;
   storageDeposit?: number;
   mock?: boolean;
+}
+
+/* ------------------------------------------------------------------ */
+/* SELF-SERVE SIGNUP — testnet self-admit (becomeDevTenant)            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Thrown when the signup email already belongs to a Terminal 3 tenant. Signup
+ * mints a fresh DID, and T3 refuses to reparent an owned email onto it — so the
+ * user must either log in with that tenant's key or sign up with a new email.
+ */
+export class SignupEmailTakenError extends Error {
+  constructor(public email: string, public existingDid: string) {
+    super(`"${email}" is already registered to Terminal 3 tenant ${existingDid}.`);
+    this.name = "SignupEmailTakenError";
+  }
+}
+
+export interface SignupOptions {
+  env: "testnet" | "production";
+  email: string;
+  /** Prompt callback: the SDK calls this between OTP-request and OTP-verify. */
+  getOtpCode: (contact: string, channel: "email" | "sms") => Promise<string> | string;
+  /** Extra profile fields to merge (first_name, campaign_code, …). */
+  profile?: Record<string, unknown>;
+  /**
+   * Called the instant the email is verified and the DID is real — BEFORE the
+   * self-admit commit that could still fail. Persist the key here so a failed
+   * admit never strands a live, email-bound tenant with an unrecoverable key.
+   */
+  onKeyReady?: (key: string, did: string) => void | Promise<void>;
+  baseUrl?: string;
+}
+
+export interface SignupResult {
+  /**
+   * The freshly-generated tenant private key (0x…, secp256k1). This is the
+   * ONLY secret this function produces; the caller must store it in the OS
+   * keychain and MUST NOT print or log it — same handling rule as a sealed key.
+   */
+  key: string;
+  did: string;
+  address: string;
+  env: "testnet" | "production";
+  /** "admitted" | "already-admitted" | "refused" | "unknown". */
+  admitStatus: string;
+  grantedCredits?: string;
+  refusedReason?: string;
+  refusedDetail?: string;
+}
+
+/**
+ * Provision a Terminal 3 testnet tenant end-to-end, with no human in the loop
+ * on the T3 side:
+ *   1. generate a fresh secp256k1 key locally (the tenant's identity),
+ *   2. eth-authenticate with it (yields an eth-derived DID — required by
+ *      becomeDevTenant),
+ *   3. prove the email via OTP and self-admit (`becomeDevTenant: true`), which
+ *      mints operator-configured welcome credits.
+ *
+ * The generated key is returned so the caller can persist it to the keychain;
+ * it never leaves this process otherwise. Testnet-only (production refuses
+ * self-admit).
+ */
+export async function signupTenant(opts: SignupOptions): Promise<SignupResult> {
+  const sdk = await loadSdk();
+  sdk.setEnvironment(opts.env);
+  const baseUrl = opts.baseUrl || sdk.NODE_URLS[opts.env];
+  const wasmComponent = await sdk.loadWasmComponent();
+
+  // A fresh 32-byte random value is a valid secp256k1 private key with
+  // overwhelming probability (~1 - 2^-128). If the SDK ever rejects one as
+  // out-of-range, the caller can simply retry signup.
+  const key = "0x" + randomBytes(32).toString("hex");
+  const address = sdk.eth_get_address(key);
+
+  const t3n = new sdk.T3nClient({
+    baseUrl,
+    wasmComponent,
+    handlers: { EthSign: sdk.metamask_sign(address, undefined, key) },
+  });
+  await t3n.handshake();
+  const did = String(await t3n.authenticate(sdk.createEthAuthInput(address)));
+
+  // Run the OTP roundtrip explicitly (rather than the runOtpThenUserInput
+  // convenience) so we can surface the two failure modes it otherwise swallows:
+  // a wrong/expired code, and an email that already belongs to another tenant.
+  const channel = { emailChannel: { emailAddress: opts.email } };
+  await t3n.otpRequest(channel);
+  const code = String(await opts.getOtpCode(opts.email, "email")).trim();
+  const verify = await t3n.otpVerify({ otpCode: code, request: channel });
+  if (verify.mergeSuggestion) {
+    throw new SignupEmailTakenError(opts.email, verify.mergeSuggestion.existingDid);
+  }
+  if (verify.status === "otp_failed" || verify.status === "otp_expired") {
+    throw new Error(
+      verify.status === "otp_expired"
+        ? "the code expired — run `blindfold signup` again to get a fresh one"
+        : "that code was incorrect — re-run `blindfold signup` and enter the emailed code",
+    );
+  }
+
+  // The email is now bound to `did` and the generated key controls it — a real,
+  // recoverable credential whether or not the self-admit below succeeds. Hand it
+  // to the caller to persist NOW, so a failing admit can't burn the tenant.
+  if (opts.onKeyReady) await opts.onKeyReady(key, did);
+
+  const result = await t3n.submitUserInput({
+    profile: { email_address: opts.email, ...(opts.profile ?? {}) },
+    becomeDevTenant: true,
+  });
+
+  const admit = result.tenantAdmit;
+  return {
+    key,
+    did,
+    address,
+    env: opts.env,
+    admitStatus: admit?.status ?? "unknown",
+    grantedCredits: admit?.grantedCredits,
+    refusedReason: admit?.reason,
+    refusedDetail: admit?.detail,
+  };
 }
 
 export async function openT3Client(env: BlindfoldEnv): Promise<T3ClientHandle> {
