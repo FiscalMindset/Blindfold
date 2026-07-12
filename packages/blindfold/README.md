@@ -2,6 +2,11 @@
 
 > Your AI agent can't leak the API key it never had.
 
+> **⚠️ Beta · testnet-backed.** `blindfold signup` provisions a **Terminal 3
+> testnet** tenant. Secrets are sealed in a real TDX enclave (the key never
+> leaks), but testnet has no production SLA and tenants may be reset — treat this
+> as a beta/demo, not yet a production secret store. A production path is planned.
+
 Blindfold seals your API keys inside a **Terminal 3 TDX enclave**. Your agent
 only ever sees a placeholder — `__BLINDFOLD__` — while the real credential is
 substituted *inside* the enclave, right before the outbound call. A prompt
