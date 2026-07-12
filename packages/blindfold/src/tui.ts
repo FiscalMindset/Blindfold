@@ -45,9 +45,11 @@ export function vlen(s: string): number {
   }
   return w;
 }
-function padEnd(s: string, w: number): string {
+/** Pad `s` with spaces to display width `w` (ANSI/emoji aware). */
+export function pad(s: string, w: number): string {
   return s + " ".repeat(Math.max(0, w - vlen(s)));
 }
+const padEnd = pad;
 
 /** Word-wrap `text` to `width` columns (ANSI-aware). */
 export function wrapText(text: string, width: number): string[] {
@@ -111,6 +113,31 @@ export function commandBox(title: string, rows: Array<[string, string]>): string
   }
   out.push(dim(B.bl + B.h.repeat(w - 2) + B.br));
   return out.join("\n");
+}
+
+/**
+ * Wrap pre-rendered content lines in a titled rounded box, padding each line to
+ * the inner width so the right border stays aligned. `title` is embedded in the
+ * top border. Content lines may already contain ANSI color.
+ */
+export function boxLines(title: string, lines: string[]): string {
+  const w = termWidth();
+  const inner = w - 4;
+  const prefix = B.tl + B.h + " ";
+  const fill = Math.max(0, w - vlen(prefix) - vlen(title) - 2);
+  const out: string[] = [dim(prefix) + c.bold(title) + dim(" " + B.h.repeat(fill) + B.tr)];
+  for (const l of lines) out.push(dim(B.v) + " " + pad(l, inner) + " " + dim(B.v));
+  out.push(dim(B.bl + B.h.repeat(w - 2) + B.br));
+  return out.join("\n");
+}
+
+/** A plain full-width rule with an optional bold label: "── Label ─────". */
+export function rule(label = ""): string {
+  const w = termWidth();
+  if (!label) return dim(B.h.repeat(w));
+  const left = B.h + B.h + " ";
+  const fill = Math.max(0, w - vlen(left) - vlen(label) - 1);
+  return dim(left) + c.bold(label) + dim(" " + B.h.repeat(fill));
 }
 
 /** Nearest command by edit distance, for "did you mean" suggestions. */

@@ -4,6 +4,19 @@
 
 ---
 
+## [0.4.2] — 2026-07-13 — Per-command help + usage in the overview
+
+### Added
+- **Per-command help** — `blindfold <cmd> --help` (or `-h`, or `blindfold help
+  <cmd>`) shows a detailed, responsive panel: a summary box, the exact **Usage**
+  line, a **Flags** table (each flag + description), **Examples**, and **Notes**.
+- The **overview** (`blindfold help`) now shows each command's invocation format
+  inline (`↳ blindfold signup [--email <addr>] …`) under its summary.
+- New `src/help.ts` command registry driving both views; `tui.ts` gains
+  `boxLines` / `rule` / exported `pad`.
+
+---
+
 ## [0.4.1] — 2026-07-12 — Responsive terminal UI for `blindfold help`
 
 ### Changed
