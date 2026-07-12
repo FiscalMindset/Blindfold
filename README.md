@@ -2,14 +2,18 @@
 
 <img src="assets/logo.png" alt="Blindfold — Your AI Agent Can't Leak The API Key It Never Had" width="560" />
 
+[![npm version](https://img.shields.io/npm/v/@fiscalmindset/blindfold?style=for-the-badge&color=cb3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/@fiscalmindset/blindfold)
 [![Built on Terminal 3](https://img.shields.io/badge/built%20on-Terminal%203-6e44ff?style=for-the-badge)](https://terminal3.io)
 [![Confidential Compute: Intel TDX](https://img.shields.io/badge/confidential%20compute-Intel%20TDX-0071c5?style=for-the-badge)](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-trust-domain-extensions.html)
-[![Status: Demo](https://img.shields.io/badge/status-hackathon%20demo-orange?style=for-the-badge)](#status)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](#license)
 
 **One line of change. Zero added risk. Prompt-injection-proof.**
 
-[**📊 View the Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) — 12-slide deck with live demos
+```bash
+npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
+```
+
+[**📦 Install**](#installation) &nbsp;·&nbsp; [**📊 Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) &nbsp;·&nbsp; [**⚡ Quickstart**](#quickstart)
 
 <br/>
 
@@ -19,8 +23,8 @@
 
 ---
 
-> **What's new (v0.2 / v0.3 + webhook):**
-> - **On npm** — `npm i -g @fiscalmindset/blindfold` ([npmjs.com](https://www.npmjs.com/package/@fiscalmindset/blindfold)) gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency). Keep it current with `blindfold update`.
+> **What's new (v0.4):**
+> - **Published on npm** — `npm i -g @fiscalmindset/blindfold` ([npmjs.com](https://www.npmjs.com/package/@fiscalmindset/blindfold)) gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency). Keep it current with `blindfold update`.
 > - **`blindfold signup`** — self-serve onboarding: mint a brand-new, funded Terminal 3 testnet tenant from nothing (`npm i -g` + one command). Verifies your email by code and stores the generated key in the OS keychain — never printed. No manual token claim.
 > - **`blindfold login`** — store tenant creds in `~/.blindfold`, with the tenant key in the **OS keychain** (macOS/Linux), not a plaintext file. Then `blindfold …` works anywhere.
 > - **Webhook support** — a `webhook` auth scheme (contract v0.5.5) + a `/discord` proxy provider let an agent post to a webhook **without ever holding the URL**. See [`examples/discord-webhook/`](examples/discord-webhook/).
@@ -29,6 +33,23 @@
 >
 > **Full command list** (`login`, `logout`, `whoami`, `register`, `use`, `proxy`, `attest`, `grant`, `share`, `revoke`, `rotate`, `rollback`, `versions`, `migrate`, `status`, `sealed`, `audit`, `export`, `credit`, `dashboard`, `doctor`, `verify`, `compat`, `publish`, `update`, `skill`): see the **[Usage Guide → Command reference](usage.md#command-reference-all-of-them)**.
 
+<details>
+<summary><b>📑 Table of contents</b></summary>
+
+- [📦 Installation](#installation) · [⚡ Quickstart](#quickstart)
+- [Plain-English: what's happening](#plain-english-whats-actually-happening-here)
+- [The one-line adoption](#the-one-line-adoption)
+- [The attack, and why other fixes fail](#the-attack-and-why-every-other-fix-fails) · [How Blindfold fixes it](#how-blindfold-fixes-it)
+- [How Terminal 3 is used here](#how-terminal-3-is-used-here)
+- [Proof of blindness — the demo](#proof-of-blindness--the-side-by-side-demo)
+- [Two integration styles](#two-integration-styles) · [Supported integrations](#supported-integrations)
+- [CLI at a glance](#cli-at-a-glance) · [Agent skill](#agent-skill--let-your-coding-agent-seal-keys-for-you)
+- [Cookbook (clone → working)](#cookbook--every-command-from-clone-to-working-with-expected-output)
+- [Real T3 mode — what works today](#real-t3-mode--what-works-today) · [Status](#status)
+- Guides: [Usage](usage.md) · [Examples](EXAMPLES.md) · [Teams](TEAMS.md) · [FAQ](FAQ.md)
+
+</details>
+
 ## TL;DR
 
 Today, your AI agent holds its OpenAI / Stripe / Anthropic API key in memory. A single prompt-injection from a webpage, email, or PDF can talk your agent into exfiltrating that key — and there is no probabilistic defense (guardrails, classifiers, allowlists) that closes the gap structurally.
@@ -36,6 +57,62 @@ Today, your AI agent holds its OpenAI / Stripe / Anthropic API key in memory. A 
 **Blindfold** moves the key into a Terminal 3 TDX hardware enclave. Your agent's code is identical — it just points at a local proxy. The key is **substituted into the outbound request inside the enclave**, after it leaves your agent's process. The agent never has the key. There is nothing for an injection to steal.
 
 > *"The only durable fix is that the key is never in the agent's context."* — [`docs/01-problem-analysis.md`](docs/01-problem-analysis.md)
+
+---
+
+<a id="installation"></a>
+
+## 📦 Installation
+
+> **Requirements:** Node.js ≥ 18. That's it — the Terminal 3 SDK installs automatically, and a tenant is created for you in step 2.
+
+### 1 · Install the CLI
+
+```bash
+npm i -g @fiscalmindset/blindfold
+```
+
+<sub>Installs a global `blindfold` command that runs from any directory. State lives in `~/.blindfold`. Update anytime with `blindfold update`.</sub>
+
+### 2 · Create a Terminal 3 tenant — self-serve, ~30s
+
+```bash
+blindfold signup --email you@example.com
+```
+
+This generates your tenant key **locally** (stored in the OS keychain — never printed), emails you a verification code, and self-admits a **funded testnet tenant** (~20,000 credits). No manual token claim.
+
+<sub>Already have Terminal 3 credentials? Use <code>blindfold login --did did:t3n:…</code> instead. One email = one tenant (Gmail <code>+aliases</code> work).</sub>
+
+### 3 · Confirm it's live
+
+```bash
+blindfold doctor      # ✅ handshake + authenticate OK · tenant active
+blindfold credit      # your token balance
+```
+
+### 4 · Seal a key and use it
+
+```bash
+blindfold register --name openai_api_key       # prompts, hidden input — never touches disk
+blindfold proxy                                 # http://127.0.0.1:8787 · sentinel __BLINDFOLD__
+```
+
+Then point your agent at the proxy — that's the [one-line change](#the-one-line-adoption).
+
+<details>
+<summary><b>Alternative: install from source (contributors)</b></summary>
+
+```bash
+git clone https://github.com/FiscalMindset/Blindfold.git
+cd Blindfold
+npm install
+npm i -g .            # or `npm link` — makes the `blindfold` command available
+```
+
+Working from a clone without a global install? Every `blindfold <cmd>` below also works as `npm run blindfold -- <cmd>`. See the [Cookbook](#cookbook--every-command-from-clone-to-working-with-expected-output) for the full clone-to-working walkthrough.
+
+</details>
 
 ---
 
@@ -417,8 +494,8 @@ curl -sL https://raw.githubusercontent.com/FiscalMindset/Blindfold/main/.claude/
 **npx** (from any directory, no clone needed):
 
 ```bash
-npx blindfold skill install           # current project
-npx blindfold skill install --global  # global
+blindfold skill install           # current project
+blindfold skill install --global  # global
 ```
 
 ### How it works
@@ -507,7 +584,7 @@ If you skip this, Blindfold runs in **MOCK** mode — useful for the demo, not f
 <summary><b>3. Publish the wrapper contract (real mode only)</b></summary>
 
 ```bash
-npm run blindfold -- publish
+blindfold publish
 # → registers contract/target/wasm32-wasip2/release/blindfold_proxy.wasm with your tenant
 ```
 
@@ -520,15 +597,15 @@ Three input modes, in order of preference:
 
 ```bash
 # (a) Interactive — value never touches disk or shell history. Preferred.
-npm run blindfold -- register --name openai_api_key
+blindfold register --name openai_api_key
 #  Value for "openai_api_key" (input is hidden): ●●●●●●●●●● ↵
 #  ✓ Registered "openai_api_key" — value lives only in the enclave.
 
 # (b) Piped — for scripts. Same on-disk-free property.
-echo "$OPENAI_API_KEY" | npm run blindfold -- register --name openai_api_key
+echo "$OPENAI_API_KEY" | blindfold register --name openai_api_key
 
 # (c) From an env var you already have (e.g. set by a vault tool).
-npm run blindfold -- register --name openai_api_key --from-env OPENAI_API_KEY
+blindfold register --name openai_api_key --from-env OPENAI_API_KEY
 ```
 
 Mode (a) is the friendliest: no `.env` edit, no leftover line to delete. Use (c) only when the value is *already* in env for another reason — then this is just a transfer.
@@ -539,7 +616,7 @@ Mode (a) is the friendliest: no `.env` edit, no leftover line to delete. Use (c)
 <summary><b>5. Run the proxy and point your agent at it</b></summary>
 
 ```bash
-npm run blindfold -- proxy --port 8787
+blindfold proxy --port 8787
 # In another shell:
 OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-agent.js
 ```
@@ -552,7 +629,10 @@ OPENAI_BASE_URL=http://127.0.0.1:8787/v1 OPENAI_API_KEY=__BLINDFOLD__ node my-ag
 
 ## Cookbook — every command from clone to working, with expected output
 
-> If you're just starting, do these in order. Each block is copy-pasteable; the comment shows what you should see. If a step doesn't match, jump to [`vicky.md` Q6 (common errors)](vicky.md).
+> If you're just starting, the fastest path is [📦 Installation](#installation) above (`npm i -g` + `blindfold signup`). This section is the **full clone → working walkthrough for contributors**, with expected output at every step.
+
+<details>
+<summary><b>Show the full clone → working walkthrough (contributors)</b></summary>
 
 ### A. Install
 
@@ -587,7 +667,7 @@ T3N_API_KEY=0xYOUR_HEX_HERE
 DID=did:t3n:YOUR_HEX_HERE
 EOF
 
-npm run blindfold -- doctor
+blindfold doctor
 # Expected:
 #   mode:               REAL (T3)
 #   T3N_API_KEY set:    yes
@@ -595,7 +675,7 @@ npm run blindfold -- doctor
 #   T3 environment:     testnet
 #   default proxy port: 8787
 
-npm run blindfold -- verify
+blindfold verify
 # Expected:
 #   ✓ REAL T3 round-trip succeeded.
 ```
@@ -617,7 +697,7 @@ npm run setup
 ### D. Seal your first key (interactive, no `.env` touch)
 
 ```bash
-npm run blindfold -- register --name openai_api_key
+blindfold register --name openai_api_key
 #   Value for "openai_api_key" (input is hidden): ●●●●●●●● ↵
 # Expected:
 #   ✓ Registered "openai_api_key" — value lives only in the enclave.
@@ -626,7 +706,7 @@ npm run blindfold -- register --name openai_api_key
 ### E. Confirm it's sealed (three ways, fastest first)
 
 ```bash
-npm run blindfold -- sealed
+blindfold sealed
 # Expected:
 #   WHEN  NAME  BYTES  MODE  WHERE
 #   2026-06-20 12:31:46   openai_api_key   51   real   z:<tid>:secrets/openai_api_key
@@ -665,13 +745,13 @@ Working files: [`examples/grok-via-blindfold.ts`](examples/grok-via-blindfold.ts
 ### G. The day-2 view
 
 ```bash
-npm run blindfold -- proxy            # terminal 1, leave running
+blindfold proxy            # terminal 1, leave running
 npm run dashboard                     # terminal 2 → open http://127.0.0.1:8799
 # Expected: live dashboard with System / Sealed Keys / Audit / Traffic panels.
 # The audit panel turns yellow if a sealed key is ALSO present in .env (= leak surface).
 
-npm run blindfold -- stats            # CLI summary of usage.jsonl
-npm run blindfold -- stats:clear      # wipe the usage log
+blindfold stats            # CLI summary of usage.jsonl
+blindfold stats:clear      # wipe the usage log
 npm run env:fingerprint               # safe-to-share view of .env (no full values)
 npm run test:report                   # full 9-check battery; appends to output_analysis.md
 ```
@@ -690,13 +770,15 @@ npm run demo
 
 | Goal | Command |
 |---|---|
-| Rotate a key | `npm run blindfold -- register --name openai_api_key` (overwrites) |
+| Rotate a key | `blindfold register --name openai_api_key` (overwrites) |
 | Add a new provider key | same `register` with a new `--name` |
-| Verify everything is working without sending traffic | `npm run blindfold -- doctor` → `verify` → `sealed` |
-| Scan for agent CLIs you have installed | `npm run blindfold -- compat` |
+| Verify everything is working without sending traffic | `blindfold doctor` → `verify` → `sealed` |
+| Scan for agent CLIs you have installed | `blindfold compat` |
 | Test against real T3 end-to-end | `npm run test:real` (uses one contract slot) |
 | Send a real email through the release-broker | `npx tsx scripts/smtp-with-blindfold.ts you@example.com` |
 | Real Grok API call without the key in env | `npx tsx examples/grok-via-blindfold.ts "prompt here"` |
+
+</details>
 
 ---
 
@@ -704,7 +786,7 @@ npm run demo
 
 | Capability | Status | Note |
 |---|---|---|
-| Handshake + authenticate against testnet | ✅ verified live | `npm run blindfold -- verify` |
+| Handshake + authenticate against testnet | ✅ verified live | `blindfold verify` |
 | **`doctor` live tenant check** | ✅ **verified live** | `blindfold doctor` now authenticates **and** reads `me()`, so it tells you in plain English if a key is unprovisioned / out of credit / has a mismatched DID — instead of the bare HTTP 500 the server returns. |
 | Seal a secret into `z:<tid>:secrets` via `executeControl("map-entry-set", …)` | ✅ **verified live** | `blindfold register --name <X> --from-env <X>`; e.g. `github_token` (93 B) sealed on the active tenant |
 | **Use a sealed secret with any tool** (`blindfold use`) | ✅ **verified live** | `blindfold use --name <X> -- <cmd>` injects the released secret as an env var into one subprocess (no code); `--url <https>` does a quick auth check. Verified: `use --as GH_TOKEN -- gh api user` → authenticated as the token owner. |
@@ -721,7 +803,7 @@ npm run demo
 **The "verify" command** does a real handshake + authenticate round-trip and reports success. Try it:
 
 ```bash
-npm run blindfold -- verify
+blindfold verify
 # 🛡️  Blindfold — verify
 #   · mode: REAL  ·  T3 env: testnet
 #   ✓ REAL T3 round-trip succeeded.
@@ -734,10 +816,10 @@ npm run blindfold -- verify
 Every forwarded request appends a metadata line to `.blindfold/usage.jsonl`. The line contains the provider, path, method, status, latency, whether the agent supplied any auth header, and whether the Blindfold sentinel was actually placed in the outbound headers. **It never contains request bodies, response bodies, or header values** — by construction, those are not passed to the logger.
 
 ```bash
-npm run blindfold -- proxy            # in one terminal
+blindfold proxy            # in one terminal
 npm run dashboard                     # in another → opens http://127.0.0.1:8799
-npm run blindfold -- stats            # quick CLI summary
-npm run blindfold -- stats:clear      # wipe the log
+blindfold stats            # quick CLI summary
+blindfold stats:clear      # wipe the log
 ```
 
 The dashboard shows live counters (by provider, success rate, average latency, sentinel-substitution count) and the most recent 50 events, auto-refreshing every 2 seconds.
@@ -821,7 +903,7 @@ The defaults run in **MOCK mode**: no T3 deps needed, no real API key needed, de
 
 1. Install Rust + the `wasm32-wasip2` target: `rustup target add wasm32-wasip2`.
 2. `npm i @terminal3/t3n-sdk` (it's listed as `optionalDependencies`).
-3. Set `T3N_API_KEY` and `DID` in `.env`. Run `npm run blindfold -- doctor` to confirm `REAL` mode.
+3. Set `T3N_API_KEY` and `DID` in `.env`. Run `blindfold doctor` to confirm `REAL` mode.
 4. Run the full one-time flow in [§Quickstart](#quickstart) steps 3-5.
 
 Open issues we'd love a real T3 engineer to confirm are in [`docs/02-terminal3-analysis.md` §7 — NEEDS VERIFICATION](docs/02-terminal3-analysis.md).
