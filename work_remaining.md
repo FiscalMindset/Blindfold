@@ -14,16 +14,17 @@ Living list of what's left, newest concerns first. Update as items land.
   `+blindfold3` → `did:t3n:36506da58d1de0d977b193f0ad73a076c832030a` is the live one
   stored on the Windows box.
 
-## npm publish prerequisites (blockers for `npm publish`)
+## npm publish prerequisites
 
-- [ ] **`packages/blindfold/README.md`** — currently absent, so the npm package
-  page would be blank. Write a focused install + `signup` + quickstart README.
-- [ ] **LICENSE + `license` field** in `packages/blindfold/package.json`.
-- [ ] **Fix the library `exports`** — `./`, `./proxy`, `./register`, `./wrap` point
-  at `.ts` sources. Either build them to `.js`/`.d.ts` or document that consumers
-  need a TS/tsx loader. (The `bin` already ships the bundled `dist/cli.mjs`.)
-- [ ] Decide version bump: `[Unreleased]` in CHANGELOG is substantial (signup,
-  attest, credit, update, socket, audit remediation) — cut a real version.
+- [x] **`packages/blindfold/README.md`** — focused install + `signup` + quickstart.
+- [x] **MIT LICENSE + `license` field** (+ repository/homepage/bugs/keywords).
+- [x] **Library `exports` fixed** — `.`, `./proxy`, `./register`, `./wrap` build to
+  `dist/lib/*.mjs` (plain-Node runnable); types resolve from shipped `src/*.ts`.
+- [x] **Version cut to 0.4.0** (CHANGELOG dated).
+- [ ] **`npm publish`** — actually publish `@fiscalmindset/blindfold@0.4.0` once
+  you're ready (needs an npm login with publish rights to the `@fiscalmindset`
+  scope). `npm pack --dry-run` is clean: 41 files, README + LICENSE + dist ship,
+  no secrets.
 
 ## Nice-to-have hardening
 

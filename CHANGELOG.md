@@ -4,7 +4,7 @@
 
 ---
 
-## [Unreleased] — Defense-in-depth + full security-audit remediation
+## [0.4.0] — 2026-07-12 — Self-serve onboarding + defense-in-depth + audit remediation
 
 ### Added
 - **`blindfold signup`** — self-serve onboarding. On a machine with no
@@ -33,6 +33,10 @@
 - Package renamed to **`@fiscalmindset/blindfold`** (command stays `blindfold`).
   The bare npm name `blindfold` is an unrelated, deprecated package, so publish
   and `npm i -g` must use the scoped name.
+- **Publish-ready:** MIT `LICENSE` + `license` field, package `README.md`,
+  `repository`/`homepage`/`bugs`/`keywords` metadata. Library exports (`.`,
+  `./proxy`, `./register`, `./wrap`) now build to `dist/lib/*.mjs` (runnable in
+  plain Node), with types resolved from the shipped `src/*.ts`.
 
 ### Security (self-audit remediation)
 - **Enclave contract v0.5.6** (published, id 476): the sentinel is substituted
