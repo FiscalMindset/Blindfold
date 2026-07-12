@@ -215,9 +215,14 @@ export function renderMainHelp(): string {
       // command name (bright) + summary
       lines.push(pad(c.bold(c.cyan(cmd.name)), nameW) + "  " + (dl[0] ?? ""));
       for (let i = 1; i < dl.length; i++) lines.push(pad("", nameW) + "  " + (dl[i] ?? ""));
+      const gutter = pad("", nameW) + "  ";
+      // the shape — with <placeholders> — so you learn the pattern (only if it takes args)
+      if (cmd.usage) {
+        lines.push(gutter + c.gray(pad("usage", 5)) + " " + c.cyan(fit(`blindfold ${cmd.name} ${cmd.usage}`, descW - 6)));
+      }
       // one concrete example — the fastest way to "get" the command
-      const ex = fit(cmd.examples?.[0] ?? `blindfold ${cmd.name}`, descW - 5);
-      lines.push(pad("", nameW) + "  " + c.gray("e.g. ") + c.green(ex));
+      const ex = fit(cmd.examples?.[0] ?? `blindfold ${cmd.name}`, descW - 6);
+      lines.push(gutter + c.gray(pad("e.g.", 5)) + " " + c.green(ex));
     }
     out.push(boxLines(group, lines));
     out.push("");
