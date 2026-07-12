@@ -111,6 +111,40 @@ export function recordSealed(entry: SealedEntry): void {
   }
 }
 
+/**
+ * Remove every entry with the given name from the ledger and RE-CHAIN what
+ * remains, so the tamper-evident hash-chain stays valid (an owner-initiated
+ * delete is legitimate, unlike a stealth edit). Backs the old ledger up first.
+ * Returns the number of entries removed.
+ */
+export function removeSealedEntry(name: string): number {
+  const p = defaultSealedLogPath();
+  if (!fs.existsSync(p)) return 0;
+  let removed = 0;
+  withFileLockSync(p, () => {
+    const all = fs.readFileSync(p, "utf8").split("\n").filter(Boolean)
+      .map((l) => { try { return JSON.parse(l) as SealedEntry; } catch { return null; } })
+      .filter((e): e is SealedEntry => e !== null);
+    const kept = all.filter((e) => e.name !== name);
+    removed = all.length - kept.length;
+    if (removed === 0) return;
+    // Backup the pre-delete ledger (0600) so nothing is ever silently lost.
+    try { fs.writeFileSync(`${p}.bak.${Date.now()}`, fs.readFileSync(p), { mode: 0o600 }); } catch { /* best effort */ }
+    // Re-chain the survivors into a fresh, valid HMAC chain.
+    const key = ledgerKey();
+    let prev = "";
+    const rebuilt = kept.map((e) => {
+      const core = coreString(e); // preserves original t/name/source/length/mode/tenant/map
+      const thisPrev = prev; // the PREVIOUS entry's hash (not this one's)
+      const { hash, alg } = chainHash(key, thisPrev, core);
+      prev = hash;
+      return { ...e, prev: thisPrev, hash, ...(alg ? { alg } : {}) };
+    });
+    fs.writeFileSync(p, rebuilt.map((e) => JSON.stringify(e)).join("\n") + (rebuilt.length ? "\n" : ""));
+  });
+  return removed;
+}
+
 export function readSealed(): SealedEntry[] {
   const p = defaultSealedLogPath();
   if (!fs.existsSync(p)) return [];

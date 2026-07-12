@@ -5,7 +5,8 @@ import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { loadBlindfoldEnv, configPath, homeDir, stateDir } from "../src/env.ts";
 import { keychainAvailable, keychainBackend, keychainSet, keychainDelete } from "../src/keychain.ts";
-import { readSecretLine } from "../src/prompt.ts";
+import { readSecretLine, readLine } from "../src/prompt.ts";
+import { c, ok, warn } from "../src/color.ts";
 import { registerSecret, registerContract } from "../src/register.ts";
 import { startProxy } from "../src/proxy.ts";
 import { attest, attestationGate, writePinnedRtmr3 } from "../src/attest.ts";
@@ -13,7 +14,7 @@ import { startDashboard } from "../src/dashboard.ts";
 import { clearUsage, defaultLogPath, readUsage } from "../src/usage-log.ts";
 import { runInit, runVerify } from "../src/init.ts";
 import { runCompat } from "../src/compat.ts";
-import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/sealed-ledger.ts";
+import { defaultSealedLogPath, readSealed, removeSealedEntry, verifyLedgerChain } from "../src/sealed-ledger.ts";
 import { type Argv, die, assetPath, fingerprint, resolveEnvVar } from "./cli-shared.ts";
 
 export async function handleSecrets(cmd: string, argv: Argv, cmdArgs: string[]): Promise<void> {
@@ -47,6 +48,44 @@ export async function handleSecrets(cmd: string, argv: Argv, cmdArgs: string[]):
       console.log(`    blindfold use --name ${name} --as ${asVar} -- <cmd>  # custom env-var name`);
       console.log(`    blindfold use --name ${name} --url <https url>       # quick "does it auth?" check`);
       console.log(`    proxy/SDK:  set the key to "__BLINDFOLD__" + route via \`blindfold proxy\`, or \`release("${name}")\` in code`);
+      return;
+    }
+    case "delete":
+    case "remove": {
+      // Delete a sealed secret: empty its value in the enclave (current tenant)
+      // AND remove it from the local ledger, re-chaining so `audit` stays valid.
+      const name = String(argv.flags.name ?? argv._[1] ?? "");
+      if (!name) die("usage: blindfold delete --name <secret>   [--yes to skip the prompt]");
+
+      const inLedger = readSealed().some((e) => e.name === name);
+      if (!inLedger) console.error(warn(`⚠ "${name}" isn't in the local ledger — will still try to empty it in the enclave.`));
+
+      // Confirm (unless --yes/--force). Destructive.
+      const skip = Boolean(argv.flags.yes || argv.flags.force || argv.flags.y);
+      if (!skip) {
+        const ans = (await readLine(`Delete sealed secret ${c.bold(name)}? This empties it in the enclave and removes it from the ledger. Type "yes": `)).trim().toLowerCase();
+        if (ans !== "yes" && ans !== "y") { console.log("Aborted — nothing deleted."); return; }
+      }
+
+      // Enclave side (best-effort — a secret on a different/old tenant just won't be found).
+      const env = loadBlindfoldEnv();
+      let enclaveNote = "";
+      try {
+        const { openT3Client } = await import("../src/t3-client.ts");
+        const client = await openT3Client(env);
+        try {
+          const how = await client.deleteSecret(name);
+          enclaveNote = how === "deleted" ? "enclave entry deleted" : "enclave value emptied (key may remain)";
+        } finally { await client.close(); }
+      } catch (e) {
+        enclaveNote = `enclave not updated (${(e as Error).message.slice(0, 80)}) — ledger still cleaned`;
+      }
+
+      const removed = removeSealedEntry(name);
+      console.log(ok(`✓ Deleted "${name}".`));
+      console.log(`  ${c.gray("ledger:")}  ${removed > 0 ? `removed ${removed} entr${removed === 1 ? "y" : "ies"} (re-chained; backup kept)` : "not present"}`);
+      console.log(`  ${c.gray("enclave:")} ${enclaveNote}`);
+      if (inLedger) console.log(c.gray(`  Verify: blindfold sealed   ·   blindfold audit`));
       return;
     }
     case "use": {
