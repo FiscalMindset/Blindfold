@@ -3,7 +3,7 @@
  * wrapping, rounded boxes, and a two-column command table. Used to render a
  * structured `blindfold help` that reflows to the terminal.
  */
-import { c } from "./color.ts";
+import { c, colorOn } from "./color.ts";
 
 /** Terminal width, clamped to a readable range. */
 export function termWidth(): number {
@@ -124,11 +124,30 @@ export function boxLines(title: string, lines: string[]): string {
   const w = termWidth();
   const inner = w - 4;
   const prefix = B.tl + B.h + " ";
-  const fill = Math.max(0, w - vlen(prefix) - vlen(title) - 2);
-  const out: string[] = [dim(prefix) + c.bold(title) + dim(" " + B.h.repeat(fill) + B.tr)];
-  for (const l of lines) out.push(dim(B.v) + " " + pad(l, inner) + " " + dim(B.v));
+  const fill = Math.max(0, w - vlen(prefix) - vlen(clip(title, inner)) - 2);
+  const out: string[] = [dim(prefix) + c.bold(clip(title, inner)) + dim(" " + B.h.repeat(fill) + B.tr)];
+  for (const l of lines) out.push(dim(B.v) + " " + pad(clip(l, inner), inner) + " " + dim(B.v));
   out.push(dim(B.bl + B.h.repeat(w - 2) + B.br));
   return out.join("\n");
+}
+
+/** Truncate a string to display width `width` (ANSI/emoji aware), appending …
+ *  and a reset so a clipped color can't bleed. No-op if it already fits. */
+export function clip(s: string, width: number): string {
+  if (vlen(s) <= width) return s;
+  let out = "";
+  let wSoFar = 0;
+  for (const part of s.split(/(\x1b\[[0-9;]*m)/)) {
+    if (part.startsWith("\x1b")) { out += part; continue; }
+    for (const ch of part) {
+      const cp = ch.codePointAt(0) ?? 0;
+      const cw = cp === 0x200d || (cp >= 0xfe00 && cp <= 0xfe0f) || (cp >= 0x300 && cp <= 0x36f) ? 0 : isWide(cp) ? 2 : 1;
+      if (wSoFar + cw > width - 1) return out + "…" + (colorOn ? "\x1b[0m" : "");
+      out += ch;
+      wSoFar += cw;
+    }
+  }
+  return out + (colorOn ? "\x1b[0m" : "");
 }
 
 /** A plain full-width rule with an optional bold label: "── Label ─────". */

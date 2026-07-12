@@ -16,6 +16,7 @@ import { runCompat } from "../src/compat.ts";
 import { defaultSealedLogPath, readSealed, verifyLedgerChain } from "../src/sealed-ledger.ts";
 import { type Argv, die, assetPath, fingerprint, resolveEnvVar } from "./cli-shared.ts";
 import { c, ok, bad, warn, head } from "../src/color.ts";
+import { boxLines, rule } from "../src/tui.ts";
 
 export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]): Promise<void> {
   switch (cmd) {
@@ -32,15 +33,19 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
         const b = await client.getBalance();
         const tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });
         if (argv.flags.json) { console.log(JSON.stringify(b, null, 2)); return; }
-        console.log(head(`💳 Terminal 3 credit`) + c.gray(` — ${env.did || "(no tenant)"}  (${env.mock ? "MOCK" : env.t3Env})`));
-        console.log(`  available:  ${c.bold(tok(b.available) + " tokens")}  ${c.gray("(" + b.available.toLocaleString() + " base units)")}`);
-        console.log(`  reserved:   ${b.reserved.toLocaleString()} base units`);
-        console.log(`  status:     ${b.creditExhausted ? warn("⚠ EXHAUSTED") : ok("✅ ok")}`);
+        const lines = [
+          c.gray(`${env.did || "(no tenant)"}  ·  ${env.mock ? "MOCK" : env.t3Env}`),
+          "",
+          `available:  ${c.bold(c.green(tok(b.available) + " tokens"))}  ${c.gray("(" + b.available.toLocaleString() + " base units)")}`,
+          `reserved:   ${b.reserved.toLocaleString()} base units`,
+          `status:     ${b.creditExhausted ? warn("⚠ EXHAUSTED") : ok("✅ ok")}`,
+        ];
         if (b.creditExhausted) {
-          console.log(`  Top up testnet credits, then re-check with \`blindfold credit\`:`);
-          console.log(`    https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens`);
+          lines.push("", c.yellow("Top up testnet credits, then re-check with `blindfold credit`:"),
+            c.cyan("  https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens"));
           process.exitCode = 1;
         }
+        console.log(boxLines("💳 Terminal 3 credit", lines));
       } finally {
         await client.close();
       }
@@ -136,9 +141,10 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
         console.log(`Seal one with:  blindfold register --name <KV_KEY>`);
         return;
       }
-      console.log(head("🔐 Sealed keys") + c.gray(`  (source: ${defaultSealedLogPath()})`) + "\n");
-      console.log("  WHEN                  NAME                       BYTES  MODE   WHERE");
-      console.log("  ────                  ────                       ─────  ────   ─────");
+      console.log(boxLines("🔐 Sealed keys", [c.gray(`source: ${defaultSealedLogPath()}`)]));
+      console.log("");
+      console.log(c.gray("  WHEN                  NAME                       BYTES  MODE   WHERE"));
+      console.log(c.gray("  ────                  ────                       ─────  ────   ─────"));
       for (const e of entries) {
         const when = e.t.replace("T", " ").slice(0, 19);
         const where = e.map_name.length > 60 ? e.map_name.slice(0, 57) + "…" : e.map_name;
@@ -150,9 +156,10 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
     case "audit": {
       // (1) Tamper-evidence: verify the local ledger's hash-chain.
       // (2) Reconcile against the enclave — the actual source of truth.
-      console.log("🔍 Blindfold audit\n");
+      console.log(boxLines("🔍 Blindfold audit", [c.gray("ledger hash-chain + reconciliation against the enclave")]));
+      console.log("");
       const chain = verifyLedgerChain();
-      console.log("  1. Ledger integrity (tamper-evidence)");
+      console.log(c.bold("  1. Ledger integrity (tamper-evidence)"));
       if (chain.total === 0) {
         console.log("     (ledger is empty)");
       } else if (chain.ok) {
@@ -203,44 +210,46 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
     case "status": {
       // One-glance overview: health + sealed inventory + what to do next.
       const env = loadBlindfoldEnv();
-      console.log(head("🛡️  Blindfold status") + "\n");
-      console.log(`  mode:    ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL"}   ·   T3 env: ${env.t3Env}`);
-      if (env.t3BaseUrl) console.log(`  node:    ${env.t3BaseUrl}  (override)`);
+      const lines: string[] = [];
+      lines.push(`mode:    ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL"}   ·   T3 env: ${env.t3Env}`);
+      if (env.t3BaseUrl) lines.push(`node:    ${env.t3BaseUrl}  (override)`);
       if (!env.mock) {
         try {
           const { openT3Client } = await import("../src/t3-client.ts");
           const client = await openT3Client(env);
           const info = await client.me();
-          console.log(`  tenant:  ${ok("✅ " + info.tenant)}  (status=${info.status ?? "?"})`);
+          lines.push(`tenant:  ${ok("✅ " + info.tenant)}  (status=${info.status ?? "?"})`);
         } catch (e) {
-          console.log(`  tenant:  ${bad("✖ " + (e as Error).message.slice(0, 90))}`);
-          console.log(`           → run \`blindfold doctor\` for a full diagnosis.`);
+          lines.push(`tenant:  ${bad("✖ " + (e as Error).message.slice(0, 90))}`);
+          lines.push(`         ${c.gray("→ run `blindfold doctor` for a full diagnosis.")}`);
           process.exitCode = 1;
         }
       }
       const entries = readSealed();
       const latest = new Map<string, (typeof entries)[number]>();
       for (const e of entries) latest.set(e.name, e); // last write wins
-      console.log(`\n  Sealed secrets (${latest.size}):`);
+      lines.push("", c.bold(`Sealed secrets (${latest.size})`));
       if (latest.size === 0) {
-        console.log(`    (none yet)   seal one:  blindfold register --name <X> --from-env <X>`);
+        lines.push(`  ${c.gray("(none yet)  seal one:")}  ${c.cyan("blindfold register --name <X>")}`);
       } else {
         for (const e of latest.values()) {
-          console.log(`    • ${e.name.padEnd(22)} ${String(e.length).padStart(4)} B   ${e.mode}`);
+          lines.push(`  ${c.green("•")} ${c.cyan(e.name.padEnd(22))} ${String(e.length).padStart(4)} B   ${c.gray(e.mode)}`);
         }
       }
-      console.log(`\n  Next:  blindfold use --name <secret> -- <command>     (use it, no code)`);
+      lines.push("", c.gray("Next:  ") + c.cyan("blindfold use --name <secret> -- <command>") + c.gray("   (use it, no code)"));
+      console.log(boxLines("🛡️  Blindfold status", lines));
       return;
     }
     case "doctor": {
       const env = loadBlindfoldEnv();
-      console.log(head("🩺 Blindfold doctor"));
-      console.log(`  mode:               ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL (T3)"}`);
-      console.log(`  T3N_API_KEY set:    ${env.t3nApiKey ? "yes" : "NO ✖"}`);
-      console.log(`  DID set:            ${env.did ? "yes" : "NO ✖"}`);
-      console.log(`  T3 environment:     ${env.t3Env}`);
-      console.log(`  node URL:           ${env.t3BaseUrl || `(SDK default for ${env.t3Env})`}`);
-      console.log(`  default proxy port: ${env.port}`);
+      console.log(boxLines("🩺 Blindfold doctor", [
+        `mode:          ${env.mock ? "MOCK (BLINDFOLD_MOCK=1)" : "REAL (T3)"}`,
+        `T3N_API_KEY:   ${env.t3nApiKey ? ok("set") : bad("NOT set ✖")}`,
+        `DID:           ${env.did ? ok("set") : bad("NOT set ✖")}`,
+        `T3 env:        ${env.t3Env}`,
+        `node URL:      ${env.t3BaseUrl || c.gray(`(SDK default for ${env.t3Env})`)}`,
+        `proxy port:    ${env.port}`,
+      ]));
       if (!env.mock && (!env.t3nApiKey || !env.did)) {
         console.log("");
         console.log(`  ⚠  REAL mode is selected but credentials are missing.`);
@@ -254,8 +263,7 @@ export async function handleEnclave(cmd: string, argv: Argv, cmdArgs: string[]):
       // LIVE check: authenticate, then read the tenant behind the key. This is
       // what catches the painful "key authenticates but has no tenant" case,
       // which the server otherwise reports only as a bare HTTP 500.
-      console.log("");
-      console.log("  Live check (handshake + authenticate + me) …");
+      console.log("\n" + rule("Live check — handshake + authenticate + me"));
       const { openT3Client } = await import("../src/t3-client.ts");
       let client;
       try {

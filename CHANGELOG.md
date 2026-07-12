@@ -4,6 +4,18 @@
 
 ---
 
+## [0.4.4] — 2026-07-13 — Boxed, responsive command outputs
+
+### Changed
+- **`doctor` / `status` / `credit` / `sealed` / `audit`** now render in the same
+  rounded, responsive boxes as `help` — consistent, width-aware, with over-long
+  values safely clipped (a long sealed-key name can no longer break the border).
+  Only presentation changed: the diagnostics, data, and exit codes are identical.
+- `tui.ts` gains `clip()` (ANSI/emoji-aware truncation); `boxLines` clips every
+  line so no content can overflow a box.
+
+---
+
 ## [0.4.3] — 2026-07-13 — `blindfold help` you can actually learn from
 
 ### Changed
