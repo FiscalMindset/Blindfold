@@ -19,6 +19,9 @@ export type Intent =
   | "what_is_blindfold"
   | "what_problem_does_it_solve"
   | "how_does_it_work"
+  | "signup_self_serve"
+  | "install_from_npm"
+  | "signup_vs_login"
   | "one_line_change"
   | "is_production_ready"
   // Concepts
