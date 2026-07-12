@@ -4,6 +4,15 @@
 
 ---
 
+## [0.4.5] — 2026-07-13 — Shape + example together in `help`
+
+### Changed
+- Each command in `blindfold help` now shows both its **`usage`** shape (with
+  `<placeholders>`, cyan) **and** a concrete **`e.g.`** example (green) — so you
+  learn the pattern and see a real invocation at once.
+
+---
+
 ## [0.4.4] — 2026-07-13 — Boxed, responsive command outputs
 
 ### Changed
