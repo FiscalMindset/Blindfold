@@ -14,11 +14,12 @@ You're working in (or with) Blindfold — a Terminal 3 TDX-enclave wrapper that 
 - User asks about `.env`, sealing, vaulting, or "where do I put my key".
 - You're about to write code that would read `process.env.SOME_PROVIDER_KEY` for an outbound call.
 - User says "use Blindfold" or "seal it" or "make this safe".
+- User has no Terminal 3 tenant yet ("how do I start", "I don't have an account/DID", `doctor` shows creds MISSING) → point them at self-serve `blindfold signup` (see below).
 
 ## The four rules (mirror of `usage_by_claude.md` §3)
 
-1. **R1 — no-paste-into-chat.** If a new secret needs sealing, *propose* the command (`npm run blindfold -- register --name <KV_KEY>`) for the user to run in their own terminal. Do NOT ask them to paste the value into chat. Only use `printf 'VALUE' | ...` from chat as a fallback, and only after the user explicitly says "go ahead from here".
-2. **R2 — verify by fingerprint, never by value.** To check what's sealed: `npm run blindfold -- sealed`. To check what's in `.env`: `npm run env:fingerprint`. To check a specific sealed key matches an expected value: `npx tsx scripts/test-v5-release.ts <secret_name>` (prints `first3…last2 (N bytes)`, never plaintext). Ask the user to paste the *output* of those commands — that's safe.
+1. **R1 — no-paste-into-chat.** If a new secret needs sealing, *propose* the command (`blindfold register --name <KV_KEY>`) for the user to run in their own terminal. Do NOT ask them to paste the value into chat. Only use `printf 'VALUE' | ...` from chat as a fallback, and only after the user explicitly says "go ahead from here".
+2. **R2 — verify by fingerprint, never by value.** To check what's sealed: `blindfold sealed`. To check what's in `.env`: `npm run env:fingerprint`. To check a specific sealed key matches an expected value: `npx tsx scripts/test-v5-release.ts <secret_name>` (prints `first3…last2 (N bytes)`, never plaintext). Ask the user to paste the *output* of those commands — that's safe.
 3. **R3 — code uses release-broker pattern.** Any code you write that needs a provider key must fetch it from T3 just-in-time via `tenant.contracts.execute("blindfold-proxy", { version: CONTRACT_VERSION, functionName: "release-to-tenant", input: { secret_key: "<name>" } })`, use it inside a `try { … } finally { /* dropped */ }`, and never reference `process.env.<provider>_API_KEY`. Reference templates: `examples/grok-via-blindfold.ts` (HTTPS) and `scripts/smtp-with-blindfold.ts` (non-HTTP).
 4. **R4 — propose `.env` cleanup after every successful seal.** The sealed copy is canonical; the `.env` copy is leak surface. *Exception:* `T3N_API_KEY` itself stays in `.env` — it's the root credential, can't be sealed (chicken-and-egg).
 
@@ -26,19 +27,22 @@ You're working in (or with) Blindfold — a Terminal 3 TDX-enclave wrapper that 
 
 | Command | Purpose | Safe to paste output? |
 |---|---|---|
-| `npm run blindfold -- doctor` | mode + cred presence (yes/no) | ✅ |
-| `npm run blindfold -- verify` | T3 round-trip status | ✅ |
-| `npm run blindfold -- login` | store tenant creds in `~/.blindfold` (OS keychain for the key) — works from any dir | ⚠ tell user to run it (prompts for key) |
-| `npm run blindfold -- whoami` | show config path, tenant, env, key source (never the value) | ✅ |
-| `npm run blindfold -- logout` | remove stored creds (keychain + `~/.blindfold/config.json`) | ✅ |
-| `npm run blindfold -- sealed` | sealed-keys ledger (metadata only, LOCAL) | ✅ |
-| `npm run blindfold -- audit` | reconcile ledger against the ENCLAVE — what's actually usable now | ✅ |
-| `npm run blindfold -- status` | one-glance: mode, tenant health, sealed list | ✅ |
+| `blindfold signup --email <addr>` | self-serve: mint a new testnet tenant (key local, email-verified) | ⚠ tell user to run it (prompts for the emailed code) |
+| `blindfold doctor` | mode + cred presence (yes/no) | ✅ |
+| `blindfold verify` | T3 round-trip status | ✅ |
+| `blindfold credit` | tenant token/credit balance | ✅ |
+| `blindfold attest [--pin]` | verify enclave TDX attestation; `--pin` gates seal/proxy on the code measurement | ✅ |
+| `blindfold login` | store tenant creds in `~/.blindfold` (OS keychain for the key) — works from any dir | ⚠ tell user to run it (prompts for key) |
+| `blindfold whoami` | show config path, tenant, env, key source (never the value) | ✅ |
+| `blindfold logout` | remove stored creds (keychain + `~/.blindfold/config.json`) | ✅ |
+| `blindfold sealed` | sealed-keys ledger (metadata only, LOCAL) | ✅ |
+| `blindfold audit` | reconcile ledger against the ENCLAVE — what's actually usable now | ✅ |
+| `blindfold status` | one-glance: mode, tenant health, sealed list | ✅ |
 | `npm run env:fingerprint` | `.env` lines as `KEY = first3…last2 (N bytes)` | ✅ |
 | `npx tsx scripts/test-v5-release.ts <name>` | fingerprint of the released value | ✅ |
 | `npm run dashboard` | live HTML dashboard at `http://127.0.0.1:8799` | n/a (UI) |
-| `npm run blindfold -- register --name <K>` | interactive seal (no echo) | ⚠ tell user to run in their terminal |
-| `printf 'V' \| npm run blindfold -- register --name <K>` | piped seal (value briefly in this process) | ⚠ only if user already pasted value |
+| `blindfold register --name <K>` | interactive seal (no echo) | ⚠ tell user to run in their terminal |
+| `printf 'V' \| blindfold register --name <K>` | piped seal (value briefly in this process) | ⚠ only if user already pasted value |
 
 ## Seal once, use forever (no re-seal per session)
 
@@ -51,16 +55,21 @@ To **use** already-sealed keys, a session needs three persistent things (all
 survive across sessions — none require re-sealing):
 
 1. **Tenant creds** — `T3N_API_KEY` + `DID`. These authenticate to the enclave
-   and are what release/proxy require. Two ways to provide them:
+   and are what release/proxy require. Ways to provide them:
+   - **`blindfold signup --email you@x.com`** (self-serve, the fastest start):
+     mints a brand-new Terminal 3 **testnet** tenant with no manual token claim —
+     generates the tenant key locally (→ OS keychain, never printed), verifies the
+     email by an emailed code, self-admits, and mints welcome credits. One email
+     binds to one tenant. Use this when the user has no tenant yet.
    - **Repo `.env`** (dev). Exception to R4: they stay in `.env`; see R4.
-   - **`blindfold login`** (v0.2+, product path): stores DID + settings in
+   - **`blindfold login`** (v0.2+, product path, for an EXISTING tenant): stores DID + settings in
      `~/.blindfold/config.json` and the tenant key in the **OS keychain** (v0.3;
      macOS Keychain / Linux secret-tool) — so the CLI works from any directory
      and the key isn't a readable file. Precedence: `process.env` > repo `.env` >
      `~/.blindfold`. State (ledger/usage/egress) also lives in `~/.blindfold`.
 2. **Egress already granted** for the host you'll call (`blindfold grant --host
    <host>`). The grant is per-tenant and persistent.
-3. **The proxy running** if using the HTTP path: `npm run blindfold -- proxy`
+3. **The proxy running** if using the HTTP path: `blindfold proxy`
    (listens on `127.0.0.1:8787`). Point the tool at it with base URL
    `http://127.0.0.1:8787/v1` and key `__BLINDFOLD__`. (Code paths use the
    release-broker instead — see R3.) On a shared machine, run `proxy --auth`:
@@ -76,6 +85,24 @@ re-sealing.
 
 ## What to do, by scenario
 
+### "I'm new / I don't have a Terminal 3 tenant yet" (onboarding)
+
+Blindfold is published on npm and onboarding is self-serve — no manual token claim.
+Propose (the user runs it in their own terminal):
+
+```bash
+npm i -g @fiscalmindset/blindfold
+blindfold signup --email you@example.com
+```
+
+`signup` generates the tenant key locally (→ OS keychain, never printed),
+verifies the email by an emailed code, self-admits a funded **testnet** tenant,
+and mints welcome credits. Then confirm with `blindfold doctor` (should show the
+tenant `active`) and `blindfold credit` (token balance). After that they can
+`register` and `use` keys. Notes: testnet-only; one email = one tenant (Gmail
+`+aliases` give fresh identities); if the email is already registered, use
+`blindfold login` with that tenant's key instead.
+
 ### "I want to seal my Stripe key" (or any new credential)
 
 **Don't ask for the value.** Respond with:
@@ -83,10 +110,10 @@ re-sealing.
 > In your own terminal, run:
 >
 > ```bash
-> npm run blindfold -- register --name stripe_api_key
+> blindfold register --name stripe_api_key
 > ```
 >
-> It'll prompt for the value with input hidden (no echo, no shell history). Paste your `sk_live_…` there, press Enter. Once done, paste me the output of `npm run blindfold -- sealed` so I can verify it landed in the right place.
+> It'll prompt for the value with input hidden (no echo, no shell history). Paste your `sk_live_…` there, press Enter. Once done, paste me the output of `blindfold sealed` so I can verify it landed in the right place.
 
 ### "Seal / use a webhook URL (Discord, Slack, …)"
 
@@ -126,7 +153,7 @@ end**; only the final `register` (plaintext) is handed back to the user.
    ```
 2. Rebuild (`npm run build` in `packages/blindfold`) so `dist/` picks up the entry.
 3. Hand back the two one-time human steps: seal the key —
-   `npm run blindfold -- register --name notion_api_key` (in their terminal, R1) —
+   `blindfold register --name notion_api_key` (in their terminal, R1) —
    and grant egress: `blindfold grant --host api.notion.com`.
 4. The agent then calls `http://127.0.0.1:8787/notion/...` with
    `Authorization: Bearer __BLINDFOLD__`; the enclave swaps in the sealed key.
@@ -139,7 +166,7 @@ auth scheme none of the four cover — otherwise this stays a TypeScript-only ch
 It's in our chat context now (can't undo). Reduce future surface:
 
 ```bash
-printf 'sk-...' | npx tsx packages/blindfold/bin/blindfold.ts register --name openai_api_key
+printf 'sk-...' | blindfold register --name openai_api_key
 ```
 
 Then propose deleting any `.env` copy. Note in your response that the chat-context exposure already happened and you can't retroactively fix it — only forward-protect.
@@ -174,9 +201,9 @@ Ask the user to paste that output. You get key *names* + lengths + first/last fe
 Run these in order, asking the user to paste each output:
 
 ```bash
-npm run blindfold -- doctor      # config sanity
-npm run blindfold -- verify      # T3 reachability
-npm run blindfold -- sealed      # is the key there?
+blindfold doctor      # config sanity
+blindfold verify      # T3 reachability
+blindfold sealed      # is the key there?
 ```
 
 Cross-reference any errors with `vicky.md` Q6 (keyword-indexed error table).
