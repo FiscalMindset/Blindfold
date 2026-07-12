@@ -20,7 +20,7 @@
 ---
 
 > **What's new (v0.2 / v0.3 + webhook):**
-> - **Installable CLI** — `npm i -g @fiscalmindset/blindfold` (or `npm i -g ./packages/blindfold` from a clone) gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency). Keep it current with `blindfold update`.
+> - **On npm** — `npm i -g @fiscalmindset/blindfold` ([npmjs.com](https://www.npmjs.com/package/@fiscalmindset/blindfold)) gives a global `blindfold` that runs from **any directory**; state lives in `~/.blindfold` (no repo/SSD dependency). Keep it current with `blindfold update`.
 > - **`blindfold signup`** — self-serve onboarding: mint a brand-new, funded Terminal 3 testnet tenant from nothing (`npm i -g` + one command). Verifies your email by code and stores the generated key in the OS keychain — never printed. No manual token claim.
 > - **`blindfold login`** — store tenant creds in `~/.blindfold`, with the tenant key in the **OS keychain** (macOS/Linux), not a plaintext file. Then `blindfold …` works anywhere.
 > - **Webhook support** — a `webhook` auth scheme (contract v0.5.5) + a `/discord` proxy provider let an agent post to a webhook **without ever holding the URL**. See [`examples/discord-webhook/`](examples/discord-webhook/).

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-07-04",
-  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04)",
+  "generatedAt": "2026-07-12",
+  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-11)",
   "entries": [
     {
       "id": "kb-001",
@@ -15324,6 +15324,4002 @@
       ],
       "confidence": 0.88,
       "lastVerified": "2026-07-04"
+    },
+    {
+      "id": "kb-extracted-ad3360f4",
+      "intent": "code_docs_01_problem_analysis_md_1_the_setup_what_an_ai_agent_actually_is",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 1. The setup: what an \"AI agent\" actually is do in docs/01-problem-analysis.md?",
+      "shortAnswer": "An AI agent is a loop",
+      "longAnswer": "An AI agent is a loop\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+      "links": [
+        {
+          "label": "docs/01-problem-analysis.md",
+          "url": "docs/01-problem-analysis.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "docs/01-problem-analysis.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-816f0db2",
+      "intent": "code_docs_01_problem_analysis_md_3_3_guardrails_prompt_injection_classifiers_inp",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 3.3 Guardrails / prompt-injection classifiers / input filters do in docs/01-problem-analysis.md?",
+      "shortAnswer": "\"Scan the incoming text and refuse to act on suspicious instructions",
+      "longAnswer": "\"Scan the incoming text and refuse to act on suspicious instructions\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+      "links": [
+        {
+          "label": "docs/01-problem-analysis.md",
+          "url": "docs/01-problem-analysis.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "docs/01-problem-analysis.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8c22639c",
+      "intent": "code_docs_01_problem_analysis_md_6_what_this_means_for_the_rest_of_the_project",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 6. What this means for the rest of the project do in docs/01-problem-analysis.md?",
+      "shortAnswer": "- Step 2 will examine **Terminal 3** specifically: how `http-with-placeholders` actually performs the in-enclave substitution, how secrets get into the enclave in the first place, and which T3 API cal",
+      "longAnswer": "- Step 2 will examine **Terminal 3** specifically: how `http-with-placeholders` actually performs the in-enclave substitution, how secrets get into the enclave in the first place, and which T3 API cal\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/01-problem-analysis.md`",
+      "links": [
+        {
+          "label": "docs/01-problem-analysis.md",
+          "url": "docs/01-problem-analysis.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "docs/01-problem-analysis.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-54f8acca",
+      "intent": "code_docs_05_compatibility_md_05_compatibility_where_blindfold_works_and_where_i",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 05 — Compatibility: Where Blindfold Works (and Where It Doesn't) do in docs/05-compatibility.md?",
+      "shortAnswer": "> The short version: Blindfold protects **any tool that lets you set a base URL and uses a user-supplied API key**",
+      "longAnswer": "> The short version: Blindfold protects **any tool that lets you set a base URL and uses a user-supplied API key**\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `docs/05-compatibility.md`",
+      "links": [
+        {
+          "label": "docs/05-compatibility.md",
+          "url": "docs/05-compatibility.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "docs/05-compatibility.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-639e99e2",
+      "intent": "code_readme_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exa",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 📖 &nbsp; **[Home](README.md)** &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in README.md?",
+      "shortAnswer": "</div>",
+      "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `README.md`",
+      "links": [
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "README.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5f804d79",
+      "intent": "code_faq_md__blindfold_faq",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ❓ Blindfold FAQ do in FAQ.md?",
+      "shortAnswer": "> **What's new (v0",
+      "longAnswer": "> **What's new (v0\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `FAQ.md`",
+      "links": [
+        {
+          "label": "FAQ.md",
+          "url": "FAQ.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "FAQ.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4af9d9ac",
+      "intent": "code_usage_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exam",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; **[Usage Guide](usage.md)** &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; [Teams](TEAMS.md) &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in usage.md?",
+      "shortAnswer": "</div>",
+      "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-18f42fd5",
+      "intent": "code_usage_md_command_reference_all_of_them_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Command reference (all of them) do in usage.md?",
+      "shortAnswer": "> Run any command with `blindfold <cmd>` (global install) or",
+      "longAnswer": "> Run any command with `blindfold <cmd>` (global install) or\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a0eef407",
+      "intent": "code_usage_md_install_any_os_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Install (any OS) do in usage.md?",
+      "shortAnswer": "```bash",
+      "longAnswer": "```bash\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-0c981596",
+      "intent": "code_usage_md_windows_notes",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Windows notes do in usage.md?",
+      "shortAnswer": "- The global install **auto-adds** `%APPDATA%\\npm` to your user PATH",
+      "longAnswer": "- The global install **auto-adds** `%APPDATA%\\npm` to your user PATH\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5fcc21c4",
+      "intent": "code_usage_md_terminal_2_hand_the_token_to_your_agent_every_request_must_carry_i",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does terminal 2 — hand the token to your agent; every request must carry it do in usage.md?",
+      "shortAnswer": "export BLINDFOLD_PROXY_TOKEN=<token>",
+      "longAnswer": "export BLINDFOLD_PROXY_TOKEN=<token>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-28fdca69",
+      "intent": "code_usage_md_call_it_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does call it: do in usage.md?",
+      "shortAnswer": "curl --unix-socket ~/",
+      "longAnswer": "curl --unix-socket ~/\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1bfb4c5d",
+      "intent": "code_usage_md_verify_the_enclave_before_you_trust_it_attest_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Verify the enclave before you trust it (`attest`) do in usage.md?",
+      "shortAnswer": "Don't just *trust* that Terminal 3 runs a genuine TDX enclave — **verify** it",
+      "longAnswer": "Don't just *trust* that Terminal 3 runs a genuine TDX enclave — **verify** it\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a3a96542",
+      "intent": "code_usage_md_tip_pin_it_next_time_blindfold_attest_expect_rtmr3_b6mn_adhhd_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Tip: pin it next time → blindfold attest --expect-rtmr3 B6mn+/ADHhD... do in usage.md?",
+      "shortAnswer": "```",
+      "longAnswer": "```\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4e98601b",
+      "intent": "code_usage_md_if_the_enclave_ever_changes_fails_the_command_aborts_before_sealin",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does if the enclave ever changes / fails: the command aborts before sealing. do in usage.md?",
+      "shortAnswer": "```",
+      "longAnswer": "```\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `usage.md`",
+      "links": [
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ba212abb",
+      "intent": "code_examples_md_see_also",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does See also do in EXAMPLES.md?",
+      "shortAnswer": "- **[Usage Guide](usage",
+      "longAnswer": "- **[Usage Guide](usage\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `EXAMPLES.md`",
+      "links": [
+        {
+          "label": "EXAMPLES.md",
+          "url": "EXAMPLES.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "EXAMPLES.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7ffddf16",
+      "intent": "code_contributing_md_chatbot",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Chatbot do in CONTRIBUTING.md?",
+      "shortAnswer": "npx tsx packages/chatbot/bin/chatbot",
+      "longAnswer": "npx tsx packages/chatbot/bin/chatbot\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+      "links": [
+        {
+          "label": "CONTRIBUTING.md",
+          "url": "CONTRIBUTING.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "CONTRIBUTING.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-2ceb74ab",
+      "intent": "code_contributing_md_add_a_chatbot_intent",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Add a chatbot intent do in CONTRIBUTING.md?",
+      "shortAnswer": "1",
+      "longAnswer": "1\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+      "links": [
+        {
+          "label": "CONTRIBUTING.md",
+          "url": "CONTRIBUTING.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "CONTRIBUTING.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-f452eadb",
+      "intent": "code_contributing_md_add_a_chatbot_kb_entry_hand_curated_",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Add a chatbot KB entry (hand-curated) do in CONTRIBUTING.md?",
+      "shortAnswer": "1",
+      "longAnswer": "1\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+      "links": [
+        {
+          "label": "CONTRIBUTING.md",
+          "url": "CONTRIBUTING.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "CONTRIBUTING.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4c8ab6ad",
+      "intent": "code_contributing_md_or_via_the_cli_wrapper",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Or via the CLI wrapper do in CONTRIBUTING.md?",
+      "shortAnswer": "npx tsx packages/chatbot/bin/chatbot",
+      "longAnswer": "npx tsx packages/chatbot/bin/chatbot\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+      "links": [
+        {
+          "label": "CONTRIBUTING.md",
+          "url": "CONTRIBUTING.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "CONTRIBUTING.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-49149385",
+      "intent": "code_contributing_md_before_you_open_a_pr",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does Before you open a PR do in CONTRIBUTING.md?",
+      "shortAnswer": "- [ ] `BLINDFOLD_MOCK=1 npm run test:report` → **9/9 ✅**",
+      "longAnswer": "- [ ] `BLINDFOLD_MOCK=1 npm run test:report` → **9/9 ✅**\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `CONTRIBUTING.md`",
+      "links": [
+        {
+          "label": "CONTRIBUTING.md",
+          "url": "CONTRIBUTING.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "CONTRIBUTING.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e1eb7e54",
+      "intent": "code_teams_md__blindfold_for_teams",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 👥 Blindfold for Teams do in TEAMS.md?",
+      "shortAnswer": "> **What's new (v0",
+      "longAnswer": "> **What's new (v0\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+      "links": [
+        {
+          "label": "TEAMS.md",
+          "url": "TEAMS.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "TEAMS.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7ad84567",
+      "intent": "code_teams_md__nbsp_home_readme_md_nbsp_nbsp_usage_guide_usage_md_nbsp_nbsp_exam",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does 📖 &nbsp; [Home](README.md) &nbsp;·&nbsp; [Usage Guide](usage.md) &nbsp;·&nbsp; [Examples](EXAMPLES.md) &nbsp;·&nbsp; **[Teams](TEAMS.md)** &nbsp;·&nbsp; [FAQ](FAQ.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) do in TEAMS.md?",
+      "shortAnswer": "</div>",
+      "longAnswer": "</div>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+      "links": [
+        {
+          "label": "TEAMS.md",
+          "url": "TEAMS.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "TEAMS.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-35f78a08",
+      "intent": "code_teams_md_see_also",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does See also do in TEAMS.md?",
+      "shortAnswer": "- **[Usage Guide](usage",
+      "longAnswer": "- **[Usage Guide](usage\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `TEAMS.md`",
+      "links": [
+        {
+          "label": "TEAMS.md",
+          "url": "TEAMS.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "TEAMS.md"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-704e40dd",
+      "intent": "code_packages_blindfold_src_attest_ts_attest_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does attest.ts do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "Auto-extracted summary for attest.ts.",
+      "longAnswer": "Auto-extracted summary for attest.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-486cb8a1",
+      "intent": "code_packages_blindfold_src_attest_ts_v",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does v do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const v = obj[PIN_FIELD];",
+      "longAnswer": "const v = obj[PIN_FIELD];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-f161d59c",
+      "intent": "code_packages_blindfold_src_attest_ts_cfg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cfg do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const cfg = configPath();",
+      "longAnswer": "const cfg = configPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d924ee57",
+      "intent": "code_packages_blindfold_src_attest_ts_attestsdk",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does AttestSdk do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "interface AttestSdk {",
+      "longAnswer": "interface AttestSdk {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-444e1baf",
+      "intent": "code_packages_blindfold_src_attest_ts_attestresult",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does AttestResult do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "export interface AttestResult {",
+      "longAnswer": "export interface AttestResult {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-3bea4558",
+      "intent": "code_packages_blindfold_src_attest_ts_attestopts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does AttestOpts do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "export interface AttestOpts {",
+      "longAnswer": "export interface AttestOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7eca6be0",
+      "intent": "code_packages_blindfold_src_attest_ts_loadattestsdk",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does loadAttestSdk do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "async function loadAttestSdk(): Promise<AttestSdk> {",
+      "longAnswer": "async function loadAttestSdk(): Promise<AttestSdk> {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d647b6ee",
+      "intent": "code_packages_blindfold_src_attest_ts_r",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does r do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const r = await sdk",
+      "longAnswer": "const r = await sdk\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-53728916",
+      "intent": "code_packages_blindfold_src_attest_ts_result",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does result do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const result: AttestResult = {",
+      "longAnswer": "const result: AttestResult = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-f85d7d13",
+      "intent": "code_packages_blindfold_src_attest_ts_gateresult",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does GateResult do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "export interface GateResult {",
+      "longAnswer": "export interface GateResult {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-16099c95",
+      "intent": "code_packages_blindfold_src_attest_ts_required",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does required do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const required = Boolean(pinned) || process",
+      "longAnswer": "const required = Boolean(pinned) || process\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d5ff3faa",
+      "intent": "code_packages_blindfold_src_attest_ts_warning",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does warning do in packages/blindfold/src/attest.ts?",
+      "shortAnswer": "const warning = ok && !pinned",
+      "longAnswer": "const warning = ok && !pinned\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/attest.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/attest.ts",
+          "url": "packages/blindfold/src/attest.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/attest.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-10b7a205",
+      "intent": "code_packages_blindfold_src_compat_ts_envline",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does envLine do in packages/blindfold/src/compat.ts?",
+      "shortAnswer": "const envLine = Object",
+      "longAnswer": "const envLine = Object\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/compat.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/compat.ts",
+          "url": "packages/blindfold/src/compat.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/compat.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-62a4ce3e",
+      "intent": "code_packages_blindfold_src_dashboard_ts_dashboard_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does dashboard.ts do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "Auto-extracted summary for dashboard.ts.",
+      "longAnswer": "Auto-extracted summary for dashboard.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-56cda0c5",
+      "intent": "code_packages_blindfold_src_dashboard_ts_svg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does svg do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "const svg = `<svg xmlns=\"http://www",
+      "longAnswer": "const svg = `<svg xmlns=\"http://www\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ca612b48",
+      "intent": "code_packages_blindfold_src_dashboard_ts_counters",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does counters do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "const counters: Record<string, number> = {};",
+      "longAnswer": "const counters: Record<string, number> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-34bd566d",
+      "intent": "code_packages_blindfold_src_dashboard_ts_chain",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does chain do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "const chain = verifyLedgerChain();",
+      "longAnswer": "const chain = verifyLedgerChain();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ca0f66ea",
+      "intent": "code_packages_blindfold_src_dashboard_ts_env_path",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ENV_PATH do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "const ENV_PATH = defaultEnvPath();",
+      "longAnswer": "const ENV_PATH = defaultEnvPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-3a740b29",
+      "intent": "code_packages_blindfold_src_dashboard_ts_html",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does HTML do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "const HTML = `<!DOCTYPE html>",
+      "longAnswer": "const HTML = `<!DOCTYPE html>\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-098a69bb",
+      "intent": "code_packages_blindfold_src_dashboard_ts_frame",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does frame do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "function frame(now){",
+      "longAnswer": "function frame(now){\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d2e45de9",
+      "intent": "code_packages_blindfold_src_dashboard_ts_renderdonut",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does renderDonut do in packages/blindfold/src/dashboard.ts?",
+      "shortAnswer": "function renderDonut(ev){",
+      "longAnswer": "function renderDonut(ev){\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/dashboard.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/dashboard.ts",
+          "url": "packages/blindfold/src/dashboard.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/dashboard.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8bbf590f",
+      "intent": "code_packages_blindfold_src_env_ts_env_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does env.ts do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "Auto-extracted summary for env.ts.",
+      "longAnswer": "Auto-extracted summary for env.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b7711cd0",
+      "intent": "code_packages_blindfold_src_env_ts_src_relative_root",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does SRC_RELATIVE_ROOT do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const SRC_RELATIVE_ROOT = path",
+      "longAnswer": "const SRC_RELATIVE_ROOT = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-3ef7e423",
+      "intent": "code_packages_blindfold_src_env_ts_reporoot",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does repoRoot do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "export function repoRoot(): string {",
+      "longAnswer": "export function repoRoot(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8537392c",
+      "intent": "code_packages_blindfold_src_env_ts_parent",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does parent do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const parent = path",
+      "longAnswer": "const parent = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1ae01643",
+      "intent": "code_packages_blindfold_src_env_ts_configpath",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does configPath do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "export function configPath(): string {",
+      "longAnswer": "export function configPath(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d0500f10",
+      "intent": "code_packages_blindfold_src_env_ts_legacy",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does legacy do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const legacy = path",
+      "longAnswer": "const legacy = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-19d8fc06",
+      "intent": "code_packages_blindfold_src_env_ts_islocal",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does isLocal do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const isLocal = [\"localhost\", \"127",
+      "longAnswer": "const isLocal = [\"localhost\", \"127\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e4e2323c",
+      "intent": "code_packages_blindfold_src_env_ts_fd",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does fd do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const fd = fs",
+      "longAnswer": "const fd = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-de068120",
+      "intent": "code_packages_blindfold_src_env_ts_st",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does st do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const st = fs",
+      "longAnswer": "const st = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a1102c8e",
+      "intent": "code_packages_blindfold_src_env_ts_obj",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does obj do in packages/blindfold/src/env.ts?",
+      "shortAnswer": "const obj = JSON",
+      "longAnswer": "const obj = JSON\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/env.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/env.ts",
+          "url": "packages/blindfold/src/env.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/env.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4291afc8",
+      "intent": "code_packages_blindfold_src_init_ts_v",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does v do in packages/blindfold/src/init.ts?",
+      "shortAnswer": "const v = await ask(prompt);",
+      "longAnswer": "const v = await ask(prompt);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/init.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/init.ts",
+          "url": "packages/blindfold/src/init.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/init.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8a313ad8",
+      "intent": "code_packages_blindfold_src_keychain_ts_keychain_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does keychain.ts do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "Auto-extracted summary for keychain.ts.",
+      "longAnswer": "Auto-extracted summary for keychain.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a0650585",
+      "intent": "code_packages_blindfold_src_keychain_ts_r",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does r do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "const r = spawnSync(finder, [cmd], { stdio: \"ignore\" });",
+      "longAnswer": "const r = spawnSync(finder, [cmd], { stdio: \"ignore\" });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4484b16b",
+      "intent": "code_packages_blindfold_src_keychain_ts_win_cs",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does WIN_CS do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "const WIN_CS = `",
+      "longAnswer": "const WIN_CS = `\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9d4e79fc",
+      "intent": "code_packages_blindfold_src_keychain_ts_winps",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does winPS do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "function winPS(op: \"set\" | \"get\" | \"delete\", target: string, secret?: string): { status: number | null; stdout: string } {",
+      "longAnswer": "function winPS(op: \"set\" | \"get\" | \"delete\", target: string, secret?: string): { status: number | null; stdout: string } {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-2cec4468",
+      "intent": "code_packages_blindfold_src_keychain_ts_keychainavailable",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does keychainAvailable do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "export function keychainAvailable(): boolean {",
+      "longAnswer": "export function keychainAvailable(): boolean {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1a3bc09d",
+      "intent": "code_packages_blindfold_src_keychain_ts_keychainbackend",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does keychainBackend do in packages/blindfold/src/keychain.ts?",
+      "shortAnswer": "export function keychainBackend(): string {",
+      "longAnswer": "export function keychainBackend(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/keychain.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/keychain.ts",
+          "url": "packages/blindfold/src/keychain.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/keychain.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-23098c3f",
+      "intent": "code_packages_blindfold_src_migrate_ts_eq",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does eq do in packages/blindfold/src/migrate.ts?",
+      "shortAnswer": "const eq = line",
+      "longAnswer": "const eq = line\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/migrate.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/migrate.ts",
+          "url": "packages/blindfold/src/migrate.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/migrate.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5bd20aab",
+      "intent": "code_packages_blindfold_src_migrate_ts_key",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does key do in packages/blindfold/src/migrate.ts?",
+      "shortAnswer": "const key = eq > 0 ? raw",
+      "longAnswer": "const key = eq > 0 ? raw\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/migrate.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/migrate.ts",
+          "url": "packages/blindfold/src/migrate.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/migrate.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e949444a",
+      "intent": "code_packages_blindfold_src_prompt_ts_readoneline",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does readOneLine do in packages/blindfold/src/prompt.ts?",
+      "shortAnswer": "function readOneLine(stdin: NodeJS",
+      "longAnswer": "function readOneLine(stdin: NodeJS\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/prompt.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/prompt.ts",
+          "url": "packages/blindfold/src/prompt.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/prompt.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b11c0af0",
+      "intent": "code_packages_blindfold_src_providers_ts_providers_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does providers.ts do in packages/blindfold/src/providers.ts?",
+      "shortAnswer": "Auto-extracted summary for providers.ts.",
+      "longAnswer": "Auto-extracted summary for providers.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/providers.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/providers.ts",
+          "url": "packages/blindfold/src/providers.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/providers.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5f7727f1",
+      "intent": "code_packages_blindfold_src_providers_ts_forwardauth",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ForwardAuth do in packages/blindfold/src/providers.ts?",
+      "shortAnswer": "export type ForwardAuth =",
+      "longAnswer": "export type ForwardAuth =\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/providers.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/providers.ts",
+          "url": "packages/blindfold/src/providers.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/providers.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7f07668b",
+      "intent": "code_packages_blindfold_src_proxy_ts_proxy_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does proxy.ts do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "Auto-extracted summary for proxy.ts.",
+      "longAnswer": "Auto-extracted summary for proxy.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-fe416937",
+      "intent": "code_packages_blindfold_src_proxy_ts_proxyopts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ProxyOpts do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "export interface ProxyOpts {",
+      "longAnswer": "export interface ProxyOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-44aa921c",
+      "intent": "code_packages_blindfold_src_proxy_ts_proxyhandle",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ProxyHandle do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "export interface ProxyHandle {",
+      "longAnswer": "export interface ProxyHandle {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-6287b1ce",
+      "intent": "code_packages_blindfold_src_proxy_ts_socketpath",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does socketPath do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const socketPath = opts",
+      "longAnswer": "const socketPath = opts\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4ecadeb1",
+      "intent": "code_packages_blindfold_src_proxy_ts_server",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does server do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const server = http",
+      "longAnswer": "const server = http\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-742f7479",
+      "intent": "code_packages_blindfold_src_proxy_ts_onlistening",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does onListening do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const onListening = () => {",
+      "longAnswer": "const onListening = () => {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-def8985f",
+      "intent": "code_packages_blindfold_src_proxy_ts_handle",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does handle do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "async function handle(",
+      "longAnswer": "async function handle(\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-3fa520e7",
+      "intent": "code_packages_blindfold_src_proxy_ts_provided",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does provided do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const provided = String(req",
+      "longAnswer": "const provided = String(req\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-93d1a6fc",
+      "intent": "code_packages_blindfold_src_proxy_ts_startedat",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does startedAt do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const startedAt = Date",
+      "longAnswer": "const startedAt = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-133966a1",
+      "intent": "code_packages_blindfold_src_proxy_ts_latency",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does latency do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const latency = Date",
+      "longAnswer": "const latency = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8b54eca3",
+      "intent": "code_packages_blindfold_src_proxy_ts_arm",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does arm do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const arm = () => {",
+      "longAnswer": "const arm = () => {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-0b526b62",
+      "intent": "code_packages_blindfold_src_proxy_ts_out",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does out do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const out: Record<string, string> = {};",
+      "longAnswer": "const out: Record<string, string> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1e505d07",
+      "intent": "code_packages_blindfold_src_proxy_ts_msg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does msg do in packages/blindfold/src/proxy.ts?",
+      "shortAnswer": "const msg = err?",
+      "longAnswer": "const msg = err?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/proxy.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/proxy.ts",
+          "url": "packages/blindfold/src/proxy.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/proxy.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-41fd5092",
+      "intent": "code_packages_blindfold_src_release_ts_release_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does release.ts do in packages/blindfold/src/release.ts?",
+      "shortAnswer": "Auto-extracted summary for release.ts.",
+      "longAnswer": "Auto-extracted summary for release.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/release.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/release.ts",
+          "url": "packages/blindfold/src/release.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/release.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d7087a1d",
+      "intent": "code_packages_blindfold_src_release_ts_key",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does key do in packages/blindfold/src/release.ts?",
+      "shortAnswer": "const key = `${env",
+      "longAnswer": "const key = `${env\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/release.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/release.ts",
+          "url": "packages/blindfold/src/release.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/release.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-23a0e5c6",
+      "intent": "code_packages_blindfold_src_sealed_ledger_ts_sealed_ledger_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does sealed-ledger.ts do in packages/blindfold/src/sealed-ledger.ts?",
+      "shortAnswer": "Auto-extracted summary for sealed-ledger.ts.",
+      "longAnswer": "Auto-extracted summary for sealed-ledger.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/sealed-ledger.ts",
+          "url": "packages/blindfold/src/sealed-ledger.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/sealed-ledger.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-53baffeb",
+      "intent": "code_packages_blindfold_src_sealed_ledger_ts_defaultsealedlogpath",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does defaultSealedLogPath do in packages/blindfold/src/sealed-ledger.ts?",
+      "shortAnswer": "export function defaultSealedLogPath(): string {",
+      "longAnswer": "export function defaultSealedLogPath(): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/sealed-ledger.ts",
+          "url": "packages/blindfold/src/sealed-ledger.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/sealed-ledger.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-f08bc552",
+      "intent": "code_packages_blindfold_src_sealed_ledger_ts_key",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does key do in packages/blindfold/src/sealed-ledger.ts?",
+      "shortAnswer": "const key = randomBytes(32);",
+      "longAnswer": "const key = randomBytes(32);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/sealed-ledger.ts",
+          "url": "packages/blindfold/src/sealed-ledger.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/sealed-ledger.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-550597b8",
+      "intent": "code_packages_blindfold_src_sealed_ledger_ts_chained",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does chained do in packages/blindfold/src/sealed-ledger.ts?",
+      "shortAnswer": "const chained: SealedEntry = {",
+      "longAnswer": "const chained: SealedEntry = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/sealed-ledger.ts",
+          "url": "packages/blindfold/src/sealed-ledger.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/sealed-ledger.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-64cacf92",
+      "intent": "code_packages_blindfold_src_sealed_ledger_ts_expected",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does expected do in packages/blindfold/src/sealed-ledger.ts?",
+      "shortAnswer": "const expected = key ? createHmac(\"sha256\", key)",
+      "longAnswer": "const expected = key ? createHmac(\"sha256\", key)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/sealed-ledger.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/sealed-ledger.ts",
+          "url": "packages/blindfold/src/sealed-ledger.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/sealed-ledger.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-55739c97",
+      "intent": "code_packages_blindfold_src_t3_client_ts_t3_client_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does t3-client.ts do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "Auto-extracted summary for t3-client.ts.",
+      "longAnswer": "Auto-extracted summary for t3-client.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1ddf7202",
+      "intent": "code_packages_blindfold_src_t3_client_ts_timer",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does timer do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);",
+      "longAnswer": "const timer = setTimeout(() => reject(new T3TimeoutError(`T3 ${label} timed out after ${ms}ms`)), ms);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-805d4a59",
+      "intent": "code_packages_blindfold_src_t3_client_ts_p",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does p do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const p = egressCachePath();",
+      "longAnswer": "const p = egressCachePath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-225df1a3",
+      "intent": "code_packages_blindfold_src_t3_client_ts_existing",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does existing do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const existing = Array",
+      "longAnswer": "const existing = Array\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-94280a5e",
+      "intent": "code_packages_blindfold_src_t3_client_ts_t3sdk",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does T3Sdk do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "export interface T3Sdk {",
+      "longAnswer": "export interface T3Sdk {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-cb53ad33",
+      "intent": "code_packages_blindfold_src_t3_client_ts_raw",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does raw do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const raw = (await withDeadline(tenant",
+      "longAnswer": "const raw = (await withDeadline(tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-21b01f6b",
+      "intent": "code_packages_blindfold_src_t3_client_ts_r",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does r do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const r = (await withDeadline(tenant",
+      "longAnswer": "const r = (await withDeadline(tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a3969252",
+      "intent": "code_packages_blindfold_src_t3_client_ts_direct",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does direct do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const direct = decodeSecret(",
+      "longAnswer": "const direct = decodeSecret(\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9c0ed903",
+      "intent": "code_packages_blindfold_src_t3_client_ts_u",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does u do in packages/blindfold/src/t3-client.ts?",
+      "shortAnswer": "const u = new URL(url);",
+      "longAnswer": "const u = new URL(url);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/t3-client.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ce6564f4",
+      "intent": "code_packages_blindfold_src_usage_log_ts_usage_log_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does usage-log.ts do in packages/blindfold/src/usage-log.ts?",
+      "shortAnswer": "Auto-extracted summary for usage-log.ts.",
+      "longAnswer": "Auto-extracted summary for usage-log.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/usage-log.ts",
+          "url": "packages/blindfold/src/usage-log.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/usage-log.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-c087b5e1",
+      "intent": "code_packages_blindfold_src_usage_log_ts_size",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does size do in packages/blindfold/src/usage-log.ts?",
+      "shortAnswer": "const size = fs",
+      "longAnswer": "const size = fs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/usage-log.ts",
+          "url": "packages/blindfold/src/usage-log.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/usage-log.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7e14e3a1",
+      "intent": "code_packages_blindfold_src_usage_log_ts_dir",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does dir do in packages/blindfold/src/usage-log.ts?",
+      "shortAnswer": "const dir = path",
+      "longAnswer": "const dir = path\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/usage-log.ts",
+          "url": "packages/blindfold/src/usage-log.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/usage-log.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-50add5e2",
+      "intent": "code_packages_blindfold_src_usage_log_ts_events",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does events do in packages/blindfold/src/usage-log.ts?",
+      "shortAnswer": "const events = text",
+      "longAnswer": "const events = text\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/usage-log.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/usage-log.ts",
+          "url": "packages/blindfold/src/usage-log.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/usage-log.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7d7d3c04",
+      "intent": "code_packages_blindfold_src_versions_ts_versions_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does versions.ts do in packages/blindfold/src/versions.ts?",
+      "shortAnswer": "Auto-extracted summary for versions.ts.",
+      "longAnswer": "Auto-extracted summary for versions.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/versions.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/versions.ts",
+          "url": "packages/blindfold/src/versions.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/versions.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-52103acd",
+      "intent": "code_packages_blindfold_src_versions_ts_versionkeyfor",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does versionKeyFor do in packages/blindfold/src/versions.ts?",
+      "shortAnswer": "export function versionKeyFor(name: string, stampMs: number): string {",
+      "longAnswer": "export function versionKeyFor(name: string, stampMs: number): string {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/versions.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/versions.ts",
+          "url": "packages/blindfold/src/versions.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/versions.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b21fddd2",
+      "intent": "code_packages_blindfold_src_wrap_ts_wrap_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does wrap.ts do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "Auto-extracted summary for wrap.ts.",
+      "longAnswer": "Auto-extracted summary for wrap.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-39914873",
+      "intent": "code_packages_blindfold_src_wrap_ts_wrapopts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does WrapOpts do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "export interface WrapOpts {",
+      "longAnswer": "export interface WrapOpts {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1bfc2ed5",
+      "intent": "code_packages_blindfold_src_wrap_ts_proxy_token_header",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does PROXY_TOKEN_HEADER do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "const PROXY_TOKEN_HEADER = \"x-blindfold-token\";",
+      "longAnswer": "const PROXY_TOKEN_HEADER = \"x-blindfold-token\";\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-df6ea80a",
+      "intent": "code_packages_blindfold_src_wrap_ts_respheaders",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does respHeaders do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "const respHeaders = new Headers();",
+      "longAnswer": "const respHeaders = new Headers();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-36e96f7f",
+      "intent": "code_packages_blindfold_src_wrap_ts_body",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does body do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "const body = init?",
+      "longAnswer": "const body = init?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-6f463202",
+      "intent": "code_packages_blindfold_src_wrap_ts_socket",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does socket do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "const socket = (opts",
+      "longAnswer": "const socket = (opts\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9095e246",
+      "intent": "code_packages_blindfold_src_wrap_ts_headers",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does headers do in packages/blindfold/src/wrap.ts?",
+      "shortAnswer": "const headers = new Headers(init?",
+      "longAnswer": "const headers = new Headers(init?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/src/wrap.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/src/wrap.ts",
+          "url": "packages/blindfold/src/wrap.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/wrap.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4d8980fc",
+      "intent": "code_packages_blindfold_bin_blindfold_ts_blindfold_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does blindfold.ts do in packages/blindfold/bin/blindfold.ts?",
+      "shortAnswer": "Auto-extracted summary for blindfold.ts.",
+      "longAnswer": "Auto-extracted summary for blindfold.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/blindfold.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/blindfold.ts",
+          "url": "packages/blindfold/bin/blindfold.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/blindfold.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9c4c8f12",
+      "intent": "code_packages_blindfold_bin_blindfold_ts_routes",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does ROUTES do in packages/blindfold/bin/blindfold.ts?",
+      "shortAnswer": "const ROUTES: Record<string, Handler> = {",
+      "longAnswer": "const ROUTES: Record<string, Handler> = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/blindfold.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/blindfold.ts",
+          "url": "packages/blindfold/bin/blindfold.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/blindfold.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-8bc8662f",
+      "intent": "code_packages_blindfold_bin_cli_shared_ts_cli_shared_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cli-shared.ts do in packages/blindfold/bin/cli-shared.ts?",
+      "shortAnswer": "Auto-extracted summary for cli-shared.ts.",
+      "longAnswer": "Auto-extracted summary for cli-shared.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cli-shared.ts",
+          "url": "packages/blindfold/bin/cli-shared.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cli-shared.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a015fb39",
+      "intent": "code_packages_blindfold_bin_cli_shared_ts_next",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does next do in packages/blindfold/bin/cli-shared.ts?",
+      "shortAnswer": "const next = argv[i + 1];",
+      "longAnswer": "const next = argv[i + 1];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cli-shared.ts",
+          "url": "packages/blindfold/bin/cli-shared.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cli-shared.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-28fc6e69",
+      "intent": "code_packages_blindfold_bin_cli_shared_ts_tool_env",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does TOOL_ENV do in packages/blindfold/bin/cli-shared.ts?",
+      "shortAnswer": "const TOOL_ENV: Record<string, string> = {",
+      "longAnswer": "const TOOL_ENV: Record<string, string> = {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cli-shared.ts",
+          "url": "packages/blindfold/bin/cli-shared.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cli-shared.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-997a0ae2",
+      "intent": "code_packages_blindfold_bin_cli_shared_ts_die",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does die do in packages/blindfold/bin/cli-shared.ts?",
+      "shortAnswer": "export function die(msg: string): never {",
+      "longAnswer": "export function die(msg: string): never {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cli-shared.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cli-shared.ts",
+          "url": "packages/blindfold/bin/cli-shared.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cli-shared.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1770db50",
+      "intent": "code_packages_blindfold_bin_cmd_auth_ts_cmd_auth_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-auth.ts do in packages/blindfold/bin/cmd-auth.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-auth.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-auth.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5ebee881",
+      "intent": "code_packages_blindfold_bin_cmd_auth_ts_cfg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cfg do in packages/blindfold/bin/cmd-auth.ts?",
+      "shortAnswer": "const cfg = configPath();",
+      "longAnswer": "const cfg = configPath();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-c9083ee9",
+      "intent": "code_packages_blindfold_bin_cmd_auth_ts_inkeychain",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does inKeychain do in packages/blindfold/bin/cmd-auth.ts?",
+      "shortAnswer": "const inKeychain = triedKeychain && keychainSet(did, key);",
+      "longAnswer": "const inKeychain = triedKeychain && keychainSet(did, key);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-0c727d48",
+      "intent": "code_packages_blindfold_bin_cmd_auth_ts_keysource",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does keySource do in packages/blindfold/bin/cmd-auth.ts?",
+      "shortAnswer": "const keySource = !env",
+      "longAnswer": "const keySource = !env\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-auth.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-3f00f080",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_cmd_enclave_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-enclave.ts do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-enclave.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-enclave.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-2fbcd7d8",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_seedarr",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does seedArr do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const seedArr = Array",
+      "longAnswer": "const seedArr = Array\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-0cf93fd9",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_entries",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does entries do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const entries = readSealed();",
+      "longAnswer": "const entries = readSealed();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b2a65a72",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_where",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does where do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const where = e",
+      "longAnswer": "const where = e\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-555fe072",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_latest",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does latest do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const latest = new Map<string, (typeof realEntries)[number]>();",
+      "longAnswer": "const latest = new Map<string, (typeof realEntries)[number]>();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-bd2c2b6a",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_v",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does v do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const v = await client",
+      "longAnswer": "const v = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-537b50ff",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_info",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does info do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const info = await client",
+      "longAnswer": "const info = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-90971799",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_env",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does env do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const env = loadBlindfoldEnv();",
+      "longAnswer": "const env = loadBlindfoldEnv();\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-70718557",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_mehex",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does meHex do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const meHex = info",
+      "longAnswer": "const meHex = info\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9ee17e3b",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_msg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does msg do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const msg = (e as Error)",
+      "longAnswer": "const msg = (e as Error)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e0f0ded3",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_all",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does all do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const all = !!argv",
+      "longAnswer": "const all = !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ea1eae08",
+      "intent": "code_packages_blindfold_bin_cmd_enclave_ts_locations",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does locations do in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "const locations = [",
+      "longAnswer": "const locations = [\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-enclave.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9f720e84",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_cmd_lifecycle_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-lifecycle.ts do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-lifecycle.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-lifecycle.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-616caf77",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_vkey",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does vKey do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const vKey = versionKeyFor(name, Date",
+      "longAnswer": "const vKey = versionKeyFor(name, Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-d4bc8547",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_now",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does now do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const now = await client",
+      "longAnswer": "const now = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-7d1aa9be",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_sel",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does sel do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const sel = versions",
+      "longAnswer": "const sel = versions\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e9f8c7f3",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_restored",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does restored do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const restored = await client",
+      "longAnswer": "const restored = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-70e17719",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_list",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does list do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const list = readVersions(name);",
+      "longAnswer": "const list = readVersions(name);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9ef45c92",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_when",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does when do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const when = v",
+      "longAnswer": "const when = v\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ca72f617",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_toseal",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does toSeal do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const toSeal = plan",
+      "longAnswer": "const toSeal = plan\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-48a74721",
+      "intent": "code_packages_blindfold_bin_cmd_lifecycle_ts_results",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does results do in packages/blindfold/bin/cmd-lifecycle.ts?",
+      "shortAnswer": "const results = await runMigrate({ keep });",
+      "longAnswer": "const results = await runMigrate({ keep });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-lifecycle.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "url": "packages/blindfold/bin/cmd-lifecycle.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-lifecycle.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b10a78de",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_cmd_secrets_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-secrets.ts do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-secrets.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-secrets.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-e808b668",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_sealgate",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does sealGate do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const sealGate = await attestationGate({ skip: !!argv",
+      "longAnswer": "const sealGate = await attestationGate({ skip: !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-c91824b2",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_asvar",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does asVar do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const asVar = name",
+      "longAnswer": "const asVar = name\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-55c988b1",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_value",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does value do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const value = await release(name, { via: \"use\" }); // plaintext, kept local; never printed",
+      "longAnswer": "const value = await release(name, { via: \"use\" }); // plaintext, kept local; never printed\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-bf74b19f",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_islocal",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does isLocal do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const isLocal = [\"localhost\", \"127",
+      "longAnswer": "const isLocal = [\"localhost\", \"127\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-ab81bbec",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_res",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does res do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const res = await fetch(url, {",
+      "longAnswer": "const res = await fetch(url, {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5aa71da1",
+      "intent": "code_packages_blindfold_bin_cmd_secrets_ts_child",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does child do in packages/blindfold/bin/cmd-secrets.ts?",
+      "shortAnswer": "const child = spawn(cmdArgs[0]!, cmdArgs",
+      "longAnswer": "const child = spawn(cmdArgs[0]!, cmdArgs\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-secrets.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-secrets.ts",
+          "url": "packages/blindfold/bin/cmd-secrets.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-secrets.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-1d8ddc2f",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_cmd_serve_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-serve.ts do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-serve.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-serve.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a215c949",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_secret",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does secret do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const secret = argv",
+      "longAnswer": "const secret = argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-5e9c468b",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_proxygate",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does proxyGate do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const proxyGate = await attestationGate({ skip: !!argv",
+      "longAnswer": "const proxyGate = await attestationGate({ skip: !!argv\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-4542b355",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_handle",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does handle do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const handle = await startProxy({ port, secretKey: secret, token, socket });",
+      "longAnswer": "const handle = await startProxy({ port, secretKey: secret, token, socket });\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-922313bb",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_r",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does r do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const r = await attest({ expectRtmr3, noCache: true }); // CLI check is always fresh",
+      "longAnswer": "const r = await attest({ expectRtmr3, noCache: true }); // CLI check is always fresh\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-b42dbd70",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_topin",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does toPin do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const toPin = expectRtmr3 ?? r",
+      "longAnswer": "const toPin = expectRtmr3 ?? r\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-20eea985",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_byprovider",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does byProvider do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const byProvider: Record<string, number> = {};",
+      "longAnswer": "const byProvider: Record<string, number> = {};\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-44cf4848",
+      "intent": "code_packages_blindfold_bin_cmd_serve_ts_total",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does total do in packages/blindfold/bin/cmd-serve.ts?",
+      "shortAnswer": "const total = events",
+      "longAnswer": "const total = events\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-serve.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-serve.ts",
+          "url": "packages/blindfold/bin/cmd-serve.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-serve.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-52bc4943",
+      "intent": "code_packages_blindfold_bin_cmd_tenant_ts_cmd_tenant_ts",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does cmd-tenant.ts do in packages/blindfold/bin/cmd-tenant.ts?",
+      "shortAnswer": "Auto-extracted summary for cmd-tenant.ts.",
+      "longAnswer": "Auto-extracted summary for cmd-tenant.ts.\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-tenant.ts",
+          "url": "packages/blindfold/bin/cmd-tenant.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-tenant.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-218c34b3",
+      "intent": "code_packages_blindfold_bin_cmd_tenant_ts_authorized",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does authorized do in packages/blindfold/bin/cmd-tenant.ts?",
+      "shortAnswer": "const authorized = await client",
+      "longAnswer": "const authorized = await client\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-tenant.ts",
+          "url": "packages/blindfold/bin/cmd-tenant.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-tenant.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a157e9f8",
+      "intent": "code_packages_blindfold_bin_cmd_tenant_ts_client",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does client do in packages/blindfold/bin/cmd-tenant.ts?",
+      "shortAnswer": "const client = await openT3Client(env);",
+      "longAnswer": "const client = await openT3Client(env);\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `packages/blindfold/bin/cmd-tenant.ts`",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-tenant.ts",
+          "url": "packages/blindfold/bin/cmd-tenant.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-tenant.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-9c8ac977",
+      "intent": "code_contract_src_auth_rs_base64_std",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does base64_std do in contract/src/auth.rs?",
+      "shortAnswer": "pub fn base64_std(input: &[u8]) -> String {",
+      "longAnswer": "pub fn base64_std(input: &[u8]) -> String {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/auth.rs`",
+      "links": [
+        {
+          "label": "contract/src/auth.rs",
+          "url": "contract/src/auth.rs",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "contract/src/auth.rs"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-89fd97a1",
+      "intent": "code_contract_src_auth_rs_base64_matches_known_values",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does base64_matches_known_values do in contract/src/auth.rs?",
+      "shortAnswer": "fn base64_matches_known_values() {",
+      "longAnswer": "fn base64_matches_known_values() {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/auth.rs`",
+      "links": [
+        {
+          "label": "contract/src/auth.rs",
+          "url": "contract/src/auth.rs",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "contract/src/auth.rs"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a81d1f27",
+      "intent": "code_contract_src_forward_rs_build_headers",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does build_headers do in contract/src/forward.rs?",
+      "shortAnswer": "fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, String)>, String> {",
+      "longAnswer": "fn build_headers(input: &ForwardInput, secret: &str) -> Result<Vec<(String, String)>, String> {\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `contract/src/forward.rs`",
+      "links": [
+        {
+          "label": "contract/src/forward.rs",
+          "url": "contract/src/forward.rs",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "contract/src/forward.rs"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-381ff172",
+      "intent": "code_scripts_demo_smtp_ts_transporter",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does transporter do in scripts/demo-smtp.ts?",
+      "shortAnswer": "const transporter = nodemailer",
+      "longAnswer": "const transporter = nodemailer\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/demo-smtp.ts`",
+      "links": [
+        {
+          "label": "scripts/demo-smtp.ts",
+          "url": "scripts/demo-smtp.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/demo-smtp.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-c0055489",
+      "intent": "code_scripts_demo_smtp_ts_info",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does info do in scripts/demo-smtp.ts?",
+      "shortAnswer": "const info = await transporter",
+      "longAnswer": "const info = await transporter\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/demo-smtp.ts`",
+      "links": [
+        {
+          "label": "scripts/demo-smtp.ts",
+          "url": "scripts/demo-smtp.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/demo-smtp.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-664f33e7",
+      "intent": "code_scripts_grant_egress_ts_msg",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does msg do in scripts/grant-egress.ts?",
+      "shortAnswer": "const msg = (e as Error)",
+      "longAnswer": "const msg = (e as Error)\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/grant-egress.ts`",
+      "links": [
+        {
+          "label": "scripts/grant-egress.ts",
+          "url": "scripts/grant-egress.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/grant-egress.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-23fde231",
+      "intent": "code_scripts_init_tenant_ts_r",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does r do in scripts/init-tenant.ts?",
+      "shortAnswer": "const r = await tenant",
+      "longAnswer": "const r = await tenant\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/init-tenant.ts`",
+      "links": [
+        {
+          "label": "scripts/init-tenant.ts",
+          "url": "scripts/init-tenant.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/init-tenant.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-f09e9d08",
+      "intent": "code_scripts_run_tests_ts_deadline",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does deadline do in scripts/run-tests.ts?",
+      "shortAnswer": "const deadline = Date",
+      "longAnswer": "const deadline = Date\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+      "links": [
+        {
+          "label": "scripts/run-tests.ts",
+          "url": "scripts/run-tests.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/run-tests.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-076e2da3",
+      "intent": "code_scripts_run_tests_ts_chunks",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does chunks do in scripts/run-tests.ts?",
+      "shortAnswer": "const chunks: Buffer[] = [];",
+      "longAnswer": "const chunks: Buffer[] = [];\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+      "links": [
+        {
+          "label": "scripts/run-tests.ts",
+          "url": "scripts/run-tests.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/run-tests.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-eadddfab",
+      "intent": "code_scripts_run_tests_ts_req",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does req do in scripts/run-tests.ts?",
+      "shortAnswer": "const req = http",
+      "longAnswer": "const req = http\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+      "links": [
+        {
+          "label": "scripts/run-tests.ts",
+          "url": "scripts/run-tests.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/run-tests.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-85a50c24",
+      "intent": "code_scripts_run_tests_ts_block",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does block do in scripts/run-tests.ts?",
+      "shortAnswer": "const block = [",
+      "longAnswer": "const block = [\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/run-tests.ts`",
+      "links": [
+        {
+          "label": "scripts/run-tests.ts",
+          "url": "scripts/run-tests.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/run-tests.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-extracted-a7a66f91",
+      "intent": "code_scripts_seal_via_working_key_ts_len",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "What does len do in scripts/seal-via-working-key.ts?",
+      "shortAnswer": "const len = got?",
+      "longAnswer": "const len = got?\n\nThis is an auto-extracted stub from the mock summariser. Run the extractor with a real API key to populate richer content.\n\nSource: `scripts/seal-via-working-key.ts`",
+      "links": [
+        {
+          "label": "scripts/seal-via-working-key.ts",
+          "url": "scripts/seal-via-working-key.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "scripts/seal-via-working-key.ts"
+      ],
+      "confidence": 0.5,
+      "lastVerified": "2026-07-11"
+    },
+    {
+      "id": "kb-signup-selfserve",
+      "intent": "signup_self_serve",
+      "audience": [
+        "user",
+        "founder",
+        "developer",
+        "enterprise",
+        "researcher",
+        "general"
+      ],
+      "question": "How do I get started with Blindfold / sign up / create a Terminal 3 tenant?",
+      "shortAnswer": "Onboarding is self-serve: `npm i -g @fiscalmindset/blindfold` then `blindfold signup --email you@example.com`. It generates your tenant key locally (stored in the OS keychain, never printed), verifies your email by an emailed code, and self-admits a funded Terminal 3 testnet tenant — no manual token claim.",
+      "longAnswer": "## Getting started (self-serve)\n\nBlindfold is published on npm and onboarding needs no manual credential claim:\n\n```bash\nnpm i -g @fiscalmindset/blindfold\nblindfold signup --email you@example.com\n```\n\nWhat `signup` does, all client-side except the Terminal 3 calls:\n\n1. **Generates a fresh tenant key locally** (a secp256k1 private key) and stores it in your OS keychain — it is never printed or transmitted.\n2. **Eth-authenticates** to Terminal 3, producing an eth-derived DID.\n3. **Verifies your email** — a one-time code is emailed to you; you type it in.\n4. **Self-admits a funded testnet tenant** (via the SDK's `becomeDevTenant`) and mints welcome credits (~20,000 tokens on the current testnet dial).\n\nThen confirm and start sealing:\n\n```bash\nblindfold doctor    # tenant shows active\nblindfold credit    # your token balance\nblindfold register --name openai_api_key   # seal your first secret\n```\n\n**Notes:** it's testnet-only today; one email binds to one tenant (Gmail `+aliases` like `you+blindfold@gmail.com` give fresh identities into the same inbox); if the email is already registered to a tenant, use `blindfold login` with that tenant's key instead.",
+      "links": [
+        {
+          "label": "npm: @fiscalmindset/blindfold",
+          "url": "https://www.npmjs.com/package/@fiscalmindset/blindfold",
+          "type": "url"
+        },
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts",
+        "README.md",
+        "process.md"
+      ],
+      "confidence": 0.97,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-install-npm",
+      "intent": "install_from_npm",
+      "audience": [
+        "user",
+        "founder",
+        "developer",
+        "enterprise",
+        "researcher",
+        "general"
+      ],
+      "question": "Is Blindfold on npm? How do I install it?",
+      "shortAnswer": "Yes — it's published as `@fiscalmindset/blindfold` (MIT). Install globally with `npm i -g @fiscalmindset/blindfold`, which gives you a `blindfold` command that runs from any directory.",
+      "longAnswer": "## Installing Blindfold\n\nBlindfold is published on npm as [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold) under the MIT license.\n\n```bash\nnpm i -g @fiscalmindset/blindfold\n```\n\nThat installs a global `blindfold` CLI (Node.js ≥ 18) that runs from any directory; its state lives in `~/.blindfold`, independent of any repo. Keep it current with `blindfold update`.\n\nThe scoped name matters: the bare npm name `blindfold` is an unrelated, deprecated package — always install the scoped `@fiscalmindset/blindfold`.\n\nAfter installing, get a tenant with `blindfold signup --email you@example.com` (self-serve) or `blindfold login` if you already have Terminal 3 credentials. The `@terminal3/t3n-sdk` dependency installs automatically for REAL mode; `BLINDFOLD_MOCK=1` gives a no-network mock for CI.",
+      "links": [
+        {
+          "label": "npm: @fiscalmindset/blindfold",
+          "url": "https://www.npmjs.com/package/@fiscalmindset/blindfold",
+          "type": "url"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/package.json",
+        "README.md"
+      ],
+      "confidence": 0.97,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-signup-vs-login",
+      "intent": "signup_vs_login",
+      "audience": [
+        "user",
+        "developer",
+        "general"
+      ],
+      "question": "What's the difference between `blindfold signup` and `blindfold login`?",
+      "shortAnswer": "`signup` creates a brand-new Terminal 3 testnet tenant for you (generates the key, verifies your email, mints credits). `login` stores credentials for a tenant you ALREADY have (you supply the DID + tenant key). New user → signup; existing credentials → login.",
+      "longAnswer": "## `signup` vs `login`\n\n- **`blindfold signup --email you@x.com`** — for a NEW user with no Terminal 3 tenant. It generates a fresh tenant key locally, eth-authenticates, verifies your email by an emailed code, and self-admits a funded testnet tenant (mints welcome credits). You end up with a working, funded tenant and nothing to paste.\n\n- **`blindfold login`** — for someone who ALREADY has Terminal 3 credentials (a DID + `T3N_API_KEY`, e.g. claimed manually or issued to you). It prompts for the DID and key (key hidden) and stores them — the key in the OS keychain, the DID + settings in `~/.blindfold/config.json`.\n\nBoth leave you able to run `blindfold doctor`, `register`, `use`, and `proxy`. Rule of thumb: no tenant yet → `signup`; you were handed credentials → `login`.",
+      "links": [
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.96,
+      "lastVerified": "2026-07-12"
     }
   ]
 }

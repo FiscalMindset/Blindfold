@@ -1,10 +1,13 @@
 # Blindfold — Current Status (as of 2026-06-28, real seal working)
 
-> **2026-07 update:** shipped v0.2 (installable, SSD-independent CLI — `npm i -g`,
-> state in `~/.blindfold`, runs from any directory), v0.3 (tenant key in the OS
-> keychain via `blindfold login`), a full security/scale hardening pass, and
-> Discord webhook support (release path + `/discord` proxy provider, contract
-> v0.5.5). CI is green. See `CHANGELOG.md` for the full list.
+> **2026-07 update:** shipped **v0.4 — published on npm** as
+> [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold)
+> with **self-serve onboarding** (`blindfold signup` mints a funded testnet tenant,
+> no manual token claim; verified live on a second machine). Earlier: v0.2
+> (installable, SSD-independent CLI — `npm i -g`, state in `~/.blindfold`), v0.3
+> (tenant key in the OS keychain via `blindfold login`), a full security/scale
+> hardening pass, and Discord webhook support (contract v0.5.5). CI is green. See
+> `CHANGELOG.md` for the full list.
 
 > Snapshot. Read top to bottom. §2 is the headline.
 >

@@ -2,7 +2,7 @@
 
 # ❓ Blindfold FAQ
 
-> **What's new (v0.2 / v0.3 + webhook):** installable global CLI (`npm i -g`, runs from any directory, state in `~/.blindfold`); `blindfold login` stores the tenant key in the **OS keychain** (not a plaintext file); Discord webhook support (release path + `/discord` proxy provider, contract v0.5.5). See `CHANGELOG.md`.
+> **What's new (v0.4):** **published on npm** as [`@fiscalmindset/blindfold`](https://www.npmjs.com/package/@fiscalmindset/blindfold), and **self-serve onboarding** — `blindfold signup --email you@x.com` mints a funded Terminal 3 testnet tenant with no manual token claim. Plus (v0.2/v0.3): installable global CLI (`npm i -g`, state in `~/.blindfold`); tenant key in the **OS keychain** via `blindfold login`; Discord webhook support (contract v0.5.5). See `CHANGELOG.md`.
 
 
 **Real questions, straight answers.** New here? Start with the first three.
