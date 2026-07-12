@@ -4,6 +4,21 @@
 
 ---
 
+## [0.4.1] — 2026-07-12 — Responsive terminal UI for `blindfold help`
+
+### Changed
+- **`blindfold help`** is now a structured, responsive terminal UI: commands
+  grouped into bordered, rounded boxes (Get started / Secrets / Proxy & serve /
+  Team & sharing / Enclave & admin / Account / Agent skill) with aligned columns
+  that reflow to the terminal width (emoji/CJK-aware so borders line up). A
+  banner box + a published-flow quick-start replace the flat command dump.
+- **Unknown commands** now print a concise error with a "did you mean …?"
+  suggestion (edit-distance) instead of dumping the whole help.
+- New dependency-free `src/tui.ts` (width detection, ANSI/width-aware wrapping,
+  boxes, command table, nearest-match).
+
+---
+
 ## [0.4.0] — 2026-07-12 — Self-serve onboarding + defense-in-depth + audit remediation
 
 ### Added

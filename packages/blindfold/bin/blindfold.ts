@@ -4,7 +4,8 @@
  * helpers in ./cli-shared.ts. Every action prints what it did, never a secret.
  */
 import { type Argv, parseArgv } from "./cli-shared.ts";
-import { c, head } from "../src/color.ts";
+import { c, bad } from "../src/color.ts";
+import { bannerBox, commandBox, nearest } from "../src/tui.ts";
 import { handleAuth } from "./cmd-auth.ts";
 import { handleSecrets } from "./cmd-secrets.ts";
 import { handleLifecycle } from "./cmd-lifecycle.ts";
@@ -36,52 +37,89 @@ async function main(): Promise<void> {
   const cmd = argv._[0] ?? "help";
   const handler = ROUTES[cmd];
   if (handler) await handler(cmd, argv, cmdArgs);
-  else printHelp();
+  else if (cmd === "help" || cmd === "--help" || cmd === "-h") printHelp();
+  else printUnknown(cmd);
+}
+
+/** Unknown command: a concise error with a "did you mean" suggestion — not the
+ *  full help dump (which used to appear on any typo). */
+function printUnknown(cmd: string): void {
+  const all = [...Object.keys(ROUTES), "help"];
+  const guess = nearest(cmd, all);
+  console.error(
+    bad(`✖ Unknown command: ${cmd}`) +
+    (guess ? `  ${c.gray("— did you mean")} ${c.cyan(guess)}${c.gray("?")}` : ""),
+  );
+  console.error(c.gray("  Run ") + c.cyan("blindfold help") + c.gray(" to see all commands."));
+  process.exit(1);
 }
 
 function printHelp(): void {
-  console.log(`${head("🛡️  Blindfold")} ${c.gray("— protect your AI agent's API keys with Terminal 3 enclaves.")}
+  const groups: Array<[string, Array<[string, string]>]> = [
+    ["🚀 Get started", [
+      ["signup", "Self-serve: mint a funded Terminal 3 testnet tenant (key generated locally, email-verified)."],
+      ["init", "Guided zero-knowledge setup: .env, build, auth, publish, seed; can auto-start the proxy."],
+      ["doctor", "Show mode + config and run a live tenant health check."],
+      ["credit", "Show the tenant's Terminal 3 token balance (costs nothing)."],
+      ["verify", "Handshake + authenticate against T3 (smoke test)."],
+    ]],
+    ["🔑 Secrets", [
+      ["register", "Seal a secret into the enclave (hidden prompt; never touches disk)."],
+      ["use", "Release a sealed secret into one command as $ENV — never back in your env."],
+      ["export", "CI: release a sealed secret into $GITHUB_ENV (masked in logs)."],
+      ["rotate", "Replace a sealed secret's value (snapshots the old one for rollback)."],
+      ["rollback", "Restore a previous value snapshotted by rotate."],
+      ["versions", "List the snapshots available to roll back to (metadata only)."],
+      ["migrate", "Seal every secret in .env at once, then remove the plaintext lines."],
+    ]],
+    ["🌐 Proxy & serve", [
+      ["proxy", "Run the local sentinel proxy. --auth mints a session token; --socket binds a 0600 unix socket."],
+      ["attest", "Verify the enclave's TDX attestation (Intel root CA). --pin gates seal/proxy on the code measurement."],
+      ["dashboard", "Live HTML dashboard of proxy usage (default :8799)."],
+      ["stats", "CLI summary of proxy usage (stats:clear wipes it)."],
+    ]],
+    ["👥 Team & sharing", [
+      ["grant", "Authorize the contract to call these hosts (e.g. --host api.openai.com)."],
+      ["share", "Let a teammate's agent USE your sealed keys for a host — forward only, no plaintext."],
+      ["revoke", "Remove a teammate's access — immediate and complete."],
+    ]],
+    ["📦 Enclave & admin", [
+      ["publish", "Publish the Rust→WASM contract to your tenant (one-time)."],
+      ["status", "One-glance: mode, tenant health, and sealed secrets."],
+      ["sealed", "List sealed keys — metadata only, never the value."],
+      ["audit", "Verify the ledger hash-chain and reconcile it against the enclave."],
+      ["compat", "Scan this machine for AI agent tools + print the env-var swap for each."],
+      ["update", "Update the global install (from npm, or --from <repo>)."],
+    ]],
+    ["👤 Account", [
+      ["login", "Store existing Terminal 3 credentials (key → OS keychain)."],
+      ["logout", "Remove stored credentials."],
+      ["whoami", "Show tenant, env, and key source (never the value)."],
+    ]],
+    ["🤖 Agent skill", [
+      ["skill", "install [--global|--cursor|--opencode|--cline|--all] / uninstall — the agent skill for your coding agent."],
+    ]],
+  ];
 
-${c.bold("Commands:")}
-  signup   [--email <you@x.com>]                    Self-serve: create a Terminal 3 testnet tenant from scratch. Generates a key locally, verifies your email by code, and mints welcome credits — no manual provisioning. Then run doctor + register.
-  init     [--seed KV:ENV]... [--start]             One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.
-  verify                                            Handshake + auth against T3 (smoke test).
-  compat   [--json]                                 Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.
-  register --name <KV_KEY> [--from-env <ENV_VAR>]  Seal a secret into the enclave (one-time). With --from-env: reads process.env. Without: prompts the terminal with no echo (preferred — never touches disk/history). Also accepts piped stdin.
-  use      --name <secret> [--as <ENV>] -- <cmd>   USE a sealed secret: release it and run <cmd> with it injected as $ENV for that command only — never back in your env. --as is auto-detected for known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Or  --url <https>  for a quick auth check.
-  rotate   --name <secret> [--from-env <ENV_VAR>]  Replace a sealed secret's value (snapshots the old value for rollback; shows before/after fingerprints, never the value).
-  export   --name <secret> [--as <ENV_VAR>]         CI-only: release a sealed secret into $GITHUB_ENV for later steps (masked in logs). Used by the Blindfold GitHub Action.
-  rollback --name <secret> [--to <fp|iso-ts>]      Restore a previous value snapshotted by rotate (most recent by default).
-  versions [--name <secret>]                        List the snapshots available to roll back to (metadata only).
-  migrate  [--dry-run] [--keep]                     Seal EVERY secret in your .env in one shot, then remove the plaintext lines (backup kept). --dry-run previews; --keep comments lines instead of deleting. Skips T3 creds + config.
-  status                                             One-glance overview: mode, tenant health, and the list of sealed secrets.
-  sealed                                             List sealed keys — metadata only (name, byte-length, when, where). Never the value.
-  audit                                              Verify the ledger's tamper-evident hash-chain AND reconcile it against the enclave (the source of truth) — flags drift/missing/tampering.
-  proxy    [--port 8787] [--auth] [--socket [path]] Run the local OpenAI-shaped proxy. --auth mints a per-session token; --socket binds a 0600 unix socket (only your OS user can connect).
-  attest   [--expect-rtmr3 <b64>] [--pin] [--json]  Verify the enclave's TDX attestation (chains to Intel's root CA). --pin records the RTMR3 so seal/proxy auto-verify it first.
-  publish  [--wasm path/to/blindfold_proxy.wasm]   Publish the Rust→WASM contract (one-time).
-  grant    --host <host>[,<host2>...]              Authorize the contract to call these hosts (required before the proxy / in-enclave path can reach them). E.g. --host api.openai.com
-  share    --to <agent-did> --host <host>[,...]    Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive the plaintext (forward only, least privilege).
-  revoke   --to <agent-did>                         Remove a teammate's access. Immediate and complete — nobody holds a raw key copy.
-
-  skill    install [--global|--cursor|--opencode|--cline|--all]   Install the Blindfold agent skill so your coding agent handles secrets safely. Default: this project.
-  skill    uninstall                                Remove all installed skill files.
-
-  dashboard [--port 8799]                           Live HTML dashboard of proxy usage.
-  stats                                             CLI summary of proxy usage.
-  stats:clear                                       Wipe the usage log.
-  doctor                                            Show current mode + config.
-  credit   [--json]                                 Show the tenant's Terminal 3 token/credit balance (no credit cost).
-  update   [--from <path>]                           Update the global blindfold (from npm, or a local repo with --from).
-
-The friendliest path is just:  blindfold init
-
-Quick start:
-  1) ./scripts/build-contract.sh             # build the Rust contract (REAL mode only)
-  2) blindfold publish                        # register the contract on T3
-  3) blindfold register --name openai_api_key --from-env OPENAI_API_KEY
-  4) blindfold proxy                          # then point your agent at it
-`);
+  const out: string[] = [
+    "",
+    bannerBox("🛡️  Blindfold", "Protect your AI agent's API keys with Terminal 3 enclaves. The agent only ever holds a placeholder — the real key is substituted inside the TDX enclave."),
+    "",
+  ];
+  for (const [title, rows] of groups) {
+    out.push(commandBox(title, rows));
+    out.push("");
+  }
+  out.push(
+    c.bold("Quick start"),
+    `  ${c.cyan("blindfold signup --email you@x.com")}   ${c.gray("# create a funded testnet tenant")}`,
+    `  ${c.cyan("blindfold register --name openai_api_key")}`,
+    `  ${c.cyan("blindfold proxy")}                        ${c.gray("# point your agent at http://127.0.0.1:8787")}`,
+    "",
+    `${c.gray("Docs:")} ${c.cyan("https://www.npmjs.com/package/@fiscalmindset/blindfold")}   ${c.gray("·")}   ${c.gray("Run")} ${c.cyan("blindfold <command> --help")} ${c.gray("for details")}`,
+    "",
+  );
+  console.log(out.join("\n"));
 }
 
 main().catch((e) => {
