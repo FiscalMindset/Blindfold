@@ -139,17 +139,18 @@ export const COMMANDS: CmdDef[] = [
   // ── Team & sharing ───────────────────────────────────────────────────────
   {
     name: "grant", group: "👥 Team & sharing", usage: "--host <host>[,<host2>...]",
-    summary: "Authorize the contract to call these hosts (required before proxy/in-enclave can reach them).",
-    flags: [["--host <host,...>", "Comma-separated egress hosts to allow (additive)."]],
+    summary: "Allow the enclave to reach an API's server. Do this once per API before the proxy can call it — e.g. allow api.openai.com so a sealed OpenAI key can be used.",
+    flags: [["--host <host,...>", "The API hostname(s) to allow, comma-separated. Each grant adds to the list."]],
     examples: ["blindfold grant --host api.openai.com", "blindfold grant --host api.github.com,api.stripe.com"],
+    notes: "Why it's needed: the enclave refuses to call any host you haven't allowed (deny-by-default). Grant the host of each API whose key you've sealed.",
   },
   {
     name: "share", group: "👥 Team & sharing", usage: "--to <agent-did> --host <host>[,...]",
-    summary: "Let a teammate's agent USE your sealed keys for a host — forward only, never the plaintext.",
-    flags: [["--to <agent-did>", "The teammate's agent DID to authorize."], ["--host <host,...>", "Hosts they may reach through the enclave."]],
-    examples: ["blindfold share --to did:t3n:… --host api.openai.com"],
+    summary: "Let a teammate use your sealed key for an API — they can make calls but never see the key itself.",
+    flags: [["--to <agent-did>", "The teammate's agent DID (their Terminal 3 identity)."], ["--host <host,...>", "Which API hosts they're allowed to reach through your enclave."]],
+    examples: ["blindfold share --to did:t3n:abc… --host api.openai.com"],
   },
-  { name: "revoke", group: "👥 Team & sharing", usage: "--to <agent-did>", summary: "Remove a teammate's access — immediate and complete.", flags: [["--to <agent-did>", "The teammate's agent DID to revoke."]], examples: ["blindfold revoke --to did:t3n:…"] },
+  { name: "revoke", group: "👥 Team & sharing", usage: "--to <agent-did>", summary: "Take back a teammate's access you granted with `share` — immediate and complete.", flags: [["--to <agent-did>", "The teammate's agent DID to cut off."]], examples: ["blindfold revoke --to did:t3n:abc…"] },
 
   // ── Enclave & admin ──────────────────────────────────────────────────────
   { name: "publish", group: "📦 Enclave & admin", usage: "[--wasm <path>]", summary: "Publish the Rust→WASM contract to your tenant (one-time).", flags: [["--wasm <path>", "Path to blindfold_proxy.wasm (defaults to the bundled build)."]], examples: ["blindfold publish"] },
@@ -203,29 +204,33 @@ export function renderMainHelp(): string {
 
   const nameW = Math.min(12, COMMANDS.reduce((m, cmd) => Math.max(m, vlen(cmd.name)), 0));
   const descW = Math.max(16, w - 4 - nameW - 2);
+  const fit = (s: string, max: number): string => (s.length > max ? s.slice(0, Math.max(1, max - 1)) + "…" : s);
 
   for (const group of GROUP_ORDER) {
     const cmds = COMMANDS.filter((cmd) => cmd.group === group);
     const lines: string[] = [];
-    for (const cmd of cmds) {
+    for (const [idx, cmd] of cmds.entries()) {
+      if (idx > 0) lines.push(""); // breathing room between commands
       const dl = wrapText(cmd.summary, descW);
-      lines.push(pad(c.cyan(cmd.name), nameW) + "  " + (dl[0] ?? ""));
-      for (let i = 1; i < dl.length; i++) lines.push(pad("", nameW) + "  " + c.gray(dl[i] ?? ""));
-      if (cmd.usage) {
-        lines.push(pad("", nameW) + "  " + c.gray("↳ blindfold " + cmd.name + " " + cmd.usage));
-      }
+      // command name (bright) + summary
+      lines.push(pad(c.bold(c.cyan(cmd.name)), nameW) + "  " + (dl[0] ?? ""));
+      for (let i = 1; i < dl.length; i++) lines.push(pad("", nameW) + "  " + (dl[i] ?? ""));
+      // one concrete example — the fastest way to "get" the command
+      const ex = fit(cmd.examples?.[0] ?? `blindfold ${cmd.name}`, descW - 5);
+      lines.push(pad("", nameW) + "  " + c.gray("e.g. ") + c.green(ex));
     }
     out.push(boxLines(group, lines));
     out.push("");
   }
 
   out.push(
-    c.bold("Quick start"),
-    `  ${c.cyan("blindfold signup --email you@x.com")}   ${c.gray("# create a funded testnet tenant")}`,
-    `  ${c.cyan("blindfold register --name openai_api_key")}`,
-    `  ${c.cyan("blindfold proxy")}                        ${c.gray("# point your agent at http://127.0.0.1:8787")}`,
+    c.bold(c.magenta("▶ Quick start")),
+    `  ${c.green("blindfold signup --email you@x.com")}         ${c.gray("# create a funded testnet tenant")}`,
+    `  ${c.green("blindfold register --name openai_api_key")}   ${c.gray("# seal a key (hidden prompt)")}`,
+    `  ${c.green("blindfold proxy")}                            ${c.gray("# point your agent at http://127.0.0.1:8787")}`,
     "",
-    `${c.gray("Details for any command:")} ${c.cyan("blindfold <command> --help")}   ${c.gray("·")}   ${c.gray("Docs:")} ${c.cyan("npmjs.com/package/@fiscalmindset/blindfold")}`,
+    `${c.gray("Full flags + more examples for any command:")}  ${c.cyan("blindfold <command> --help")}`,
+    `${c.gray("Docs:")} ${c.cyan("npmjs.com/package/@fiscalmindset/blindfold")}`,
     "",
   );
   return out.join("\n");

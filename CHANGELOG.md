@@ -4,6 +4,21 @@
 
 ---
 
+## [0.4.3] — 2026-07-13 — `blindfold help` you can actually learn from
+
+### Changed
+- **Every command in `blindfold help` now shows one concrete example** (green),
+  so you can grasp it at a glance — e.g. `grant` shows
+  `blindfold grant --host api.openai.com`. No command is example-less anymore
+  (incl. `whoami`, `logout`).
+- **Plain-English summaries** — rewrote the confusing ones (notably `grant`:
+  "Allow the enclave to reach an API's server; do this once per API before the
+  proxy can call it"). `share`/`revoke` clarified too.
+- **More color / breathing room** — command names bold-cyan, examples green,
+  a blank line between commands, a highlighted quick-start.
+
+---
+
 ## [0.4.2] — 2026-07-13 — Per-command help + usage in the overview
 
 ### Added
