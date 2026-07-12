@@ -127,142 +127,155 @@ export function thinHeader(title: string): string {
 
 // ─── Markdown to terminal ────────────────────────────────────────────────────
 //
-// Same minimal renderer as the web UI, but emits ANSI-coloured text instead
-// of HTML. Handles: code fences, inline code, headings, bullets, numbered
-// lists, bold/italic, blockquotes, horizontal rules, tables, links.
-export function renderMarkdown(md: string): string {
-  if (!md) return "";
-  let s = md;
+// A line-oriented renderer that emits width-aware ANSI lines (NOT a fixed-width
+// box). Prose reflows to the terminal; code blocks get a left bar; tables and
+// lists render cleanly and shrink to fit. The caller applies a left gutter.
+// Handles: code fences, inline code, headings, lists, bold/italic, blockquotes,
+// horizontal rules, tables, links.
 
-  // Code fences ```lang\n…\n```
-  s = s.replace(/```(\w*)\n([\s\S]*?)```/g, (_m, _lang, code) => {
-    const trimmed = code.replace(/\n+$/, "");
-    const lines = trimmed.split("\n");
-    const w = Math.min(getWidth() - 6, 120);
-    const out: string[] = [];
-    out.push(C.border("  ┌" + "─".repeat(w + 2) + "┐"));
-    for (const line of lines) {
-      const visible = stripAnsi(line);
-      const padded = visible + " ".repeat(Math.max(0, w - visible.length));
-      out.push(`${C.border("  │")} ${C.cyan(padded)} ${C.border("│")}`);
-    }
-    out.push(C.border("  └" + "─".repeat(w + 2) + "┘"));
-    return "\n" + out.join("\n") + "\n";
-  });
-
-  // Inline code
-  s = s.replace(/`([^`\n]+)`/g, (_m, c) => C.cyan(c));
-
-  // Headings
-  s = s.replace(/^######\s+(.+)$/gm, (_m, t) => C.bold(C.cyan(t)));
-  s = s.replace(/^#####\s+(.+)$/gm, (_m, t) => C.bold(C.cyan(t)));
-  s = s.replace(/^####\s+(.+)$/gm, (_m, t) => C.bold(C.cyan(t)));
-  s = s.replace(/^###\s+(.+)$/gm, (_m, t) => C.bold(C.fg(t)));
-  s = s.replace(/^##\s+(.+)$/gm, (_m, t) => "\n" + C.bold(C.green(t)) + "\n");
-  s = s.replace(/^#\s+(.+)$/gm, (_m, t) => "\n" + C.bold(C.green(t)) + "\n");
-
-  // Blockquotes
-  s = s.replace(/^>\s?(.+)$/gm, (_m, t) => C.border("  ▎ ") + C.italic(C.dim(t)));
-
-  // Horizontal rule
-  s = s.replace(/^---$/gm, () => C.border("─".repeat(getWidth())));
-
-  // Bold / italic
-  s = s.replace(/\*\*([^*\n]+)\*\*/g, (_m, t) => C.bold(t));
-  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, (_m, pre, t) => pre + C.italic(t));
-
-  // Links [label](url) → just label in colour
-  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label) => C.underline(C.blue(label)));
-
-  // Tables
-  s = renderTablesTerm(s);
-
-  // Lists
-  s = renderListsTerm(s);
-
-  return s;
+/** Inline formatting: code, bold, italic, links. Applied to non-code text. */
+function inline(s: string): string {
+  return s
+    .replace(/`([^`\n]+)`/g, (_m, c) => C.cyan(c))
+    .replace(/\*\*([^*\n]+)\*\*/g, (_m, t) => C.bold(t))
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, (_m, pre, t) => pre + C.italic(t))
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label) => C.underline(C.blue(label)));
 }
 
-function renderTablesTerm(s: string): string {
-  const lines = s.split("\n");
-  const out: string[] = [];
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i] ?? "";
-    if (line && /^\s*\|.+\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|[\s\-:|]+\|\s*$/.test(lines[i + 1] ?? "")) {
-      // Header row
-      const header = parseRowTerm(line);
-      const body: string[][] = [];
-      i += 2;
-      while (i < lines.length && /^\s*\|.+\|\s*$/.test(lines[i] ?? "")) {
-        body.push(parseRowTerm(lines[i] ?? ""));
-        i++;
-      }
-      // Compute widths.
-      const all = [header, ...body];
-      const widths = header.map((_, c) => Math.max(...all.map((r) => stripAnsi(r[c] ?? "").length), 3));
-      const w = getWidth();
-      const totalWidth = widths.reduce((a, b) => a + b + 3, 0); // "| " + cell + " |"
-      const truncate = Math.min(totalWidth, w - 2);
-      out.push(C.border("  ┌" + "─".repeat(truncate) + "┐"));
-      // header
-      out.push(formatRowTerm(header, widths, truncate));
-      out.push(C.border("  ├" + widths.map((c) => "─".repeat(c + 2)).join("┼") + "┤"));
-      for (const r of body) {
-        out.push(formatRowTerm(r, widths, truncate));
-      }
-      out.push(C.border("  └" + widths.map((c) => "─".repeat(c + 2)).join("┴") + "┘"));
-      continue;
-    }
-    out.push(line);
-    i++;
-  }
-  return out.join("\n");
+function isSpecialLine(l: string): boolean {
+  return /^\s*```/.test(l) || /^#{1,6}\s/.test(l) || /^\s*---+\s*$/.test(l) ||
+    /^>\s?/.test(l) || /^(\s*)([-*+]|\d+\.)\s+/.test(l) || /^\s*\|.+\|\s*$/.test(l);
+}
+
+function isTableAt(src: string[], i: number): boolean {
+  return /^\s*\|.+\|\s*$/.test(src[i] ?? "") && /^\s*\|[\s\-:|]+\|\s*$/.test(src[i + 1] ?? "");
 }
 
 function parseRowTerm(row: string): string[] {
   return row.replace(/^\s*\||\|\s*$/g, "").split("|").map((c) => c.trim());
 }
 
-function formatRowTerm(row: string[], widths: number[], totalWidth: number): string {
-  const cells = row.map((c, i) => {
-    const v = stripAnsi(c);
-    const pad = " ".repeat(Math.max(0, (widths[i] ?? 3) - v.length));
-    return " " + c + pad + " ";
-  });
-  let line = C.border("  │") + cells.join(C.border("│")) + C.border("│");
-  // Truncate if necessary.
-  if (stripAnsi(line).length > totalWidth + 4) {
-    line = stripAnsi(line).slice(0, totalWidth + 4);
+/**
+ * Render markdown to an array of display lines, each fitting `width` columns.
+ * No gutter/box — the caller indents. Returns reflowed, structured output.
+ */
+export function renderMarkdownLines(md: string, width: number): string[] {
+  const cw = Math.max(24, width);
+  const src = (md ?? "").replace(/\r/g, "").split("\n");
+  const out: string[] = [];
+  const pushBlank = (): void => { if (out.length && out[out.length - 1] !== "") out.push(""); };
+  let i = 0;
+  while (i < src.length) {
+    const line = src[i] ?? "";
+
+    // Fenced code block
+    if (/^\s*```/.test(line)) {
+      i++;
+      const code: string[] = [];
+      while (i < src.length && !/^\s*```/.test(src[i] ?? "")) { code.push(src[i] ?? ""); i++; }
+      i++; // closing fence
+      pushBlank();
+      const inner = cw - 2;
+      for (const cl of code) {
+        const shown = cl.length > inner ? cl.slice(0, inner - 1) + "…" : cl;
+        out.push(C.border("▌ ") + C.cyan(shown));
+      }
+      out.push("");
+      continue;
+    }
+
+    // Table
+    if (isTableAt(src, i)) {
+      const rows: string[][] = [parseRowTerm(src[i] ?? "")];
+      i += 2;
+      while (i < src.length && /^\s*\|.+\|\s*$/.test(src[i] ?? "")) { rows.push(parseRowTerm(src[i] ?? "")); i++; }
+      pushBlank();
+      for (const tl of renderTableLines(rows, cw)) out.push(tl);
+      out.push("");
+      continue;
+    }
+
+    // Heading
+    const h = /^(#{1,6})\s+(.+)$/.exec(line);
+    if (h) {
+      pushBlank();
+      const t = inline(h[2] ?? "");
+      out.push((h[1] ?? "").length <= 2 ? C.bold(C.green(t)) : C.bold(C.fg(t)));
+      out.push("");
+      i++; continue;
+    }
+
+    // Horizontal rule
+    if (/^\s*---+\s*$/.test(line)) { out.push(C.border("─".repeat(cw))); i++; continue; }
+
+    // Blockquote
+    const bq = /^>\s?(.*)$/.exec(line);
+    if (bq) {
+      for (const wl of wrap(inline(bq[1] ?? ""), cw - 2)) out.push(C.border("▎ ") + C.dim(wl));
+      i++; continue;
+    }
+
+    // List item (indent-aware, wraps continuations under the text)
+    const li = /^(\s*)([-*+]|\d+\.)\s+(.+)$/.exec(line);
+    if (li) {
+      const indent = Math.min((li[1] ?? "").length, cw - 8);
+      const ordered = /\d+\./.test(li[2] ?? "");
+      const marker = ordered ? C.amber(li[2] ?? "") : C.green("•");
+      const pad = " ".repeat(indent);
+      const markerLen = stripAnsi(ordered ? (li[2] ?? "") : "•").length;
+      const wrapped = wrap(inline(li[3] ?? ""), Math.max(8, cw - indent - markerLen - 1));
+      out.push(pad + marker + " " + (wrapped[0] ?? ""));
+      for (let k = 1; k < wrapped.length; k++) out.push(pad + " ".repeat(markerLen + 1) + wrapped[k]);
+      i++; continue;
+    }
+
+    // Blank
+    if (line.trim() === "") { pushBlank(); i++; continue; }
+
+    // Prose paragraph — gather consecutive plain lines, then reflow
+    const para: string[] = [];
+    while (i < src.length && (src[i] ?? "").trim() !== "" && !isSpecialLine(src[i] ?? "")) {
+      para.push(src[i] ?? ""); i++;
+    }
+    for (const wl of wrap(inline(para.join(" ")), cw)) out.push(wl);
   }
-  return line;
+  while (out.length && out[out.length - 1] === "") out.pop();
+  return out;
 }
 
-function renderListsTerm(s: string): string {
-  const lines = s.split("\n");
-  const out: string[] = [];
-  let inList = false;
-  let ordered = false;
-  let counter = 0;
-  for (const line of lines) {
-    const m = line.match(/^(\s*)([-*+]|\d+\.)\s+(.+)/);
-    if (m) {
-      const isOrdered = /^\d+\./.test(m[2] ?? "");
-      if (!inList || ordered !== isOrdered) {
-        if (inList) out.push("");
-        inList = true;
-        ordered = isOrdered;
-        counter = 0;
-      }
-      counter++;
-      const prefix = isOrdered ? `${C.amber(`${counter}.`)} ` : `${C.green("•")} `;
-      out.push(`  ${prefix}${m[3]}`);
-    } else {
-      if (inList) { out.push(""); inList = false; }
-      out.push(line);
-    }
+/** Render a markdown table to ANSI lines, shrinking columns to fit `maxWidth`. */
+function renderTableLines(rows: string[][], maxWidth: number): string[] {
+  const cols = Math.max(...rows.map((r) => r.length));
+  const norm = rows.map((r) => { const c = r.slice(); while (c.length < cols) c.push(""); return c; });
+  const widths = Array.from({ length: cols }, (_, c) =>
+    Math.max(3, ...norm.map((r) => stripAnsi(inline(r[c] ?? "")).length)));
+  const frame = (): number => widths.reduce((a, b) => a + b + 3, 1);
+  // Shrink the widest column until the table fits.
+  let guard = 0;
+  while (frame() > maxWidth && Math.max(...widths) > 5 && guard++ < 500) {
+    widths[widths.indexOf(Math.max(...widths))]! -= 1;
   }
-  return out.join("\n");
+  const bar = (l: string, m: string, r: string): string =>
+    C.border(l + widths.map((w) => "─".repeat(w + 2)).join(m) + r);
+  const fmt = (r: string[]): string =>
+    C.border("│") + r.map((cell, c) => {
+      const w = widths[c] ?? 3;
+      let v = inline(cell ?? "");
+      if (stripAnsi(v).length > w) v = C.cyan(stripAnsi(v).slice(0, Math.max(1, w - 1)) + "…");
+      const padN = Math.max(0, w - stripAnsi(v).length);
+      return " " + v + " ".repeat(padN) + " ";
+    }).join(C.border("│")) + C.border("│");
+  const out = [bar("┌", "┬", "┐"), fmt(norm[0] ?? []), bar("├", "┼", "┤")];
+  for (let r = 1; r < norm.length; r++) out.push(fmt(norm[r] ?? []));
+  out.push(bar("└", "┴", "┘"));
+  return out;
+}
+
+/** Responsive section header: "─ LABEL  ·  meta  ·  meta ─────────────". */
+function sectionHeader(label: string, meta: string[], w: number): string {
+  const left = `─ ${C.bold(label)}${meta.length ? "  ·  " + meta.join("  ·  ") : ""} `;
+  const pad = Math.max(0, w - stripAnsi(left).length);
+  return C.borderBright(left) + C.border("─".repeat(pad));
 }
 
 // ─── Sources / related renderers ─────────────────────────────────────────────
@@ -302,19 +315,31 @@ export interface RenderableResponse {
 }
 
 export function renderResponse(r: RenderableResponse): string {
-  const meta: string[] = [];
-  meta.push(C.green(r.intent));
-  if (r.audience && r.audience !== "general") {
-    meta.push(audienceColor(r.audience)(r.audience));
-  }
+  const w = getWidth();
+  const meta: string[] = [C.green(r.intent)];
+  if (r.audience && r.audience !== "general") meta.push(audienceColor(r.audience)(r.audience));
   meta.push(C.mute(`conf ${r.confidence.toFixed(2)}`));
   if (r.usedFallback) meta.push(C.amber("fallback"));
-  const body = renderMarkdown(r.message);
-  return box("assistant", meta, body) + renderSources(r.sources) + renderRelated(r.related);
+
+  const out: string[] = [sectionHeader("ASSISTANT", meta, w), ""];
+  // The responder appends a "### Sources" footer into the message for the web
+  // UI; the CLI renders sources in its own `─ sources` section below, so strip
+  // that trailing footer here to avoid showing sources twice.
+  const body = r.message.replace(/\n#{2,4}\s*Sources[\s\S]*$/i, "").trimEnd();
+  // Render the answer reflowed to the terminal, indented under a 2-col gutter.
+  for (const l of renderMarkdownLines(body, w - 2)) out.push(l === "" ? "" : "  " + l);
+  const src = renderSources(r.sources);
+  const rel = renderRelated(r.related);
+  if (src) out.push(src);
+  if (rel) out.push(rel);
+  return out.join("\n");
 }
 
 export function renderUserMessage(msg: string): string {
-  return box("user", [C.mute("you")], C.bold(msg));
+  const w = getWidth();
+  const out: string[] = [sectionHeader("YOU", [], w), ""];
+  for (const wl of wrap(C.bold(msg), w - 2)) out.push("  " + wl);
+  return out.join("\n");
 }
 
 export function renderWelcome(): string {
