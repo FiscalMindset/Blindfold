@@ -214,8 +214,10 @@ The proxy currently returns the full upstream response (the enclave's `http.resp
 - **Any HTTP SDK** via the proxy + `__BLINDFOLD__` sentinel (one-line base-URL swap).
 - **TypeScript/JS** also have `release()` and `wrap()` for in-code use. (A Python `release()` is on the roadmap.)
 
-### Is there a cost?
-T3 runs on credits (testnet credits are free to request). Writes (seal, publish, grant) and contract executes consume credits; reads are cheap. `blindfold doctor` flags an out-of-credit tenant (403) explicitly.
+### Is there a cost? Isn't hitting an enclave every time expensive?
+Fair question. Every *use* of a key is a metered Terminal 3 enclave op — unlike reading a plaintext env var (free but leakable). But it's small: measured live, **~20 tokens per operation** (a `use`/release or a proxy forward). The self-serve `signup` grant (~20,000 tokens) is **~1,000 uses**, free, on testnet. `blindfold credit` shows your balance; `blindfold doctor` flags an out-of-credit tenant explicitly.
+
+Whether that's "expensive" is **frequency × value**: for the high-value keys Blindfold is built for (deploy tokens, payment/admin creds, keys you hand to autonomous agents), ~20 tokens per use is a rounding error next to a breach. For a low-value key hit thousands of times a second, use **release-once-reuse** — `release()` hands the plaintext to your process, so you cache it for a burst and pay **one op for N calls** instead of N ops. Also: **seal selectively** (only what would hurt if leaked) and use the **proxy where the guarantee is worth it**. See the [Cost section in the README](README.md#cost) for the full breakdown.
 
 ### Where does my key physically live (for compliance)?
 Only inside the Intel TDX enclave on Terminal 3's infrastructure, sealed to your tenant's `secrets` map. It is never written to your disk, your logs, or your git history. You're extending trust to Intel TDX + T3 — the same shape as trusting a KMS/HSM vendor.
