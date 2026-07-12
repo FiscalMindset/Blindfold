@@ -712,6 +712,32 @@ export const INTENT_PATTERNS: IntentPattern[] = [
     examples: ["is Blindfold on npm?", "how do I install Blindfold?", "what's the npm package?"],
   },
   {
+    intent: "system_architecture",
+    patterns: [
+      { type: "phrase", value: "system design", weight: 6 },
+      { type: "phrase", value: "architect", weight: 5 },
+      { type: "phrase", value: "design of", weight: 3 },
+      { type: "phrase", value: "how is it built", weight: 4 },
+      { type: "phrase", value: "how is blindfold built", weight: 5 },
+      { type: "phrase", value: "how does the whole system", weight: 5 },
+      { type: "phrase", value: "components", weight: 2 },
+      { type: "phrase", value: "how it works end to end", weight: 4 },
+    ],
+    examples: ["how is Blindfold architected?", "explain the system design", "what are the components?"],
+  },
+  {
+    intent: "three_secret_paths",
+    patterns: [
+      { type: "phrase", value: "three ways", weight: 6 },
+      { type: "phrase", value: "three paths", weight: 6 },
+      { type: "phrase", value: "proxy vs release", weight: 7 },
+      { type: "phrase", value: "release vs proxy", weight: 7 },
+      { type: "phrase", value: "secret paths", weight: 6 },
+      { type: "phrase", value: "release broker", weight: 4 },
+    ],
+    examples: ["what are the three secret paths?", "proxy vs release?"],
+  },
+  {
     intent: "signup_vs_login",
     patterns: [
       { type: "phrase", value: "signup vs login", weight: 9 },
