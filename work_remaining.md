@@ -21,10 +21,14 @@ Living list of what's left, newest concerns first. Update as items land.
 - [x] **Library `exports` fixed** — `.`, `./proxy`, `./register`, `./wrap` build to
   `dist/lib/*.mjs` (plain-Node runnable); types resolve from shipped `src/*.ts`.
 - [x] **Version cut to 0.4.0** (CHANGELOG dated).
-- [ ] **`npm publish`** — actually publish `@fiscalmindset/blindfold@0.4.0` once
-  you're ready (needs an npm login with publish rights to the `@fiscalmindset`
-  scope). `npm pack --dry-run` is clean: 41 files, README + LICENSE + dist ship,
-  no secrets.
+- [x] **`npm publish`** — DONE 2026-07-12. `@fiscalmindset/blindfold@0.4.0` is
+  live on npm (MIT, `latest` tag, public). Created the free `@fiscalmindset` npm
+  org (owner `algsoch`) first. Verified: clean `npm i -g @fiscalmindset/blindfold`
+  installs + `blindfold help/doctor` run. Page:
+  https://www.npmjs.com/package/@fiscalmindset/blindfold
+- [ ] **Regenerate npm 2FA recovery codes** — five were pasted in chat (one
+  consumed by the publish); regenerate at npmjs.com so the rest are void. Prefer a
+  granular access token (bypass-2FA) for future publishes.
 
 ## Nice-to-have hardening
 
