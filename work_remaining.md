@@ -4,11 +4,11 @@ Living list of what's left, newest concerns first. Update as items land.
 
 ## Onboarding / signup
 
-- [ ] **Re-verify the save-key-before-admit hardening live.** The `onKeyReady`
-  callback (persist key the instant the email verifies, before self-admit) is
-  built + typechecked but only the pre-hardening happy path was verified live on
-  Windows. Redeploy to `ssh win` and run one signup to confirm the success path
-  is unchanged and the post-verify-failure path reports "key saved, not lost".
+- [x] **Re-verify the save-key-before-admit hardening live.** Done 2026-07-12:
+  0.4.0 (with `onKeyReady`) redeployed to `ssh win`; signup succeeded end-to-end
+  → `did:t3n:21e3d7e82ae0aa837d47f6795a34e0b161086eba`, doctor active, credit
+  ~19,990 tokens. Success path unchanged; credentials persisted via the callback.
+  (Post-verify-failure branch is code-reviewed but hard to trigger on demand.)
 - [ ] **Burned test aliases (informational).** `algsoch+blindfold1@gmail.com` and
   `+blindfold2` are bound to discarded keys on testnet (harmless dev tenants).
   `+blindfold3` → `did:t3n:36506da58d1de0d977b193f0ad73a076c832030a` is the live one
