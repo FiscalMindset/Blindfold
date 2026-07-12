@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "generatedAt": "2026-07-12",
-  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-11)",
+  "source": "Manually curated from docs/, README.md, FAQ.md, usage.md, EXAMPLES.md, packages/blindfold/src/*.ts and contract/src/*.rs + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-04) + extraction pipeline (2026-07-11) + extraction pipeline (2026-07-12)",
   "entries": [
     {
       "id": "kb-001",
@@ -11767,33 +11767,33 @@
         "developer",
         "enterprise"
       ],
-      "question": "What does the doctor / env check in the Blindfold CLI do?",
-      "shortAnswer": "The doctor command (in `packages/blindfold/bin/blindfold.ts`) loads environment via `loadBlindfoldEnv()`, prints a summary of mode, credentials, T3 environment, node URL and default proxy port, warns and exits with code 1 when REAL mode is selected without `T3N_API_KEY` and `DID`, and then performs a live handshake + authenticate + `me` round-trip via `openT3Client(env)` to surface the 'key authenticates but has no tenant' failure mode that the server would otherwise report as a bare HTTP 500.",
-      "longAnswer": "Inside `packages/blindfold/bin/blindfold.ts` the doctor handler:\n\n1. Loads the runtime environment:\n   ```ts\n   const env = loadBlindfoldEnv();\n   ```\n   and prints a labelled summary:\n   - `mode` — `MOCK (BLINDFOLD_MOCK=1)` or `REAL (T3)` based on `env.mock`,\n   - whether `T3N_API_KEY` (`env.t3ApiKey`) and `DID` (`env.did`) are set,\n   - `env.t3Env` (the Terminal 3 environment),\n   - `env.t3BaseUrl`, falling back to `(SDK default for ${env.t3Env})` when empty,\n   - the default proxy port from `env.port`.\n\n2. Guards REAL-mode configuration. If `!env.mock` and either `env.t3nApiKey` or `env.did` is missing it prints a warning pointing to `https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens` and to `npm run setup`, sets `process.exitCode = 1`, and returns early.\n\n3. If `env.mock` is set it returns immediately (no live check).\n\n4. Otherwise it runs a LIVE check — the comment in the source describes its purpose: *\"This is what catches the painful 'key authenticates but has no tenant' case, which the server otherwise reports only as a bare HTTP 500.\"* It dynamically imports `openT3Client` from `../src/t3-client.ts`:\n   ```ts\n   const { openT3Client } = await import(\"../src/t3-client.ts\");\n   client = await openT3Client(env);\n   ```\n   On success it prints `auth:               ✅ handshake + authenticate OK`. On failure it prints `auth:               ✖ <message>` and a hint that `T3N_API_KEY` must be a `0x`-prefixed 32-byte hex private key and `DID` must look like `did:t3n:<hex>`, sets `process.exitCode = 1`, and returns.\n\nSo the doctor command is a pre-flight diagnostic that combines static environment validation with a real authentication round-trip so misconfiguration is reported locally with actionable remediation rather than as opaque server errors.",
+      "question": "What does the doctor command check in packages/blindfold/bin/cmd-enclave.ts?",
+      "shortAnswer": "The doctor command validates the Blindfold environment by checking mode (MOCK vs REAL), required credentials (T3N_API_KEY and DID), and performs a live handshake + authenticate + me call to verify the T3 client can connect and the key has an associated tenant.",
+      "longAnswer": "The `doctor` function in `cmd-enclave.ts` performs environment diagnostics:\n\n1. **Mode detection**: Reads `env.mock` to distinguish MOCK (`BLINDFOLD_MOCK=1`) from REAL (T3) mode.\n2. **Credential checks**: Verifies `env.t3nApiKey` and `env.did` are present. If REAL mode lacks either, it exits with code 1 and prints a setup wizard hint.\n3. **Live authentication** (REAL mode only):\n   - Calls `openT3Client(env)` from `../src/t3-client.ts`\n   - Catches the \"key authenticates but has no tenant\" case, which the T3 server otherwise returns as a bare HTTP 500\n   - Prints specific error guidance if auth fails (checks for 0x 32-byte hex private key format and `did:t3n:<hex>` format)\n\nThe `loadBlindfoldEnv()` call populates: `mock`, `t3nApiKey`, `did`, `t3Env`, `t3BaseUrl`, and `port`.",
       "links": [
         {
-          "label": "packages/blindfold/bin/blindfold.ts:loadBlindfoldEnv / doctor block",
-          "url": "packages/blindfold/bin/blindfold.ts:loadBlindfoldEnv / doctor block",
+          "label": "packages/blindfold/bin/cmd-enclave.ts:1-30 (env loading and credential validation)",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:1-30 (env loading and credential validation)",
           "type": "code"
         },
         {
-          "label": "packages/blindfold/src/t3-client.ts:openT3Client",
-          "url": "packages/blindfold/src/t3-client.ts:openT3Client",
+          "label": "packages/blindfold/bin/cmd-enclave.ts:31-45 (live T3 client authentication)",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:31-45 (live T3 client authentication)",
           "type": "code"
         },
         {
-          "label": "packages/blindfold/bin/blindfold.ts",
-          "url": "packages/blindfold/bin/blindfold.ts",
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
           "type": "code"
         }
       ],
       "sources": [
-        "packages/blindfold/bin/blindfold.ts:loadBlindfoldEnv / doctor block",
-        "packages/blindfold/src/t3-client.ts:openT3Client",
-        "packages/blindfold/bin/blindfold.ts"
+        "packages/blindfold/bin/cmd-enclave.ts:1-30 (env loading and credential validation)",
+        "packages/blindfold/bin/cmd-enclave.ts:31-45 (live T3 client authentication)",
+        "packages/blindfold/bin/cmd-enclave.ts"
       ],
-      "confidence": 0.92,
-      "lastVerified": "2026-07-04"
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
     },
     {
       "id": "kb-extracted-9c25d305",
@@ -19319,6 +19319,811 @@
         "packages/blindfold/bin/cmd-auth.ts"
       ],
       "confidence": 0.96,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-d068a53e",
+      "intent": "get_terminal3_tenant",
+      "audience": [
+        "user",
+        "developer"
+      ],
+      "question": "How do I get a Terminal 3 tenant quickly using Blindfold?",
+      "shortAnswer": "Use the self-serve signup command `blindfold signup --email you@example.com` which mints a tenant for you in about 30 seconds without manual token claiming.",
+      "longAnswer": "Install Blindfold globally with `npm i -g @fiscalmindset/blindfold` (or from a local clone with `npm i -g ./packages/blindfold`), then run `blindfold signup --email you@example.com`. This self-serve method takes approximately 30 seconds and automatically mints a Terminal 3 tenant for you — no manual token claim required.",
+      "links": [
+        {
+          "label": "README.md:B. Get a Terminal 3 tenant",
+          "url": "README.md:B. Get a Terminal 3 tenant",
+          "type": "code"
+        },
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "README.md:B. Get a Terminal 3 tenant",
+        "README.md"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-347f5c33",
+      "intent": "check_blindfold_status",
+      "audience": [
+        "developer"
+      ],
+      "question": "How do I verify that Blindfold is properly configured and ready to use?",
+      "shortAnswer": "Run `blindfold doctor` to check if Blindfold is ready to seal and use secrets. This command verifies your T3N_API_KEY and DID credentials are properly configured in your environment.",
+      "longAnswer": "The `blindfold doctor` command performs a readiness check for Blindfold. It verifies that your credentials are properly set up:\n\n- **T3N_API_KEY**: A 64-character hex value (format: `0x...`)\n- **DID**: A T3N decentralized identifier (format: `did:t3n:...`)\n\nIf credentials aren't configured, you can claim them manually at https://docs.terminal3.io/developers/adk/get-started/prerequisites/request-test-tokens and add them to your `.env` file:\n\n```bash\ncat >> .env <<'EOF'\nT3N_API_KEY=0xYOUR_HEX_HERE\nDID=did:t3n:YOUR_HEX_HERE\nEOF\n```\n\nYou can also run `blindfold credit` to check your token balance.",
+      "links": [
+        {
+          "label": "README.md:One email = one tenant; use a fresh address (Gmail +aliases work) per tenant.",
+          "url": "README.md:One email = one tenant; use a fresh address (Gmail +aliases work) per tenant.",
+          "type": "code"
+        },
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "README.md:One email = one tenant; use a fresh address (Gmail +aliases work) per tenant.",
+        "README.md"
+      ],
+      "confidence": 0.85,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-14a3032b",
+      "intent": "list_blindfold_cli_commands",
+      "audience": [
+        "user",
+        "developer"
+      ],
+      "question": "What CLI commands does Blindfold provide?",
+      "shortAnswer": "Blindfold provides commands for onboarding (signup, init), verification (verify, attest), secret management (register), proxying (proxy), and utility operations (credit, dashboard, stats, doctor, update).",
+      "longAnswer": "## Blindfold CLI Commands\n\n### Onboarding & Setup\n- `blindfold signup [--email <addr>] [--first/--last]` — Self-serve onboarding: mint a new Terminal 3 testnet tenant. Generates a key locally, eth-authenticates, verifies email by OTP, and self-admits to mint welcome credits. Testnet-only.\n- `blindfold init [--seed KV:ENV]... [--start]` — Zero-knowledge bootstrap. The preferred onramp.\n\n### Verification\n- `blindfold verify` — Handshake + auth round-trip against T3 testnet.\n- `blindfold attest [--expect-rtmr3 <b64>] [--pin] [--json]` — Verify the enclave's TDX attestation (Intel root CA); --pin gates seal/proxy on the code measurement.\n\n### Secret Management\n- `blindfold register --name <K> [--from-env <ENV>]` — Seal a secret. Prompts (no echo) if --from-env omitted; piped stdin also works.\n\n### Proxy & Compatibility\n- `blindfold proxy [--port 8787] [--auth] [--socket [path]]` — Local OpenAI-shaped proxy. --auth = per-session token; --socket = 0600 unix socket.\n- `blindfold compat [--json]` — Scan local box for agent CLIs.\n\n### Utilities\n- `blindfold credit [--json]` — Show tenant's Terminal 3 token/credit balance (no credit cost).\n- `blindfold publish [--wasm <path>]` — Manually publish WASM (init does this automatically).\n- `blindfold dashboard [--port 8799]` — Live HTML usage dashboard.\n- `blindfold stats | stats:clear` — CLI usage summary / wipe.\n- `blindfold doctor` — Show mode + config. Exit 1 if REAL is missing creds.\n- `blindfold update [--from <path>]` — Update global install (repo source, else @fiscalmindset/blindfold@latest).\n\n### Modes\nMocked behaviour is opt-in only: `BLINDFOLD_MOCK=1`. Otherwise, REAL mode is the only mode.",
+      "links": [
+        {
+          "label": "docs/AGENTS.md:The CLI commands",
+          "url": "docs/AGENTS.md:The CLI commands",
+          "type": "code"
+        },
+        {
+          "label": "docs/AGENTS.md",
+          "url": "docs/AGENTS.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "docs/AGENTS.md:The CLI commands",
+        "docs/AGENTS.md"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-3a8f5d17",
+      "intent": "whats_new_v0_2_v0_3",
+      "audience": [
+        "user",
+        "developer"
+      ],
+      "question": "What are the new features in Blindfold v0.2 and v0.3?",
+      "shortAnswer": "Blindfold v0.2/v0.3 introduces npm global installation via `npm i -g @fiscalmindset/blindfold`, self-serve signup/login with OS keychain storage for tenant credentials, webhook support with a /discord proxy provider, and layered proxy access with TDX attestation that verifies the enclave against Intel's root CA.",
+      "longAnswer": "## New Features in Blindfold v0.2/v0.3\n\n### Installation\n- **npm global install**: `npm i -g @fiscalmindset/blindfold` provides a global `blindfold` CLI that runs from any directory\n- State is stored in `~/.blindfold` (no repo/SSD dependency)\n- Keep current with `blindfold update`\n\n### Self-Serve Onboarding\n- **`blindfold signup`**: Mint a brand-new, funded Terminal 3 testnet tenant from nothing\n  - Verifies email by code\n  - Stores generated key in OS keychain — never printed\n  - No manual token claim required\n- **`blindfold login`**: Store tenant credentials in `~/.blindfold` with the tenant key in the OS keychain (macOS/Linux), not plaintext\n\n### Webhook Support\n- `webhook` auth scheme (contract v0.5.5)\n- `/discord` proxy provider lets an agent post to a webhook **without ever holding the URL**\n- See [`examples/discord-webhook/`](examples/discord-webhook/)\n\n### Layered Proxy Access + Attestation\n- `proxy --auth`: Mints a per-session token\n- `proxy --socket`: Binds a `0600` unix socket\n- `blindfold attest`: Verifies the enclave's TDX quotes against Intel's root CA\n- `--pin` flag gates seal/proxy on the code measurement\n- `blindfold credit`: Shows the tenant's Terminal 3 balance",
+      "links": [
+        {
+          "label": "README.md:What's new (v0.2 / v0.3 + webhook)",
+          "url": "README.md:What's new (v0.2 / v0.3 + webhook)",
+          "type": "code"
+        },
+        {
+          "label": "README.md",
+          "url": "README.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "README.md:What's new (v0.2 / v0.3 + webhook)",
+        "README.md"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-238589ce",
+      "intent": "install_blindfold",
+      "audience": [
+        "user"
+      ],
+      "question": "How do I install Blindfold and create a new account?",
+      "shortAnswer": "Install Blindfold globally via npm with `npm install -g @fiscalmindset/blindfold`, then run `blindfold signup --email <your-email>` to create a self-serve account that automatically mints a funded testnet tenant.",
+      "longAnswer": "## Installation\n\nInstall Blindfold globally using npm:\n\n```bash\nnpm install -g @fiscalmindset/blindfold\n```\n\nAlternatively, from a local clone:\n\n```bash\nnpm i -g ./packages/blindfold\n```\n\n## New User Signup\n\nAfter installation, create your account:\n\n```bash\nblindfold signup --email you@x.com\n```\n\nThis self-serve command automatically mints a funded testnet tenant for you.",
+      "links": [
+        {
+          "label": "usage.md:Install (any OS)",
+          "url": "usage.md:Install (any OS)",
+          "type": "code"
+        },
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md:Install (any OS)",
+        "usage.md"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-76f5b963",
+      "intent": "how_credentials_are_stored",
+      "audience": [
+        "user",
+        "developer",
+        "enterprise"
+      ],
+      "question": "How does Blindfold store credentials and what credential stores are supported?",
+      "shortAnswer": "Blindfold stores credentials in the OS credential store — macOS Keychain, Linux libsecret (secret-tool), or Windows Credential Manager. If none is available or in non-interactive sessions, it falls back to a 0600 file. The config.json file holds only non-secret DID and settings.",
+      "longAnswer": "## Credential Storage\n\nBlindfold uses the OS-native credential store for secure credential management:\n\n| OS | Credential Store |\n|----|------------------|\n| macOS | Keychain |\n| Linux | libsecret (`secret-tool`) |\n| Windows | Credential Manager |\n\n### Commands\n- `blindfold login` — stores tenant DID + key in the OS credential store\n- `blindfold doctor` — confirms credentials are valid; after this, `blindfold` works from any directory\n\n### Fallback Behavior\nIf no credential store is available (or in non-interactive sessions), `login` falls back to a `0600` file and reports this.\n\n### Config File\n`~/.blindfold/config.json` holds only non-secret configuration: the DID and settings. Secrets are never stored here.",
+      "links": [
+        {
+          "label": "usage.md:— or, if you already have Terminal 3 credentials:",
+          "url": "usage.md:— or, if you already have Terminal 3 credentials:",
+          "type": "code"
+        },
+        {
+          "label": "usage.md",
+          "url": "usage.md",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "usage.md:— or, if you already have Terminal 3 credentials:",
+        "usage.md"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-883546c7",
+      "intent": "what_does_color_utility_do",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the color utility in color.ts provide?",
+      "shortAnswer": "The `c` object exports ANSI escape code constants for terminal text styling (bold, dim, red, green, yellow, blue, magenta, cyan, gray) via a `wrap()` helper. Colors are conditionally enabled based on TTY detection and user preference.",
+      "longAnswer": "The `c` object in `packages/blindfold/src/color.ts` provides a mapping of color/style names to ANSI escape code values:\n\n```typescript\nexport const c = {\n  bold: wrap(\"1\"),\n  dim: wrap(\"2\"),\n  red: wrap(\"31\"),\n  green: wrap(\"32\"),\n  yellow: wrap(\"33\"),\n  blue: wrap(\"34\"),\n  magenta: wrap(\"35\"),\n  cyan: wrap(\"36\"),\n  gray: wrap(\"90\"),\n};\n```\n\nThe `wrap()` function (defined elsewhere in the file) wraps the codes with ANSI escape sequence delimiters. The comment `/** Whether color output is active (TTY + not disabled). */` indicates that color output is automatically disabled when output is not a TTY or when the user has disabled colors, ensuring clean output for non-interactive contexts like logs or CI pipelines.",
+      "links": [
+        {
+          "label": "packages/blindfold/src/color.ts:1-14",
+          "url": "packages/blindfold/src/color.ts:1-14",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/color.ts",
+          "url": "packages/blindfold/src/color.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/color.ts:1-14",
+        "packages/blindfold/src/color.ts"
+      ],
+      "confidence": 0.85,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-5c2bd192",
+      "intent": "signup_options_key_persistence_callback",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "What is the purpose of the `onKeyReady` callback in `SignupOptions`?",
+      "shortAnswer": "The `onKeyReady` callback is invoked immediately after email verification and DID confirmation, but BEFORE the self-admit commit executes. This ordering is critical: it allows the caller to persist the key to stable storage so that a failed self-admit commit never strands a live, email-bound tenant with an unrecoverable key.",
+      "longAnswer": "The `SignupOptions` interface in `packages/blindfold/src/t3-client.ts` defines the `onKeyReady` callback with signature:\n\n```typescript\nonKeyReady?: (key: string, did: string) => void | Promise<void>;\n```\n\n**Security-critical ordering**: The callback fires at the instant the email is verified and the DID is confirmed real — but **before** the self-admit commit that could still fail. This two-phase pattern ensures:\n\n1. The key is persisted externally (e.g., to disk, a KMS, or a backup mechanism).\n2. If the subsequent self-admit commit fails, the tenant still has a recoverable key bound to their email.\n3. Without this callback, a failed commit would leave a live tenant with an unrecoverable key, creating a denial-of-service scenario.\n\nThe callback receives both the raw `key` and the associated `did` string, enabling the caller to store them together atomically.",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:SignupOptions",
+          "url": "packages/blindfold/src/t3-client.ts:SignupOptions",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:SignupOptions",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-c12e6101",
+      "intent": "credit_balance_interface_structure",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the CreditBalance interface represent in the T3 client?",
+      "shortAnswer": "CreditBalance is an interface representing a Terminal 3 tenant's credit state, tracking available credits, reserved amounts, and whether credits are exhausted. It includes optional fields for storage deposits and mock/test data.",
+      "longAnswer": "The `CreditBalance` interface in `packages/blindfold/src/t3-client.ts` defines the credit state model for a T3 tenant:\n\n```typescript\nexport interface CreditBalance {\n  available: number;       // Spendable credit balance\n  reserved: number;        // Credits locked for pending operations\n  creditExhausted: boolean; // Whether tenant has run out of credits\n  storageDeposit?: number; // Optional storage deposit amount\n  mock?: boolean;          // Indicates test/mock data\n}\n```\n\nThe interface also documents the self-serve signup flow via the `becomeDevTenant` function (testnet self-admit), and notes that signup throws when the email already belongs to an existing T3 tenant — T3 refuses to reparent an owned email onto a fresh DID.",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:CreditBalance",
+          "url": "packages/blindfold/src/t3-client.ts:CreditBalance",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:CreditBalance",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.9,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-128ef5b7",
+      "intent": "what_does_verify_do_in_signup",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the verify step do in Blindfold's signup flow?",
+      "shortAnswer": "The verify step calls `t3n.otpVerify()` with the emailed OTP code and channel, handles merge suggestions for already-taken emails by throwing `SignupEmailTakenError`, validates OTP status (failed/expired) with user-friendly error messages, and triggers the `onKeyReady` callback to persist the generated key and DID before the admit step.",
+      "longAnswer": "In `packages/blindfold/src/t3-client.ts`, the `verify` chunk performs OTP verification after the user receives a code via email:\n\n```typescript\nconst verify = await t3n.otpVerify({ otpCode: code, request: channel });\n```\n\n**Merge handling**: If `verify.mergeSuggestion` exists, the email is already bound to an existing DID. The code throws `SignupEmailTakenError` with the existing DID, allowing the caller to offer account merge:\n```typescript\nif (verify.mergeSuggestion) {\n  throw new SignupEmailTakenError(opts.email, verify.mergeSuggestion.existingDid);\n}\n```\n\n**OTP failure handling**: Checks for `otp_failed` or `otp_expired` statuses and throws descriptive errors with retry instructions.\n\n**Key persistence**: The critical security property — after successful verification, the email is bound to the DID and the generated key controls it. The code calls `opts.onKeyReady(key, did)` to let the caller persist this credential *before* the admit step, ensuring the tenant's credential is never burned even if admit fails:\n```typescript\nif (opts.onKeyReady) await opts.onKeyReady(key, did);\n```",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:verify",
+          "url": "packages/blindfold/src/t3-client.ts:verify",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:verify",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-089c9260",
+      "intent": "what_does_signup_result_contain_and_key_handling",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "What does SignupResult contain and what are the security requirements for the key?",
+      "shortAnswer": "SignupResult contains the tenant's secp256k1 private key, DID, address, environment (testnet/production), and admission status. The key is the ONLY secret this function produces and must be stored in the OS keychain — it MUST NOT be printed or logged, following the same handling rules as a sealed key.",
+      "longAnswer": "## SignupResult Interface\n\nLocated in `packages/blindfold/src/t3-client.ts`, this interface represents the result of provisioning a Terminal 3 testnet tenant end-to-end:\n\n```typescript\nexport interface SignupResult {\n  key: string;           // 0x..., secp256k1 private key\n  did: string;           // eth-derived DID\n  address: string;       // Ethereum address\n  env: \"testnet\" | \"production\";\n  admitStatus: string;   // \"admitted\" | \"already-admitted\" | \"refused\" | \"unknown\"\n  grantedCredits?: string;\n  refusedReason?: string;\n  refusedDetail?: string;\n}\n```\n\n## Key Security Property\n\nThe `key` field is the **ONLY secret** produced by the provisioning function. Per the JSDoc comment:\n\n> The caller must store it in the OS keychain and MUST NOT print or log it — same handling rule as a sealed key.\n\n## Provisioning Flow (3 Steps)\n\n1. **Generate** a fresh secp256k1 key locally (tenant's identity)\n2. **eth-authenticate** with it (yields eth-derived DID required by becomeDevTenant)\n3. **Prove email via OTP** and self-admit (`becomeDevTenant: true`), which mints operator-configured welcome credits\n\nThe generated key is returned so the caller can persist it to the keychain; it never leaves the process otherwise.\n\n**Note:** Testnet-only — production refuses self-admit.",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:SignupResult (lines 1-17)",
+          "url": "packages/blindfold/src/t3-client.ts:SignupResult (lines 1-17)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts:provisioning comment (lines 19-30)",
+          "url": "packages/blindfold/src/t3-client.ts:provisioning comment (lines 19-30)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:SignupResult (lines 1-17)",
+        "packages/blindfold/src/t3-client.ts:provisioning comment (lines 19-30)",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-701ed50a",
+      "intent": "tenant_admission_status_mapping",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the admit chunk do in t3-client.ts?",
+      "shortAnswer": "This code extracts tenant admission data from the T3 client result and maps it to a structured response object, exposing admission status, granted credits, and refusal details with safe optional chaining.",
+      "longAnswer": "The `admit` chunk extracts the `tenantAdmit` field from the T3 client response and transforms it into a normalized return object. It maps:\n\n- `admitStatus`: The admission status from `admit?.status`, defaulting to `\"unknown\"` if absent\n- `grantedCredits`: Credits granted to the tenant (if admitted)\n- `refusedReason`: The reason for refusal (if rejected)\n- `refusedDetail`: Additional refusal details (if rejected)\n\nThe code uses optional chaining (`?.`) and nullish coalescing (`??`) to safely handle missing fields, ensuring the return object always has defined keys even when the underlying data is incomplete.\n\n```typescript\nconst admit = result.tenantAdmit;\nreturn {\n  key,\n  did,\n  address,\n  env: opts.env,\n  admitStatus: admit?.status ?? \"unknown\",\n  grantedCredits: admit?.grantedCredits,\n  refusedReason: admit?.reason,\n  refusedDetail: admit?.detail,\n};\n```",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:admit chunk",
+          "url": "packages/blindfold/src/t3-client.ts:admit chunk",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:admit chunk",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.9,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-dae0cc23",
+      "intent": "what_does_t3_client_return",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the T3 client return and how does getBalance work?",
+      "shortAnswer": "The T3 client returns an object with methods for secret management, contract interaction, and balance queries. The getBalance function extracts available, reserved, creditExhausted, and storageDeposit fields from a page.balance object, applying Number() conversions to numeric fields and Boolean() to credit_exhausted.",
+      "longAnswer": "The T3 client factory returns an object exposing these methods:\n\n- `close`: A no-op async function (comment: \"SDK has no close()\")\n- `seedSecret`, `releaseSecret`, `verifySecret`: Secret management\n- `invokeForward`, `registerContract`: Contract interaction\n- `me`, `grantEgress`, `setAgentGrant`: Agent/identity management\n- `getBalance`: Queries balance from a page object\n- `isReal: true`: Flag indicating real (non-mock) client\n\nThe `getBalance` function destructures `page.balance` and maps fields:\n```typescript\nconst b = (page.balance ?? {}) as Record<string, unknown>;\nreturn {\n  available: Number(b.available ?? 0),\n  reserved: Number(b.reserved ?? 0),\n  creditExhausted: Boolean(b.credit_exhausted),\n  storageDeposit: b.storage_deposit != null ? Number(b.storage_deposit) : undefined,\n};\n```\nNote: `storageDeposit` returns `undefined` (not 0) when null, preserving distinction between unset and zero values.",
+      "links": [
+        {
+          "label": "packages/blindfold/src/t3-client.ts:getBalance-return-object",
+          "url": "packages/blindfold/src/t3-client.ts:getBalance-return-object",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/src/t3-client.ts",
+          "url": "packages/blindfold/src/t3-client.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/src/t3-client.ts:getBalance-return-object",
+        "packages/blindfold/src/t3-client.ts"
+      ],
+      "confidence": 0.85,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-cb4c0d1f",
+      "intent": "what_does_routes_mapping_do",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the ROUTES mapping do in Blindfold's CLI?",
+      "shortAnswer": "The ROUTES constant maps CLI command names to handler functions, dispatching incoming commands to the appropriate handler based on the route key. Commands are grouped by functional domain: auth, secrets, lifecycle, tenant, serve, and enclave operations.",
+      "longAnswer": "The `ROUTES` object in `packages/blindfold/bin/blindfold.ts` is a `Record<string, Handler>` that serves as the central command dispatcher for Blindfold's CLI. Each key is a command name (e.g., `login`, `rotate`, `publish`) and its value is the handler function that processes that command.\n\n**Handler groupings:**\n- `handleAuth`: signup, login, logout, whoami\n- `handleSecrets`: register, use, export\n- `handleLifecycle`: rotate, rollback, versions, migrate\n- `handleTenant`: grant, share, revoke\n- `handleServe`: proxy, attest, dashboard, stats, stats:clear\n- `handleEnclave`: publish, init, verify, compat, sealed, audit, status, doctor, skill, credit, balance, update, upgrade\n\nThe routing is flat with no path hierarchy—single-level command names map directly to handlers. The `stats:clear` key demonstrates that colon-separated subcommands are supported as string keys.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/blindfold.ts:ROUTES",
+          "url": "packages/blindfold/bin/blindfold.ts:ROUTES",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/blindfold.ts",
+          "url": "packages/blindfold/bin/blindfold.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/blindfold.ts:ROUTES",
+        "packages/blindfold/bin/blindfold.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-b7065547",
+      "intent": "credential_storage_strategy",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "How does saveTenantCredentials() store tenant API keys in cmd-auth.ts?",
+      "shortAnswer": "saveTenantCredentials() prefers OS keychain storage for the tenant API key, falling back to a 0600-permissioned config file. It writes DID and environment to the config file in both cases, tracking which storage backend was used via T3N_API_KEY_STORE.",
+      "longAnswer": "The `saveTenantCredentials(did, key, env, forceFile)` function in `packages/blindfold/bin/cmd-auth.ts` implements a two-tier credential storage strategy:\n\n1. **Keychain-first**: If `keychainAvailable()` returns true and `forceFile` is false, it calls `keychainSet(did, key)` to store the API key in the OS keychain (e.g., macOS Keychain, Windows Credential Manager, or Linux libsecret).\n2. **File fallback**: If keychain is unavailable or fails, the key is stored directly in the config file as `T3N_API_KEY`.\n\nThe config file at `configPath()` (via `loadBlindfoldEnv`) is written with mode `0o600` (owner read/write only), and a best-effort `chmod` is applied. The function returns `{ inKeychain, triedKeychain, cfg }` so callers know which storage was used.\n\n```typescript\nconst triedKeychain = !forceFile && keychainAvailable();\nconst inKeychain = triedKeychain && keychainSet(did, key);\nif (inKeychain) {\n  merged.T3N_API_KEY_STORE = \"keychain\";\n  delete merged.T3N_API_KEY;\n} else {\n  merged.T3N_API_KEY = key;\n  merged.T3N_API_KEY_STORE = \"file\";\n}\nfs.writeFileSync(cfg, JSON.stringify(merged, null, 2), { mode: 0o600 });\n```\n\nThis is shared by both `login` and `signup` command handlers.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials:19-45",
+          "url": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials:19-45",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials:19-45",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-c00ef91e",
+      "intent": "credential_storage_preference",
+      "audience": [
+        "developer",
+        "researcher"
+      ],
+      "question": "How does inKeychain determine where to store T3N credentials?",
+      "shortAnswer": "The code checks if a DID's key exists in the system keychain via keychainSet(). If found, it stores the credential reference as 'keychain' and deletes the raw API key. Otherwise it falls back to storing the raw key in a file, marked as 'file' store.",
+      "longAnswer": "The `inKeychain` logic implements a two-tier credential storage preference in `cmd-auth.ts`. When a DID+key pair is registered:\n\n1. **Keychain check**: `keychainSet(did, key)` is called to test if the credential exists in the OS keychain (e.g., macOS Keychain, Windows Credential Manager, libsecret on Linux).\n2. **If in keychain**: Sets `merged.T3N_API_KEY_STORE = \"keychain\"` and deletes `merged.T3N_API_KEY` from the config file — the raw key is never written to disk.\n3. **If not in keychain**: Falls back to file storage with `merged.T3N_API_KEY = key` and `merged.T3N_API_KEY_STORE = \"file\"`.\n\n**Security hardening**: The config file is written with `mode: 0o600` (owner read/write only) and a best-effort `fs.chmodSync(cfg, 0o600)` is applied afterward to ensure restrictive permissions even if the mkdir/write doesn't honor the mode flag.\n\nThe function returns `{ inKeychain, triedKeychain, cfg }` so callers know which storage backend was used and the path to the config file.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:keychainSet() call and merged config assignment",
+          "url": "packages/blindfold/bin/cmd-auth.ts:keychainSet() call and merged config assignment",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:keychainSet() call and merged config assignment",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-f917ff01",
+      "intent": "describe_blindfold_cli_commands",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "What commands does the Blindfold CLI support?",
+      "shortAnswer": "The Blindfold CLI provides commands for managing secrets in T3 enclaves, including registration, usage, rotation, migration, proxy management, attestation, and team sharing.",
+      "longAnswer": "The `printHelp()` function in `packages/blindfold/bin/blindfold.ts` documents all Blindfold CLI commands:\n\n**Secret Management:**\n- `register --name <KV_KEY> [--from-env <ENV_VAR>]` — Seal a secret into the enclave (one-time). Reads from `process.env` with `--from-env` or prompts terminal with no echo (preferred, never touches disk/history). Accepts piped stdin.\n- `use --name <secret> [--as <ENV>] -- <cmd>` — Release a sealed secret and run `<cmd>` with it injected as `$ENV` for that command only (never back in your env). `--as` auto-detects known tools (gh→GH_TOKEN, psql→PGPASSWORD, …). Also supports `--url <https>` for quick auth checks.\n- `rotate --name <secret> [--from-env <ENV_VAR>]` — Replace a sealed secret's value, snapshots old value for rollback, shows before/after fingerprints (never the value).\n- `export --name <secret> [--as <ENV_VAR>]` — CI-only: release a sealed secret into `$GITHUB_ENV` for later steps (masked in logs). Used by the Blindfold GitHub Action.\n- `rollback --name <secret> [--to <fp|iso-ts>]` — Restore a previous value snapshotted by rotate (most recent by default).\n- `versions [--name <secret>]` — List snapshots available to roll back to (metadata only).\n\n**Setup & Provisioning:**\n- `signup [--email <you@x.com>]` — Self-serve: create a Terminal 3 testnet tenant. Generates a key locally, verifies email by code, mints welcome credits — no manual provisioning.\n- `init [--seed KV:ENV]... [--start]` — One-command zero-knowledge setup. Walks through .env, build, auth, publish, seed; can auto-launch the proxy.\n- `verify` — Handshake + auth against T3 (smoke test).\n- `publish [--wasm path/to/blindfold_proxy.wasm]` — Publish the Rust→WASM contract (one-time).\n\n**Migration:**\n- `migrate [--dry-run] [--keep]` — Seal EVERY secret in .env in one shot, then remove plaintext lines (backup kept). `--dry-run` previews; `--keep` comments lines instead of deleting. Skips T3 creds + config.\n\n**Proxy & Attestation:**\n- `proxy [--port 8787] [--auth] [--socket [path]]` — Run the local OpenAI-shaped proxy. `--auth` mints a per-session token; `--socket` binds a 0600 unix socket (only your OS user can connect).\n- `attest [--expect-rtmr3 <b64>] [--pin] [--json]` — Verify the enclave's TDX attestation (chains to Intel's root CA). `--pin` records RTMR3 so seal/proxy auto-verify it first.\n\n**Access Control:**\n- `grant --host <host>[,<host2>...]` — Authorize the contract to call these hosts (required before proxy/in-enclave path can reach them). E.g. `--host api.openai.com`\n- `share --to <agent-did> --host <host>[,...]` — Let a teammate's agent USE your sealed keys for those hosts via the enclave — they never receive plaintext (forward only, least privilege).\n- `revoke --to <agent-did>` — Remove a teammate's access. Immediate and complete — nobody holds a raw key copy.\n\n**Observability:**\n- `status` — One-glance overview: mode, tenant health, and list of sealed secrets.\n- `sealed` — List sealed keys — metadata only (name, byte-length, when, where). Never the value.\n- `audit` — Verify the ledger's tamper-evident hash-chain AND reconcile it against the enclave (source of truth) — flags drift/missing/tampering.\n- `dashboard [--port 8799]` — Live HTML dashboard of proxy usage.\n- `stats` — CLI summary of proxy usage.\n- `stats:clear` — Wipe the usage log.\n\n**Agent Integration:**\n- `compat [--json]` — Scan this machine for AI agent tools/SDKs and print the exact env-var swap for each.\n- `skill install [--global|--cursor|--opencode|--cline|--all]` — Install the Blindfold agent skill so your coding agent handles secrets safely. Default: this project.\n- `skill uninstall` — Remove all installed skill files.\n\n**Utilities:**\n- `doctor` — Show current mode + config.\n- `credit [--json]` — Show the tenant's Terminal 3 token/credit balance (no credit cost).\n- `update [--from <path>]` — Update the global blindfold (from npm, or a local repo with `--from`).",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/blindfold.ts:1-50",
+          "url": "packages/blindfold/bin/blindfold.ts:1-50",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/blindfold.ts",
+          "url": "packages/blindfold/bin/blindfold.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/blindfold.ts:1-50",
+        "packages/blindfold/bin/blindfold.ts"
+      ],
+      "confidence": 1,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-0a4d12d8",
+      "intent": "tenant_email_signup_flow",
+      "audience": [
+        "developer"
+      ],
+      "question": "How does the tenant signup process handle email input and validation?",
+      "shortAnswer": "The signup flow retrieves email from the `--email` flag or prompts interactively, validates it with a regex, then creates a Terminal 3 testnet tenant. A secp256k1 tenant key is generated locally and stored in the keychain — never printed to stdout.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the email is sourced from `argv.flags.email` if provided, otherwise the user is prompted with `readLine()`. The input is trimmed and validated against `/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/`; invalid input calls `die()`. On success, a `blindfold signup` header is printed indicating a Terminal 3 testnet tenant is being created for the email. The console output notes that a fresh secp256k1 key is generated locally and stored in the keychain — it is never printed. Comments indicate T3's Level-1 self-admit requires a first + last name on the profile, defaulting from the email local part (minus any `+tag`) so signup stays a single prompt; `--first`/`--last` flags override this default.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:email chunk (lines 1-9)",
+          "url": "packages/blindfold/bin/cmd-auth.ts:email chunk (lines 1-9)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:email chunk (lines 1-9)",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-8b6af0b5",
+      "intent": "preset_otp_authentication_flow",
+      "audience": [
+        "developer"
+      ],
+      "question": "How does presetOtp work in the authentication flow?",
+      "shortAnswer": "presetOtp captures an OTP from the --otp CLI flag, allowing non-interactive signup. It is used by getOtpCode() which returns the preset value if available, otherwise prompts the user interactively. The saved credentials are captured via onKeyReady for recovery reporting.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the `presetOtp` variable is initialized from the `--otp` CLI flag:\n\n```typescript\nconst presetOtp = argv.flags.otp ? String(argv.flags.otp).trim() : \"\";\n```\n\nThis value is consumed inside the `getOtpCode` async function passed to `signupTenant`:\n\n```typescript\ngetOtpCode: async () => {\n  if (presetOtp) return presetOtp;\n  process.stderr.write(c.yellow(`  A verification code was emailed to ${email}.\\n`));\n  return (await readLine(\"  Enter the code: \")).trim();\n},\n```\n\nIf `--otp` was provided, the function returns it immediately, enabling fully non-interactive signup. Otherwise, it prompts the user to enter the emailed code.\n\nThe `saved` variable captures the result of `onKeyReady`, which is called the moment the email verifies. This allows both the success and post-verify-failure paths to report where the key landed, and ensures a failed self-admit never strands an unrecoverable key.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:1-30",
+          "url": "packages/blindfold/bin/cmd-auth.ts:1-30",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:1-30",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-66a7fbea",
+      "intent": "what_happens_after_tenant_admission",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "What does the Blindfold CLI output after a tenant is admitted, and where is the tenant key stored?",
+      "shortAnswer": "After tenant admission, the CLI prints whether the tenant was 'created' or 'confirmed (already registered)', reports where the tenant key is stored (keychain or config file with 0600 permissions), and shows whether welcome credits were minted. The tenant key is never printed to stdout — a deliberate security property.",
+      "longAnswer": "The `verb` variable is set conditionally: if `res.admitStatus === \"already-admitted\"`, it becomes `\"confirmed (already registered)\"`; otherwise it is `\"created\"`. The tenant key storage location depends on `inKeychain`: if true, it uses the system's keychain backend (via `keychainBackend()`); if false, it falls back to the config file path (`cfg`) with Unix permissions `0600`. The comment `// never printed` documents that the private key is deliberately excluded from stdout — a security property ensuring the key is never exposed. Welcome credits (`res.grantedCredits`) are minted only if the testnet dial is non-zero; otherwise a yellow warning suggests running `blindfold credit` to check the balance.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:verb block",
+          "url": "packages/blindfold/bin/cmd-auth.ts:verb block",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:verb block",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.85,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-2d5c07be",
+      "intent": "how_tenant_credentials_saved_after_signup_failure",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "How does Blindfold handle tenant credential storage when signup fails after email verification?",
+      "shortAnswer": "When email verification succeeds but self-admit fails (e.g., unfunded tenant), Blindfold preserves the tenant key and DID in either the system keychain or a file with 0600 permissions, depending on the `--file` flag. The user is directed to `blindfold credit` or a fresh `blindfold signup` to recover.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-auth.ts`, the signup flow distinguishes between two failure modes:\n\n1. **Email verified + self-admit failed**: The tenant key is already saved (to keychain or file) before the admit call. The error message shows where credentials live: `keychainBackend()` (e.g., macOS Keychain, Windows Credential Manager) if `inKeychain` is true, or `${s.cfg} (0600)` for a file. The process exits with code 1 but credentials are **not lost**.\n\n2. **Signup completely refused**: `res.admitStatus === \"refused\"` triggers a `die()` with the refusal reason/detail.\n\nThe `saveTenantCredentials(res.did, res.key, env, Boolean(argv.flags.file))` call at the bottom handles the happy path, returning `{ inKeychain, cfg }` which is reused on retry.\n\n```typescript\nconst { inKeychain, cfg } = saved ?? saveTenantCredentials(res.did, res.key, env, Boolean(argv.flags.file));\n```\n\nThe 0600 file permission ensures the private key is readable only by the owner — a one-file plaintext path security property.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and error handling block",
+          "url": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and error handling block",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and error handling block",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-bf8d9dba",
+      "intent": "credential_storage_fallback",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "How does Blindfold store tenant credentials and what are the storage options?",
+      "shortAnswer": "Blindfold stores tenant credentials (DID + key) preferring the OS keychain, falling back to a mode-0600 file when no keychain exists or write fails (e.g., err 1312 in non-interactive sessions). The `--file` flag forces file storage.",
+      "longAnswer": "In `cmd-auth.ts`, the `saveTenantCredentials(did, key, env, forceFile)` call handles credential persistence with a security-conscious fallback chain:\n\n1. **Primary**: OS keychain (via `keychainBackend()`) — the tenant key is stored securely in the system credential store, leaving only non-secret DID + settings in the config file.\n2. **Fallback**: A `0600`-mode file (readable only by the owner) when:\n   - No OS keychain is detected (`triedKeychain` is false)\n   - Keychain write fails with err 1312 (common in non-interactive/ssh sessions)\n   - The `--file` flag is explicitly passed\n\nThe `inKeychain` boolean returned by `saveTenantCredentials` indicates which storage was used. The key is never printed to stdout — only a confirmation that it is \"stored\" is shown.\n\n```typescript\nconst { inKeychain, triedKeychain, cfg } = saveTenantCredentials(did, key, env, Boolean(argv.flags.file));\nconsole.log(`✓ Saved tenant key to ${inKeychain ? `the ${keychainBackend()}` : `${cfg} (mode 0600)`}`);\n```\n\nAfter saving, Blindfold works from any directory because the credential lookup resolves the stored path.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and console output (lines ~env determination and credential save block)",
+          "url": "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and console output (lines ~env determination and credential save block)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-auth.ts",
+          "url": "packages/blindfold/bin/cmd-auth.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-auth.ts:saveTenantCredentials call and console output (lines ~env determination and credential save block)",
+        "packages/blindfold/bin/cmd-auth.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-2d7fc8ac",
+      "intent": "how_credit_command_queries_t3_balance",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "How does the `credit` command in cmd-enclave.ts query the tenant's T3 credit balance?",
+      "shortAnswer": "The `credit` command loads the Blindfold environment, opens a T3 client via `openT3Client`, calls `client.getBalance()` to retrieve available and reserved base units, then formats and displays the balance with a warning if credits are exhausted. It costs no credit since it's a session-authed read.",
+      "longAnswer": "The `credit` (aliased as `balance`) command in `packages/blindfold/bin/cmd-enclave.ts` implements a read-only balance check that avoids the pitfall of discovering zero credits only when a seal/forward fails with a 403.\n\n**Flow:**\n1. `loadBlindfoldEnv()` reads tenant config (DID, mock flag, t3Env)\n2. `openT3Client(env)` from `../src/t3-client.ts` opens a session-authenticated connection\n3. `client.getBalance()` returns `{ available, reserved, creditExhausted }` where units are base units (1 token = 1,000,000 base)\n4. Output formats with `tok()` helper: `tok(n)` = `(n / 1_000_000).toLocaleString()`\n5. If `creditExhausted` is true, prints a warning and exits with code 1\n\n```typescript\nconst BASE = 1_000_000;\nconst client = await openT3Client(env);\nconst b = await client.getBalance();\nconst tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });\n```\n\nThe command works even when credits are exhausted because it is a session-authed read that costs no credit.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:handleEnclave:credit/balance case (lines ~20-50)",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:handleEnclave:credit/balance case (lines ~20-50)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:handleEnclave:credit/balance case (lines ~20-50)",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-45d87a1f",
+      "intent": "display_credit_status",
+      "audience": [
+        "developer"
+      ],
+      "question": "How does the credit display work in blindfold's tok helper?",
+      "shortAnswer": "The `tok` helper converts base units to human-readable tokens with up to 6 decimal places using `toLocaleString`. The credit status command displays available tokens (via `tok`), reserved base units, and an exhausted/ok status indicator.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the `tok` function is defined as:\n\n```typescript\nconst tok = (n: number) => (n / BASE).toLocaleString(undefined, { maximumFractionDigits: 6 });\n```\n\nIt divides base units by `BASE` (a constant representing the smallest token unit) and formats the result with locale-aware thousands separators and up to 6 decimal places. The credit display shows:\n\n- **available**: tokens via `tok(b.available)` plus raw base units in gray\n- **reserved**: raw base units only\n- **status**: `⚠ EXHAUSTED` (red) or `✅ ok` (green) based on `b.creditExhausted`\n\nWhen exhausted, it prints a link to the token request docs and sets `process.exitCode = 1`.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:tok helper (line ~1), credit display block",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:tok helper (line ~1), credit display block",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:tok helper (line ~1), credit display block",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-a1b4d608",
+      "intent": "pkg_discovery_and_npm_fallback",
+      "audience": [
+        "developer"
+      ],
+      "question": "How does cmd-enclave.ts discover the blindfold package and when does it fall back to npm?",
+      "shortAnswer": "The code searches candidate directories for a local package.json where pkg.name matches the PKG constant or 'blindfold' and pkg.bin.blindfold exists. If no local installation is found, it falls back to updating from the published scoped npm package.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the code performs a local package discovery loop:\n\n1. Iterates through candidate directories (`cand`)\n2. Reads `package.json` from each candidate\n3. Checks if `pkg.name === PKG || pkg.name === 'blindfold'` AND `pkg.bin?.blindfold` is defined\n4. If matched, sets `from = cand` and breaks\n\nIf no local installation is found (`!from`), it logs a message and falls back to updating from npm:\n```\nconsole.log(head(\"↻ Updating global blindfold from npm\") + c.gray(` (${PKG}@latest)…`));\n```\n\nThis implements a local-first, npm-fallback strategy for the blindfold CLI installation.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:pkg",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:pkg",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:pkg",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.85,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-7cb212a7",
+      "intent": "what_does_blindfold_update_do",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the blindfold update command do?",
+      "shortAnswer": "The update command first attempts to install the latest published blindfold version via npm install -g. If that fails (package not published or offline), it falls back to building from a local repo checkout using the --from flag, BLINDFOLD_SRC env var, or running from within the repo.",
+      "longAnswer": "In `packages/blindfold/bin/cmd-enclave.ts`, the `r` variable captures the result of `run(\"npm\", [\"install\", \"-g\", \\`${PKG}@latest\\`])`. If npm install fails (non-zero status), the command prints a helpful error with three fallback options:\n\n1. `blindfold update --from /path/to/packages/blindfold` — specify a local path\n2. `cd <repo> && blindfold update` — run from repo root\n3. `export BLINDFOLD_SRC=/path/to/packages/blindfold` — set environment variable\n\nIf npm install succeeds, it prints `✓ blindfold updated to the latest published version.` and returns. Otherwise, it sets `process.exitCode = 1` and returns early.\n\nWhen updating from a local path (the `from` variable is set), it runs `npm run build` in that directory via `run(\"npm\", [\"run\", \"build\"], from)`. If the build fails, it calls `die(\"build failed\")`.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:1-17",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:1-17",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:1-17",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-dfe9812b",
+      "intent": "what_does_inst_update_handler_do",
+      "audience": [
+        "developer",
+        "enterprise"
+      ],
+      "question": "What does the `inst` case handler do in cmd-enclave.ts?",
+      "shortAnswer": "The `inst` handler performs a global npm install of a blindfold package tarball, then cleans up the tarball file and reports success or failure to the user.",
+      "longAnswer": "The `inst` case handler implements the blindfold CLI update/install flow:\n\n1. **Install**: Runs `npm install -g <tgzPath>` to globally install the blindfold package tarball\n2. **Cleanup**: Removes the temporary `.tgz` file using `fs.rmSync` with `force: true` (errors ignored)\n3. **Error handling**: If `inst.status !== 0`, calls `die(\"global install failed\")` to exit with an error\n4. **Success message**: Logs `✓ blindfold updated.` in green, followed by a gray hint: \"Open a NEW shell if the command still looks stale.\"\n\nThe shell restart hint is necessary because global npm binaries are resolved at shell startup, so the new version won't be in PATH until a fresh shell is opened.\n\n```typescript\nconst inst = run(\"npm\", [\"install\", \"-g\", tgzPath]);\ntry { fs.rmSync(tgzPath, { force: true }); } catch { /* ignore */ }\nif (inst.status !== 0) die(\"global install failed\");\nconsole.log(ok(`✓ blindfold updated.`) + c.gray(\" Open a NEW shell if the command still looks stale.\"));\n```",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:inst case handler",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:inst case handler",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:inst case handler",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.95,
+      "lastVerified": "2026-07-12"
+    },
+    {
+      "id": "kb-extracted-2da5aa15",
+      "intent": "what_does_info_command_display",
+      "audience": [
+        "developer"
+      ],
+      "question": "What does the info command display in cmd-enclave.ts?",
+      "shortAnswer": "The info command calls `client.me()` to retrieve the current tenant's information and displays the tenant name with its status. On failure, it shows an error message (truncated to 90 characters) and suggests running `blindfold doctor` for diagnosis.",
+      "longAnswer": "The `info` command (part of the enclave subcommand in `cmd-enclave.ts`) performs the following:\n\n1. Calls `client.me()` to fetch the authenticated tenant's profile\n2. Displays the tenant name using the `ok()` helper (green checkmark) with the status value (falling back to `\"?\"` if undefined)\n3. On error, displays the error message using the `bad()` helper (red X), truncates it to 90 characters, and sets `process.exitCode = 1`\n\n```typescript\nconst info = await client.me();\nconsole.log(`  tenant:  ${ok(\"✅ \" + info.tenant)}  (status=${info.status ?? \"?\"})`);\n```\n\nThe `blindfold doctor` reference is a diagnostic subcommand users can run when the info check fails.",
+      "links": [
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts:info chunk (chunk 11 of 17)",
+          "url": "packages/blindfold/bin/cmd-enclave.ts:info chunk (chunk 11 of 17)",
+          "type": "code"
+        },
+        {
+          "label": "packages/blindfold/bin/cmd-enclave.ts",
+          "url": "packages/blindfold/bin/cmd-enclave.ts",
+          "type": "code"
+        }
+      ],
+      "sources": [
+        "packages/blindfold/bin/cmd-enclave.ts:info chunk (chunk 11 of 17)",
+        "packages/blindfold/bin/cmd-enclave.ts"
+      ],
+      "confidence": 0.7,
       "lastVerified": "2026-07-12"
     }
   ]
