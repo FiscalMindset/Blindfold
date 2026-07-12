@@ -18,7 +18,7 @@ type Handler = (cmd: string, argv: Argv, cmdArgs: string[]) => Promise<void>;
 
 const ROUTES: Record<string, Handler> = {
   signup: handleAuth, login: handleAuth, logout: handleAuth, whoami: handleAuth,
-  register: handleSecrets, use: handleSecrets, export: handleSecrets,
+  register: handleSecrets, use: handleSecrets, export: handleSecrets, delete: handleSecrets, remove: handleSecrets,
   rotate: handleLifecycle, rollback: handleLifecycle, versions: handleLifecycle, migrate: handleLifecycle,
   grant: handleTenant, share: handleTenant, revoke: handleTenant,
   proxy: handleServe, attest: handleServe, dashboard: handleServe, stats: handleServe, "stats:clear": handleServe,

@@ -104,6 +104,13 @@ export const COMMANDS: CmdDef[] = [
   },
   { name: "versions", group: "🔑 Secrets", usage: "[--name <secret>]", summary: "List the snapshots available to roll back to (metadata only).", flags: [["--name <secret>", "Limit to one secret."]], examples: ["blindfold versions --name stripe_secret_key"] },
   {
+    name: "delete", group: "🔑 Secrets", usage: "--name <secret> [--yes]", aliases: ["remove"],
+    summary: "Delete a sealed secret: empty its value in the enclave AND remove it from the local ledger (re-chained; backup kept). Use if you sealed the wrong thing.",
+    flags: [["--name <secret>", "The sealed secret to delete (required)."], ["--yes", "Skip the confirmation prompt (destructive)."]],
+    examples: ["blindfold delete --name old_api_key"],
+    notes: "Re-seal correctly with `blindfold register` afterward. If the value was a real key, revoke it at the provider too — deleting here doesn't un-expose anything already leaked.",
+  },
+  {
     name: "migrate", group: "🔑 Secrets", usage: "[--dry-run] [--keep]",
     summary: "Seal every secret in .env at once, then remove the plaintext lines (backup kept).",
     flags: [["--dry-run", "Preview what would be sealed, change nothing."], ["--keep", "Comment out the .env lines instead of deleting them."]],

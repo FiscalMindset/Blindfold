@@ -4,6 +4,20 @@
 
 ---
 
+## [0.4.6] — 2026-07-13 — `blindfold delete` (remove a sealed secret)
+
+### Added
+- **`blindfold delete --name <secret>`** (alias `remove`) — the missing "undo a
+  seal" command. Empties the value in the enclave (current tenant) **and** removes
+  the entry from the local ledger, re-chaining so `audit` stays valid; the old
+  ledger is backed up first. Confirmation prompt unless `--yes`. Use it when you
+  sealed the wrong thing (e.g. put an API key in the *name* field).
+- `t3-client` gains `deleteSecret` (true `map-entry-delete`, falling back to
+  overwriting the value with empty); `sealed-ledger` gains `removeSealedEntry`
+  (removes + re-chains the tamper-evident ledger).
+
+---
+
 ## [0.4.5] — 2026-07-13 — Shape + example together in `help`
 
 ### Changed

@@ -141,6 +141,12 @@ async function loadSdk(): Promise<T3Sdk> {
 export interface T3ClientHandle {
   close: () => Promise<void>;
   seedSecret: (name: string, value: string) => Promise<void>;
+  /**
+   * Delete a sealed secret from the enclave's secrets map. Tries a true
+   * map-entry-delete; if the control plane lacks it, overwrites the value with
+   * empty so the plaintext is gone. Returns which happened.
+   */
+  deleteSecret: (name: string) => Promise<"deleted" | "emptied">;
   invokeForward: (req: ForwardRequest) => Promise<ForwardResponse>;
   registerContract: (wasm: Uint8Array) => Promise<{ contractId: string | number }>;
   /**
@@ -364,6 +370,22 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
     safeLog("info", { msg: "seeded", name });
   };
 
+  const deleteSecret = async (name: string): Promise<"deleted" | "emptied"> => {
+    const map_name = tenant.canonicalName("secrets");
+    try {
+      // Preferred: a true delete of the map entry (removes key + value).
+      await tenant.executeControl("map-entry-delete", { map_name, key: name });
+      safeLog("info", { msg: "deleted", name });
+      return "deleted";
+    } catch {
+      // Fallback: the control plane may not expose delete — overwrite the value
+      // with empty so the plaintext is gone (the key may remain).
+      await tenant.executeControl("map-entry-set", { map_name, key: name, value: "" });
+      safeLog("info", { msg: "emptied", name });
+      return "emptied";
+    }
+  };
+
   const registerContract = async (wasm: Uint8Array): Promise<{ contractId: string | number }> => {
     const r = (await tenant.contracts.register({
       tail: CONTRACT_TAIL,
@@ -509,6 +531,7 @@ async function openRealClient(env: BlindfoldEnv): Promise<T3ClientHandle> {
       /* SDK has no close()  */
     },
     seedSecret,
+    deleteSecret,
     invokeForward,
     registerContract,
     releaseSecret,
@@ -531,6 +554,10 @@ function openMockClient(): T3ClientHandle {
     async seedSecret(name, value) {
       if (!value || value.length === 0) throw new Error(`secret ${name} is empty`);
       safeLog("info", { msg: "mock-seed (value dropped, length only)", name, length: value.length });
+    },
+    async deleteSecret(name) {
+      safeLog("info", { msg: "mock-delete", name });
+      return "deleted";
     },
     async registerContract(wasm) {
       safeLog("info", { msg: "mock-register-contract", wasmBytes: wasm.byteLength });
