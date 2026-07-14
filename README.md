@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="Blindfold — Your AI Agent Can't Leak The API Key It Never Had" width="560" />
+<h1>🛡️ Blindfold</h1>
+
+<p><strong>Your AI agent can't leak the API key it never had.</strong></p>
 
 [![npm version](https://img.shields.io/npm/v/@fiscalmindset/blindfold?style=for-the-badge&color=cb3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/@fiscalmindset/blindfold)
 [![Built on Terminal 3](https://img.shields.io/badge/built%20on-Terminal%203-6e44ff?style=for-the-badge)](https://terminal3.io)
@@ -13,7 +15,7 @@
 npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com
 ```
 
-[**📦 Install**](#installation) &nbsp;·&nbsp; [**📊 Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) &nbsp;·&nbsp; [**⚡ Quickstart**](#quickstart)
+[**🌐 Live site**](https://blindfold-rho.vercel.app) &nbsp;·&nbsp; [**📦 Install**](#installation) &nbsp;·&nbsp; [**📊 Interactive Presentation**](https://fiscalmindset.github.io/Blindfold/) &nbsp;·&nbsp; [**⚡ Quickstart**](#quickstart)
 
 <br/>
 
