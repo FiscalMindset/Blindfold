@@ -394,14 +394,16 @@
   .tbody .ann{color:#6a6a90;font-style:italic}
   .tbody .hr{display:flex;align-items:center;gap:10px;margin:10px 0 6px;color:var(--violet);font-size:11px;letter-spacing:.05em}
   .tbody .hr span{flex:1;height:1px;background:var(--line2)} .tbody .hr b{font-weight:700}
-  /* two-terminal hero stack */
-  .termstack{display:flex;flex-direction:column;gap:14px}
-  .tbody.s1{height:196px} .tbody.s2{height:244px}
-  .termhero.cc{border-color:rgba(139,123,255,.32);box-shadow:0 30px 80px -30px rgba(90,60,220,.5)}
-  .termhero.cc .bar{background:#0e0a1a;border-bottom-color:rgba(139,123,255,.18)}
+  /* one bigger hero terminal that plays the whole journey */
+  .tbody.big{height:454px}
+  .termhero.cc{border-color:rgba(139,123,255,.4);box-shadow:0 30px 80px -30px rgba(90,60,220,.55)}
+  .termhero.cc .bar{background:#0e0a1a;border-bottom-color:rgba(139,123,255,.22)}
   .termhero.cc .bar .t{color:#b6a8ff}
-  .termhero.idle{opacity:.4;filter:saturate(.45);transition:opacity .4s,filter .4s}
-  .termhero{transition:opacity .4s,filter .4s}
+  .termhero{transition:border-color .5s,box-shadow .5s}
+  .tbody .l.hr{display:flex;align-items:center;gap:10px;margin:10px 0 4px;color:var(--violet);font-size:11px;letter-spacing:.06em;font-weight:700}
+  .tbody .l.hr::before,.tbody .l.hr::after{content:"";flex:1;height:1px;background:rgba(139,123,255,.35)}
+  .cursor{display:inline-block;width:7px;height:14px;background:#7fd1ff;vertical-align:-2px;margin-left:1px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
   .cursor{display:inline-block;width:7px;height:14px;background:#7fd1ff;vertical-align:-2px;margin-left:1px;animation:blink 1s step-end infinite}
   @keyframes blink{50%{opacity:0}}
 
@@ -461,15 +463,9 @@
         <img alt="tdx" src="https://img.shields.io/badge/Intel-TDX-58a6ff?style=flat-square" />
       </div>
     </div>
-    <div class="termstack reveal">
-      <div class="termhero" id="term1">
-        <div class="bar"><i style="background:#ff6b63"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t">zsh — setup (your shell)</span></div>
-        <div class="tbody s1" id="t1body"></div>
-      </div>
-      <div class="termhero cc idle" id="term2">
-        <div class="bar"><i style="background:#8b7bff"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t">◆ Claude Code — ~/my-agent</span></div>
-        <div class="tbody s2" id="t2body"></div>
-      </div>
+    <div class="termhero reveal" id="term1">
+      <div class="bar"><i style="background:#ff6b63"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t" id="termTitle">zsh — you@mac</span></div>
+      <div class="tbody big" id="heroBody"></div>
     </div>
   </div>
 </section>
@@ -1117,14 +1113,14 @@ HEADERS: StateName | DistrictName | Sector | QueryType | QueryText | …
     window.addEventListener('load',build);
   })();
 
-  /* ── hero: TWO real terminals — setup shell, then a live Claude Code session ── */
+  /* ── hero: ONE terminal that plays the whole journey — setup, then `claude`
+        opens a live Claude Code session INSIDE the same terminal ── */
   (function(){
-    const b1=document.getElementById('t1body'), b2=document.getElementById('t2body'), w2=document.getElementById('term2');
-    if(!b1||!b2||!w2) return;
+    const body=document.getElementById('heroBody'), win=document.getElementById('term1'), title=document.getElementById('termTitle');
+    if(!body||!win||!title) return;
     const wait=ms=>new Promise(r=>setTimeout(r,ms));
-    // s1 = your shell. s2 = the Claude Code session it launches.
     // Every out: line is a real captured output from an actual run.
-    const s1=[
+    const script=[
       {cmd:'npm i -g @fiscalmindset/blindfold'},
       {out:['dim','added 133 packages in 6s']},
       {out:['ok','+ @fiscalmindset/blindfold@0.4.6']},
@@ -1135,19 +1131,25 @@ HEADERS: StateName | DistrictName | Sector | QueryType | QueryText | …
       {cmd:'blindfold register --name google_sheet_api_key'},
       {out:['dim','  Value for "google_sheet_api_key" (hidden): ••••••••••••']},
       {out:['ok','✓ Registered "google_sheet_api_key" — value lives only in the enclave.']},
+      {cmd:'blindfold status'},
+      {out:['ok','  • google_sheet_api_key    39 B    real']},
+      {out:['dim','    ↑ name + byte-size only — the value is never shown, even to you']},
+      {cmd:'blindfold attest'},
+      {out:['ok','  chain to Intel root: ✅ valid    ·    quotes verified: 3/3']},
+      {out:['dim','  RTMR3 (code measure): B6mn+/ADHhD…  ← verify the exact code in TDX']},
       {cmd:'blindfold skill install'},
       {out:['dim','  ✓ this project (Claude Code) → .claude/skills/blindfold/SKILL.md']},
       {out:['ok','✓ Blindfold skill installed (1 target)']},
       {cmd:'claude'},
-      {out:['dim','  ↑ opening a Claude Code session…']},
-    ];
-    const s2=[
-      {ann:'◆ Claude Code — Blindfold skill loaded (.claude/skills/blindfold/SKILL.md)'},
+      {session:1},
+      {ann:'◆ Blindfold skill loaded (.claude/skills/blindfold/SKILL.md)'},
       {you:'Read what’s inside my Google Sheet, I sealed the key already:'},
       {you:'https://docs.google.com/spreadsheets/d/1N5xuy8j…/edit'},
       {cl:'I’ll use your sealed key through Blindfold — I never read the key myself.'},
       {cmd:'blindfold use --name google_sheet_api_key --as GKEY -- \\'},
       {cmd2:'python3 read_sheet.py 1N5xuy8j…'},
+      {out:['dim','# 1N5xuy8j… = the Sheet ID (public, from the URL) — NOT the key.']},
+      {out:['dim','# the real key is $GKEY, released just for this command, never printed.']},
       {ann:'⟨ under the hood ⟩  Terminal 3  →  tenant-authenticated RPC (eth-signed session)'},
       {ann:'⟨ under the hood ⟩  Intel TDX enclave  →  release-to-tenant reads z:tenant:secrets'},
       {ann:'⟨ under the hood ⟩  real key returned over the encrypted session, used once, dropped'},
@@ -1155,9 +1157,14 @@ HEADERS: StateName | DistrictName | Sector | QueryType | QueryText | …
       {out:['','TITLE: raksha-farmer-query   (2003 rows × 14 cols)']},
       {out:['amb','  KARNATAKA | HUBBALLI | HORTICULTURE | Sowing time of Onion?']},
       {cl:'Done — 2,003 rows across 14 columns. I used your key but never saw it.'},
+      {endsession:1},
+      {cmd:'echo $GKEY'},
+      {out:['dim','(empty)']},
+      {out:['ok','✓ $GKEY only lived inside that one command — never in your shell, never in the agent.']},
     ];
-    function line(body,cls,txt){const d=document.createElement('div');d.className='l '+(cls||'');d.textContent=txt;body.appendChild(d);body.scrollTop=body.scrollHeight;}
-    async function typeCmd(body,s,prompt,cls){
+    function line(cls,txt){const d=document.createElement('div');d.className='l '+(cls||'');d.textContent=txt;body.appendChild(d);body.scrollTop=body.scrollHeight;}
+    function hr(txt){const d=document.createElement('div');d.className='l hr';d.textContent=txt;body.appendChild(d);body.scrollTop=body.scrollHeight;}
+    async function typeCmd(s,prompt,cls){
       const d=document.createElement('div');d.className='l';
       const pr=document.createElement('span');pr.className=cls||'p';pr.textContent=prompt;d.appendChild(pr);
       const sp=document.createElement('span');sp.className='cmd';d.appendChild(sp);
@@ -1166,29 +1173,26 @@ HEADERS: StateName | DistrictName | Sector | QueryType | QueryText | …
       for(const ch of s){ sp.textContent+=ch; body.scrollTop=body.scrollHeight; await wait(20+Math.random()*32); }
       cur.remove();
     }
-    async function runScript(body, steps){
-      for(const st of steps){
-        if(st.cmd){ await typeCmd(body,st.cmd,'$ ','p'); await wait(st.cmd.endsWith('\\')?110:420); }
-        else if(st.cmd2){ await typeCmd(body,st.cmd2,'  ','dim'); await wait(560); }
-        else if(st.you){ line(body,'you','❯ '+st.you); await wait(560); }
-        else if(st.cl){ line(body,'cl','◆ Claude  '+st.cl); await wait(880); }
-        else if(st.ann){ line(body,'ann',st.ann); await wait(520); }
-        else if(st.out){ line(body,st.out[0],st.out[1]); await wait(300); }
-      }
-    }
     let running=false;
     async function play(){
       running=true;
       for(;;){
-        b1.innerHTML=''; b2.innerHTML=''; w2.classList.add('idle');
-        await runScript(b1, s1);
-        await wait(450); w2.classList.remove('idle'); await wait(350);
-        await runScript(b2, s2);
-        await wait(3400);
+        body.innerHTML=''; win.classList.remove('cc'); title.textContent='zsh — you@mac';
+        for(const st of script){
+          if(st.session){ win.classList.add('cc'); title.textContent='◆ Claude Code — ~/my-agent'; hr('◆ Claude Code'); await wait(650); }
+          else if(st.endsession){ win.classList.remove('cc'); title.textContent='zsh — you@mac'; hr('back in your shell'); await wait(600); }
+          else if(st.cmd){ await typeCmd(st.cmd,'$ ','p'); await wait(st.cmd.endsWith('\\')?110:420); }
+          else if(st.cmd2){ await typeCmd(st.cmd2,'  ','dim'); await wait(560); }
+          else if(st.you){ line('you','❯ '+st.you); await wait(560); }
+          else if(st.cl){ line('cl','◆ Claude  '+st.cl); await wait(880); }
+          else if(st.ann){ line('ann',st.ann); await wait(520); }
+          else if(st.out){ line(st.out[0],st.out[1]); await wait(300); }
+        }
+        await wait(3600);
       }
     }
     const vo=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting && !running){ play(); } }),{threshold:.15});
-    vo.observe(document.getElementById('term1'));
+    vo.observe(win);
   })();
 
   /* ── packet FLOWS ALONG WIRES through the nested architecture ── */
