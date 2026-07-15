@@ -1,0 +1,4 @@
+# Upload only the static landing page — keep the rest of the private monorepo out.
+/*
+!/site
+!/vercel.json

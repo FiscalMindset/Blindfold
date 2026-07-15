@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blindfold — Your AI agent can't leak the API key it never had</title>
+<meta name="description" content="Blindfold seals your API keys inside an Intel TDX hardware enclave on Terminal 3. Your AI agent only ever sees a placeholder — a prompt injection can't leak a key that was never in its memory. Open source, on npm." />
+<meta name="theme-color" content="#080810" />
+<meta property="og:title" content="Blindfold — un-leakable API keys for AI agents" />
+<meta property="og:description" content="Seal your key in a hardware enclave. The agent uses it but never sees it." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://blindfold-rho.vercel.app/" />
+<meta property="og:image" content="https://blindfold-rho.vercel.app/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Blindfold — un-leakable API keys for AI agents" />
+<meta name="twitter:description" content="Seal your key in a hardware enclave. The agent uses it but never sees it." />
+<meta name="twitter:image" content="https://blindfold-rho.vercel.app/og.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#080810; --bg2:#0b0b16; --panel:#101020; --panel2:#15152a; --panel3:#191932;
+    --line:#22223a; --line2:#2e2e4c;
+    --ink:#eef0fa; --muted:#9a9ab8; --dim:#66668a;
+    /* accent = clean electric blue (new CTA color) */
+    --accent:#3d7bfd; --accent2:#5b8cff; --accentink:#ffffff;
+    --violet:#8b7bff; --blue:#58a6ff; --green:#3fd07a; --amber:#f0b429; --red:#ff6b63; --cyan:#39c5cf;
+    --heroGrad:linear-gradient(100deg,#4ce08a,#39c5cf 52%,#5b8cff);
+    --r:16px; --maxw:1140px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  /* ── mobile overflow guards: let grid/flex children shrink below their content ── */
+  .hero-grid > *{min-width:0}
+  .termstack,.termhero,.tbody{min-width:0;max-width:100%}
+  .termhero .bar{min-width:0}
+  .termhero .bar .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .arch{overflow:hidden}
+  .term,.term pre,.diagram,pre.mini{max-width:100%}
+  .grid3>*,.grid2>*,.cost-grid>*,.prov>*,.journey>*,.concepts>*,.steps>*{min-width:0}
+  .node{min-width:0}
+  img{max-width:100%;height:auto}
+  a{color:inherit;text-decoration:none}
+  code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  .grad-text{background:var(--heroGrad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .c-use{color:var(--green)} .c-read{color:var(--red)}
+  .glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:
+    radial-gradient(650px 420px at 12% -6%,rgba(61,123,253,.20),transparent 60%),
+    radial-gradient(720px 500px at 100% 2%,rgba(139,123,255,.14),transparent 55%),
+    radial-gradient(700px 640px at 55% 118%,rgba(63,208,122,.08),transparent 60%)}
+  section{position:relative;z-index:1;padding:92px 0}
+  .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);font-weight:700}
+  h1,h2,h3{margin:0;line-height:1.12;letter-spacing:-.02em}
+  h2{font-size:clamp(28px,4vw,42px);font-weight:800;margin:14px 0 12px}
+  p.lead{font-size:clamp(16px,2.1vw,19px);color:var(--muted);max-width:660px}
+  .center{text-align:center;margin:0 auto 46px;max-width:720px}.center p.lead{margin:0 auto}
+
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(8,8,16,.72);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .brand .mark{font-size:20px;filter:drop-shadow(0 0 10px rgba(61,123,253,.7))}
+  .nav-links{display:flex;align-items:center;gap:20px;font-size:14px;color:var(--muted)}
+  .nav-links a:hover{color:var(--ink)}
+  @media(min-width:1025px){.nav-links a.only-mobile{display:none}}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;font-weight:600;font-size:14px;padding:11px 18px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);cursor:pointer;transition:.18s;white-space:nowrap}
+  .btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border:1px solid var(--accent);color:var(--accentink);font-weight:700}
+  .btn.primary:hover{background:var(--accent2);box-shadow:0 12px 30px -10px rgba(61,123,253,.7)}
+  .navtoggle{display:none;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);width:42px;height:42px;border-radius:10px;align-items:center;justify-content:center;font-size:20px;cursor:pointer;line-height:1}
+  .navcta{display:none}
+  .navcta b{color:var(--accent2);font-weight:600;font-style:normal}
+  @media(max-width:1024px){
+    .navtoggle{display:inline-flex}
+    .navcta{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;min-width:0;text-align:center;font-size:12px;line-height:1.3;color:var(--muted);font-style:italic;font-weight:500;padding:0 14px}
+    .nav-links{position:fixed;top:60px;right:12px;left:12px;flex-direction:column;align-items:stretch;gap:4px;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:10px;box-shadow:0 30px 60px -20px rgba(0,0,0,.85);display:none;z-index:200}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:11px 13px;border-radius:9px}
+    .nav-links a:not(.btn):hover{background:var(--panel2)}
+    .nav-links a.btn{text-align:center;justify-content:center;margin-top:4px}
+  }
+  @media(min-width:620px) and (max-width:1024px){.navcta{font-size:13.5px;-webkit-line-clamp:1}}
+  @media(max-width:380px){.navcta{font-size:10.5px;padding:0 9px}}
+
+  .hero{padding:74px 0 56px}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center}
+  @media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:34px}}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);border:1px solid var(--line2);background:var(--panel);border-radius:999px;padding:6px 13px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  h1.big{font-size:clamp(36px,6vw,58px);font-weight:900;margin:20px 0 16px}
+  .hero p{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:560px}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .cmd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;background:#06060d;border:1px solid var(--line2);border-radius:12px;padding:13px 15px;max-width:540px}
+  .cmd code{color:#c9d4ff;font-size:14px}
+  .cmd .cp{font-size:12px;color:var(--muted);border:1px solid var(--line2);background:var(--panel2);border-radius:8px;padding:5px 10px;cursor:pointer;transition:.15s}
+  .cmd .cp:hover{color:var(--ink);border-color:var(--accent)}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.badges img{height:22px}
+
+  /* hero visual */
+  .viz{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.85)}
+  .viz .row{display:flex;align-items:center;gap:12px;margin:12px 0}
+  .chip{flex:1;border:1px solid var(--line2);border-radius:12px;padding:12px 14px;background:#0a0a15}
+  .chip .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+  .chip .v{font-family:"JetBrains Mono",monospace;font-size:13px;margin-top:4px}
+  .chip.agent .v{color:var(--amber)} .chip.enc{border-color:rgba(61,123,253,.5);background:linear-gradient(180deg,rgba(61,123,253,.10),transparent)} .chip.enc .v{color:var(--accent2)} .chip.api .v{color:var(--green)}
+  .arrow{color:var(--dim);font-size:18px}
+  .sentinel{color:var(--blue);font-weight:600}
+  .leak{margin-top:10px;font-size:12.5px;color:var(--red);display:flex;gap:8px}.leak s{color:var(--dim)}
+
+  .trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:24px 0;background:rgba(255,255,255,.012)}
+  .trust .wrap{display:flex;align-items:center;justify-content:center;gap:34px;flex-wrap:wrap;color:var(--muted);font-size:13.5px;font-weight:500}.trust b{color:var(--ink)}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:900px){.grid3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px;transition:.2s}
+  .card:hover{border-color:var(--line2);transform:translateY(-3px)}
+  .card .ic{font-size:22px;margin-bottom:10px}.card h3{font-size:17px;font-weight:700;margin-bottom:6px}.card p{color:var(--muted);font-size:14.5px;margin:0}
+
+  /* WHAT IS — concept chips */
+  .concepts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+  @media(max-width:900px){.concepts{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.concepts{grid-template-columns:1fr}}
+  .concept{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .concept b{display:block;font-size:14px;margin-bottom:4px}.concept span{color:var(--muted);font-size:13px}
+
+  /* SEALING JOURNEY */
+  .journey{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative}
+  @media(max-width:900px){.journey{grid-template-columns:1fr}}
+  .jstep{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;position:relative}
+  .jstep .big-ic{font-size:26px;margin-bottom:8px}
+  .jstep h4{margin:0 0 6px;font-size:15px}
+  .jstep p{margin:0;color:var(--muted);font-size:13.5px}
+  .jstep code{display:inline-block;margin-top:9px;background:#06060d;border:1px solid var(--line2);border-radius:8px;padding:6px 9px;font-size:12px;color:#c9d4ff}
+  .jbadge{position:absolute;top:-10px;right:14px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .jbadge.you{background:rgba(240,180,41,.15);color:var(--amber);border:1px solid rgba(240,180,41,.4)}
+  .jbadge.enc{background:rgba(61,123,253,.15);color:var(--accent2);border:1px solid rgba(61,123,253,.4)}
+
+  /* ARCHITECTURE — real nested diagram */
+  .arch{border:1px solid var(--line);border-radius:20px;padding:26px;background:linear-gradient(180deg,var(--panel),var(--bg2))}
+  .zone{border:1px dashed var(--line2);border-radius:16px;padding:18px;margin-top:16px;position:relative}
+  .zone > .ztag{position:absolute;top:-11px;left:16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:6px;background:var(--bg);border:1px solid var(--line2)}
+  .zone.local{border-color:rgba(255,107,99,.4)} .zone.local .ztag{color:var(--red);border-color:rgba(255,107,99,.4)}
+  .zone.t3{border-color:rgba(139,123,255,.5);border-style:solid;background:linear-gradient(180deg,rgba(139,123,255,.05),transparent)} .zone.t3 .ztag{color:var(--violet);border-color:rgba(139,123,255,.5)}
+  .zone.tdx{border-color:rgba(61,123,253,.6);border-style:solid;background:linear-gradient(180deg,rgba(61,123,253,.06),transparent)} .zone.tdx .ztag{color:var(--accent2);border-color:rgba(61,123,253,.6)}
+  .zone.enc{border-color:rgba(63,208,122,.55);border-style:solid;background:linear-gradient(180deg,rgba(63,208,122,.06),transparent)} .zone.enc .ztag{color:var(--green);border-color:rgba(63,208,122,.55)}
+  .nodes{display:flex;gap:12px;flex-wrap:wrap}
+  .node{flex:1;min-width:150px;background:#0a0a16;border:1px solid var(--line2);border-radius:12px;padding:13px 14px;position:relative;z-index:2;transition:.4s}
+  .node .nt{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px}
+  .node .nd{color:var(--muted);font-size:12px;margin-top:3px}
+  .flowline{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--dim);font-size:12.5px;margin:12px 0;font-family:"JetBrains Mono",monospace}
+  .flowline .a{color:var(--accent2)}
+  .archnote{color:var(--muted);font-size:13px;margin-top:16px;text-align:center}
+
+  /* ANIMATED FLOW — a packet that travels THROUGH the nested architecture, looping */
+  .arch{position:relative}
+  .apacket{position:absolute;left:0;top:0;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:9;pointer-events:none;transform:translate(-50%,-50%);opacity:1;
+    background:rgba(240,180,41,.20);border:1px solid var(--amber);box-shadow:0 0 26px -2px var(--amber);
+    transition:opacity .28s ease,background .5s,border-color .5s,box-shadow .5s}
+  svg.wires{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible}
+  .wire{fill:none;stroke:var(--line2);stroke-width:2;opacity:.45}
+  .wire.active{stroke:var(--accent2);stroke-width:2.6;opacity:1;filter:drop-shadow(0 0 5px var(--accent2));stroke-dasharray:8 8;animation:dash .55s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-16}}
+  .trail{position:absolute;width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:8;transform:translate(-50%,-50%);opacity:.75;transition:opacity .5s ease,transform .5s ease}
+  .zone.lit{box-shadow:0 0 0 1px currentColor,0 0 34px -8px currentColor}
+  .zone.local.lit{color:var(--red)} .zone.t3.lit{color:var(--violet)} .zone.tdx.lit{color:var(--accent2)} .zone.enc.lit{color:var(--green)} .zone.api.lit{color:var(--green)}
+  .node.lit{border-color:var(--accent)!important;box-shadow:0 0 24px -8px var(--accent);background:linear-gradient(180deg,rgba(61,123,253,.14),#0a0a16)}
+  .fcap{text-align:center;margin-top:22px;color:var(--muted);font-size:14.5px;min-height:26px;transition:.2s}
+  .fcap b{color:var(--ink)} .fcap code{color:#c9d4ff;font-family:"JetBrains Mono",monospace;font-size:13px;background:#06060d;padding:2px 6px;border-radius:6px;border:1px solid var(--line2)}
+  .fphase{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .fphase span{font-size:11px;color:var(--dim);border:1px solid var(--line2);border-radius:999px;padding:4px 12px;transition:.3s}
+  .fphase span.on{color:var(--ink);border-color:var(--accent);background:rgba(61,123,253,.12)}
+  .fdetail{max-width:660px;margin:16px auto 0;background:#0b0b16;border:1px solid var(--line2);border-radius:14px;padding:15px 18px;min-height:118px}
+  .fdetail h4{margin:0 0 9px;font-size:13.5px;color:var(--accent2);display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace}
+  .fdops{margin:0;padding:0;list-style:none}
+  .fdops li{font-size:13px;color:var(--dim);padding:3px 0 3px 22px;position:relative;font-family:"JetBrains Mono",monospace;transition:.25s}
+  .fdops li::before{content:"·";position:absolute;left:7px;color:var(--dim)}
+  .fdops li.on{color:var(--ink)} .fdops li.on::before{content:"▸";color:var(--green)}
+
+  /* three paths */
+  table.cmp{width:100%;border-collapse:collapse;font-size:14px}
+  table.cmp th,table.cmp td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  table.cmp th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  table.cmp td:first-child{color:var(--ink);font-weight:600}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .tag.strong{background:rgba(63,208,122,.15);color:var(--green)} .tag.mid{background:rgba(240,180,41,.15);color:var(--amber)}
+  /* rich comparison table — heatmap cells + sticky first column */
+  .cmpwrap{border:1px solid var(--line);border-radius:var(--r)}
+  table.cmp-rich{min-width:840px;font-size:13px}
+  .cmp-rich th{white-space:normal;vertical-align:bottom;font-size:10.5px;background:var(--panel2)}
+  .cmp-rich th,.cmp-rich td{padding:11px 13px;vertical-align:top}
+  .cmp-rich td.good{color:#7ee2a6;font-weight:600;background:rgba(63,208,122,.12)}
+  .cmp-rich td.bad{color:#ff9d97;font-weight:600;background:rgba(255,107,99,.11)}
+  .cmp-rich td.warn{color:#ffcf6b;font-weight:600;background:rgba(240,180,41,.12)}
+  .cmp-rich td.mut{color:var(--dim)}
+  .cmp-rich .sublbl{color:var(--dim);font-weight:400;font-size:11px}
+  /* sticky first column so the approach name stays while you scroll → responsive */
+  .cmp-rich th:first-child,.cmp-rich td:first-child{position:sticky;left:0;z-index:2;background:var(--panel2);box-shadow:1px 0 0 var(--line)}
+  .cmp-rich thead th:first-child{z-index:3}
+  /* winner row */
+  .cmp-rich tr.hl td{border-top:1px solid rgba(61,123,253,.45);border-bottom:1px solid rgba(61,123,253,.45)}
+  .cmp-rich tr.hl td:first-child{background:linear-gradient(90deg,rgba(61,123,253,.30),var(--panel2));box-shadow:inset 3px 0 0 var(--accent),1px 0 0 var(--line)}
+  .cmpcopy{cursor:pointer}
+  .cmpscroll{text-align:center;color:var(--dim);font-size:12px;margin-top:9px}
+  @media(min-width:900px){.cmpscroll{display:none}}
+
+  /* demo terminal */
+  .term{background:#06060d;border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 30px 70px -30px rgba(0,0,0,.85)}
+  .term .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:#0a0a15}
+  .term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}.term .bar .t{margin-left:10px;font-size:12px;color:var(--dim)}
+  .term pre{margin:0;padding:18px;font-size:13px;line-height:1.7;overflow-x:auto;color:#c9d4e6}
+  .term .cmt{color:var(--dim)}.term .ok{color:var(--green)}.term .kw{color:var(--accent2)}.term .str{color:var(--blue)}.term .amb{color:var(--amber)}
+  /* three-path cards */
+  .pathc{display:flex;flex-direction:column}
+  .phd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .phd h3{margin:0;font-size:16px;flex:1}
+  .pnum{width:24px;height:24px;border-radius:8px;background:var(--panel3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--accent2)}
+  .pwhere{font-size:13px;color:var(--muted);margin:0 0 8px}.pwhere b{color:var(--ink)}
+  .pathc p{font-size:13.5px;color:var(--muted)}
+  pre.mini{margin:12px 0 0;background:#06060d;border:1px solid var(--line2);border-radius:10px;padding:12px 13px;font-family:"JetBrains Mono",monospace;font-size:11.6px;line-height:1.66;color:#c9d4ff;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;flex:1}
+  @media(max-width:420px){pre.mini{font-size:11px}}
+  pre.mini .cmt{color:var(--dim)}
+  pre.mini .pr{color:#7fd1ff;user-select:none}
+  /* per-path strength accents + honest note */
+  .pathc.p-strong{border-top:2px solid var(--green)}
+  .pathc.p-flex{border-top:2px solid var(--amber)}
+  .pathc.p-seal{border-top:2px solid var(--violet)}
+  .p-strong .pnum{background:rgba(63,208,122,.16);border-color:rgba(63,208,122,.4);color:var(--green)}
+  .p-flex .pnum{background:rgba(240,180,41,.16);border-color:rgba(240,180,41,.4);color:var(--amber)}
+  .p-seal .pnum{background:rgba(139,123,255,.16);border-color:rgba(139,123,255,.4);color:var(--violet)}
+  .pnote{font-size:12px;color:#e9c778;background:rgba(240,180,41,.07);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:9px 12px;margin-top:18px;line-height:1.55}
+  .pnote code{color:#c9d4ff;font-family:"JetBrains Mono",monospace;font-size:11px}
+  .pgood{font-size:12px;color:#8fd8ac;background:rgba(63,208,122,.07);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:9px 12px;margin-top:18px;line-height:1.55}
+  /* command cheatsheet */
+  /* interactive command reference */
+  .cmdref{margin-top:30px}
+  .cmdref-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .cmdref-head .ct{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700}
+  .cmdref-head .hint{color:var(--dim);font-size:12px;font-weight:400;text-transform:none;letter-spacing:0}
+  .cmdgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;text-align:left}
+  @media(max-width:760px){.cmdgrid{grid-template-columns:1fr}}
+  .cmdcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 15px}
+  .cmdcard h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin:0 0 6px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .cmditem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:9px 6px;cursor:pointer;transition:.14s;border-radius:8px;font:inherit}
+  .cmdcard .cmditem:first-of-type{border-top:0}
+  .cmditem:hover{background:var(--panel2)}
+  .cmditem.copied{background:rgba(63,208,122,.09)}
+  .cmdtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .cmdtop code{font-family:"JetBrains Mono",monospace;font-size:12px;color:#c9d4ff;overflow-wrap:anywhere}
+  .cmdtop .ci{color:var(--dim);font-size:13px;flex-shrink:0;transition:.14s}
+  .cmditem:hover .ci{color:var(--accent2)}
+  .cmditem.copied .ci{color:var(--green)}
+  .cmditem .cd{color:var(--muted);font-size:11.5px}
+  /* demo stats */
+  .stats{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:22px auto 0;max-width:840px}
+  .stat{flex:1;min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center}
+  .stat b{display:block;font-size:26px;font-weight:800;color:var(--ink);font-family:"JetBrains Mono",monospace}
+  .stat.zero b{color:var(--green)}
+  .stat span{font-size:12px;color:var(--muted);margin-top:3px;display:block}
+  /* founder */
+  .founder .fcard{display:flex;gap:22px;align-items:center;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:26px 28px;max-width:760px;margin:0 auto}
+  .favatar{width:78px;height:78px;border-radius:50%;border:2px solid var(--line2);flex-shrink:0;background:var(--panel2)}
+  .fname{font-size:18px;font-weight:700}.fname b{color:var(--accent2)}
+  .founder .fcard p{color:var(--muted);font-size:14px;margin:6px 0 12px}
+  .flinks{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+  .flinks a{color:var(--muted);display:inline-flex;align-items:center;gap:7px}.flinks a:hover{color:var(--ink)}
+  @media(max-width:560px){.founder .fcard{flex-direction:column;text-align:center}.flinks{justify-content:center}}
+  /* system design */
+  .sd{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--panel),var(--bg2));padding:26px}
+  .sd-life{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:900px){.sd-life{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.sd-life{grid-template-columns:1fr}}
+  .life{background:#0a0a16;border:1px solid var(--line2);border-radius:12px;padding:14px}
+  .life .ln{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent2);font-weight:700}
+  .life h5{margin:6px 0 4px;font-size:13.5px}
+  .life p{margin:0;font-size:12.3px;color:var(--muted);line-height:1.5}
+  .life code{font-size:11px;color:#c9d4ff;word-break:break-word}
+  .sd-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:820px){.sd-cols{grid-template-columns:1fr}}
+  .sd-panel{background:#0a0a16;border:1px solid var(--line2);border-radius:14px;padding:16px 18px}
+  .sd-panel h4{margin:0 0 6px;font-size:14px;color:var(--accent2);display:flex;gap:8px;align-items:center}
+  .sd-row{display:flex;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .sd-row b{color:var(--ink);min-width:130px;flex-shrink:0;font-family:"JetBrains Mono",monospace;font-size:11.5px}
+  .sd-row span{color:var(--muted)}
+  @media(max-width:420px){.sd-row{flex-direction:column;gap:2px}.sd-row b{min-width:0}}
+  /* system-design FLOW DIAGRAM (real, responsive, SVG-wired) */
+  .sysd{position:relative;margin:6px 0 18px}
+  .sysd-flow{position:relative;display:flex;flex-direction:column;gap:30px;padding:8px 34px 8px 0}
+  .srow{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;position:relative;z-index:2}
+  .szone{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;text-align:right;padding-right:9px;border-right:2px solid var(--line2);line-height:1.35}
+  .szone.local{color:var(--red);border-color:rgba(255,107,99,.5)}
+  .szone.t3{color:var(--violet);border-color:rgba(139,123,255,.5)}
+  .szone.tdx{color:var(--accent2);border-color:rgba(61,123,253,.6)}
+  .szone.enc{color:var(--green);border-color:rgba(63,208,122,.6)}
+  .szone.api{color:var(--green);border-color:rgba(63,208,122,.6)}
+  .snode{display:flex;gap:12px;align-items:flex-start;background:#0a0a16;border:1px solid var(--line2);border-radius:12px;padding:13px 15px;transition:.2s}
+  .snode:hover{border-color:var(--accent)}
+  .snode .sic{font-size:22px;line-height:1.1}
+  .snode b{font-size:13.5px;display:block}
+  .snode i{font-style:normal;color:var(--muted);font-size:12px;display:block;margin-top:3px;line-height:1.45}
+  .snode code{color:#c9d4ff;font-size:11px}
+  .snode.local{border-color:rgba(255,107,99,.34)} .snode.t3{border-color:rgba(139,123,255,.4)}
+  .snode.tdx{border-color:rgba(61,123,253,.45)} .snode.enc{border-color:rgba(63,208,122,.45)} .snode.api{border-color:rgba(63,208,122,.45)}
+  .sysd-wires{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible}
+  .sysd-wires .fwd{fill:none;stroke:var(--accent2);stroke-width:2.4;stroke-dasharray:7 7;animation:dash .6s linear infinite}
+  .sysd-wires .ret{fill:none;stroke:var(--green);stroke-width:2.4;opacity:.85;stroke-dasharray:7 7;animation:dash .6s linear infinite}
+  .sysd-wires .head{fill:var(--accent2)} .sysd-wires .head.g{fill:var(--green)}
+  .sysd-wires .chip{fill:#06060d;stroke:var(--accent2);stroke-width:1.5}
+  .sysd-wires .num{fill:#eef0fa;font:700 10.5px "JetBrains Mono",monospace}
+  .sysd-legend{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:var(--muted);margin-top:4px}
+  .sysd-legend i{font-style:normal;display:inline-flex;align-items:center;gap:7px}
+  .sysd-legend .sw{width:22px;height:0;border-top:2.6px dashed currentColor;display:inline-block}
+  @media(max-width:640px){
+    .sysd-flow{padding-right:26px;gap:26px}
+    .srow{grid-template-columns:1fr;gap:5px}
+    .szone{text-align:left;border-right:0;border-left:2px solid var(--line2);padding-left:9px;padding-right:0}
+  }
+  /* providers */
+  .prov{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:820px){.prov{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:420px){.prov{grid-template-columns:1fr}}
+  .pv{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 15px;transition:.18s}
+  .pv:hover{border-color:var(--accent)}
+  .pv .pn{font-weight:700;font-size:14px}
+  .pv .ph{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);margin-top:2px;word-break:break-all}
+  .pv .pa{display:inline-block;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--panel3);color:var(--accent2)}
+  .provnote{text-align:center;color:var(--muted);font-size:13px;margin-top:16px}
+  /* cost */
+  .cost-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:820px){.cost-grid{grid-template-columns:1fr}}
+  /* faq */
+  .faq{max-width:780px;margin:0 auto}
+  .qa{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+  .qa summary{cursor:pointer;padding:16px 18px;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary::after{content:"+";color:var(--accent2);font-size:20px;font-weight:700;flex-shrink:0}
+  .qa[open] summary::after{content:"–"}
+  .qa .ab{padding:0 18px 16px;color:var(--muted);font-size:14px;line-height:1.62}
+  .qa .ab code{color:#c9d4ff;font-size:12.5px}
+  /* pricing tiers */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+  @media(max-width:900px){.tiers{grid-template-columns:1fr}}
+  .tier{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 22px}
+  .tier.feat{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 30px 60px -30px rgba(61,123,253,.5);position:relative}
+  .tflag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:999px;letter-spacing:.04em;white-space:nowrap}
+  .tier .tname{font-size:14px;font-weight:700;color:var(--accent2);letter-spacing:.04em;text-transform:uppercase}
+  .tier .tprice{font-size:30px;font-weight:800;margin:10px 0 4px;font-family:"JetBrains Mono",monospace}
+  .tier .tprice small{font-size:14px;color:var(--muted);font-weight:500;font-family:Inter,sans-serif}
+  .tier .tsub{font-size:13px;color:var(--muted);margin-bottom:18px;min-height:38px}
+  .tier ul{list-style:none;padding:0;margin:0 0 20px;flex:1}
+  .tier li{font-size:13.5px;color:var(--muted);padding:6px 0 6px 24px;position:relative}
+  .tier li::before{content:"✓";position:absolute;left:2px;color:var(--green);font-weight:700}
+  .tbtn{display:block;text-align:center;padding:12px;border-radius:11px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);transition:.18s}
+  .tier.feat .tbtn{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tbtn:hover{border-color:var(--accent)}
+  .pricenote{text-align:center;color:var(--muted);font-size:13px;margin-top:18px}
+  /* testnet overlay on pricing */
+  .pricing-stack{position:relative}
+  .tiers.locked{filter:blur(4px) saturate(.7);opacity:.4;pointer-events:none;user-select:none;transition:.35s}
+  .testnet-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:8px;z-index:5}
+  .testnet-card{max-width:560px;width:100%;background:linear-gradient(180deg,rgba(20,20,42,.95),rgba(11,11,22,.97));border:1px solid var(--accent);border-radius:18px;padding:26px 24px;box-shadow:0 40px 90px -30px rgba(61,123,253,.55);text-align:center}
+  .testnet-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green);background:rgba(63,208,122,.12);border:1px solid rgba(63,208,122,.4);border-radius:999px;padding:5px 12px}
+  .testnet-card h3{font-size:21px;margin:12px 0 6px}
+  .testnet-card>p{color:var(--muted);font-size:14px;margin:0 0 15px}
+  .tn-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0 0 15px}
+  .tn-stat{flex:1;min-width:118px;background:#0a0a16;border:1px solid var(--line2);border-radius:12px;padding:12px 10px}
+  .tn-stat b{display:block;font-size:22px;font-family:"JetBrains Mono",monospace;color:var(--ink)}
+  .tn-stat span{font-size:11.5px;color:var(--muted)}
+  .tn-calc{background:#0a0a16;border:1px solid var(--line2);border-radius:12px;padding:13px 14px;margin:0 0 16px;font-size:13.5px;color:var(--muted);text-align:left}
+  .tn-calc input{width:92px;background:#06060d;border:1px solid var(--line2);color:var(--ink);border-radius:8px;padding:6px 8px;font-family:"JetBrains Mono",monospace;font-size:13px}
+  .tn-calc .out{color:var(--ink);font-weight:600}
+  .tn-calc .cover{font-size:12.5px;margin-top:7px}
+  .tn-cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .tn-toggle{display:inline;background:none;border:0;color:var(--accent2);font:inherit;cursor:pointer;text-decoration:underline;padding:0}
+  .tn-toggle:hover{color:var(--ink)}
+  @media(max-width:560px){.testnet-card h3{font-size:18px}.tn-stat b{font-size:19px}}
+
+  /* HERO TYPING TERMINAL */
+  .termhero{background:#06060d;border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(0,0,0,.85)}
+  .termhero .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:#0a0a15}
+  .termhero .bar i{width:11px;height:11px;border-radius:50%;display:inline-block}.termhero .bar .t{margin-left:10px;font-size:12px;color:var(--dim)}
+  .tbody{padding:15px 16px 16px;font-family:"JetBrains Mono",monospace;font-size:12.3px;line-height:1.62;height:352px;overflow-y:auto;scrollbar-width:none}
+  .tbody::-webkit-scrollbar{display:none}
+  .tbody{overflow-x:hidden}
+  .tbody .l{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;margin:1px 0}
+  .tbody .cmd,.tbody .l span{overflow-wrap:anywhere;word-break:break-word}
+  .tbody .p{color:#7fd1ff} .tbody .cmd{color:#eef0fa} .tbody .ok{color:var(--green)} .tbody .dim{color:#6b6b90} .tbody .amb{color:var(--amber)} .tbody .blue{color:var(--blue)} .tbody .sys{color:var(--violet)}
+  .tbody .you{color:#cfe0ff;font-weight:600} .tbody .cl{color:#b6a8ff}
+  .tbody .ann{color:#6a6a90;font-style:italic}
+  .tbody .hr{display:flex;align-items:center;gap:10px;margin:10px 0 6px;color:var(--violet);font-size:11px;letter-spacing:.05em}
+  .tbody .hr span{flex:1;height:1px;background:var(--line2)} .tbody .hr b{font-weight:700}
+  /* two-terminal hero stack */
+  .termstack{display:flex;flex-direction:column;gap:14px}
+  .tbody.s1{height:196px} .tbody.s2{height:244px}
+  .termhero.cc{border-color:rgba(139,123,255,.32);box-shadow:0 30px 80px -30px rgba(90,60,220,.5)}
+  .termhero.cc .bar{background:#0e0a1a;border-bottom-color:rgba(139,123,255,.18)}
+  .termhero.cc .bar .t{color:#b6a8ff}
+  .termhero.idle{opacity:.4;filter:saturate(.45);transition:opacity .4s,filter .4s}
+  .termhero{transition:opacity .4s,filter .4s}
+  .cursor{display:inline-block;width:7px;height:14px;background:#7fd1ff;vertical-align:-2px;margin-left:1px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+  .step .n{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .step h3{font-size:16px;margin-bottom:6px}.step p{color:var(--muted);font-size:14px;margin:0 0 12px}
+  .step code{display:block;background:#06060d;border:1px solid var(--line2);border-radius:9px;padding:9px 11px;font-size:12.5px;color:#c9d4ff;overflow-x:auto}
+
+  .final{background:linear-gradient(180deg,var(--panel),#090914);border:1px solid var(--line2);border-radius:24px;padding:52px 30px;text-align:center;position:relative;overflow:hidden}
+  .final::before{content:"";position:absolute;inset:0;background:radial-gradient(520px 240px at 50% -20%,rgba(61,123,253,.22),transparent 70%)}.final>*{position:relative}
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--dim);font-size:13.5px}
+  .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}.foot a{color:var(--muted)}.foot a:hover{color:var(--ink)}
+  .reveal{opacity:0;transform:translateY(16px);transition:.6s ease}.reveal.in{opacity:1;transform:none}
+  .sub{background:rgba(255,255,255,.012);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav><div class="wrap nav">
+  <a class="brand" href="#top"><span class="mark">🛡️</span> Blindfold</a>
+  <a class="navcta" href="#what">Your AI agent can't leak the API key <b>it never had.</b></a>
+  <div class="nav-links" id="navLinks">
+    <a href="#what">What</a>
+    <a href="#sealing" class="only-mobile">Sealing</a>
+    <a href="#arch">Architecture</a>
+    <a href="#design">System design</a>
+    <a href="#providers" class="only-mobile">Providers</a>
+    <a href="#demo" class="only-mobile">Demo</a>
+    <a href="#compare">Compare</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://github.com/FiscalMindset/Blindfold" target="_blank" rel="noopener">GitHub</a>
+    <a class="btn primary" href="#start">Get started</a>
+  </div>
+  <button class="navtoggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
+</div></nav>
+
+<a id="top"></a>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="pill"><span class="dot"></span> Live on npm · Open source (MIT)</span>
+      <h1 class="big">Your AI agent can't leak the API&nbsp;key it <span class="grad-text">never had.</span></h1>
+      <p>Blindfold seals your key inside an <b style="color:var(--ink)">Intel TDX hardware enclave</b> on Terminal 3. Your agent only ever sees a placeholder — the real key is substituted <i>inside</i> the enclave. A prompt injection has nothing to steal.</p>
+      <div class="cmd"><code>npm i -g @fiscalmindset/blindfold</code><button class="cp" data-cmd="npm i -g @fiscalmindset/blindfold">Copy</button></div>
+      <div class="cta-row">
+        <a class="btn primary" href="#start">Get started →</a>
+        <a class="btn" href="#what">What is Blindfold?</a>
+        <a class="btn" href="https://github.com/FiscalMindset/Blindfold" target="_blank" rel="noopener">★ GitHub</a>
+      </div>
+      <div class="badges">
+        <img alt="npm" src="https://img.shields.io/npm/v/@fiscalmindset/blindfold?style=flat-square&color=3d7bfd&label=npm" />
+        <img alt="license" src="https://img.shields.io/badge/license-MIT-3fd07a?style=flat-square" />
+        <img alt="tdx" src="https://img.shields.io/badge/Intel-TDX-58a6ff?style=flat-square" />
+      </div>
+    </div>
+    <div class="termstack reveal">
+      <div class="termhero" id="term1">
+        <div class="bar"><i style="background:#ff6b63"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t">zsh — setup (your shell)</span></div>
+        <div class="tbody s1" id="t1body"></div>
+      </div>
+      <div class="termhero cc idle" id="term2">
+        <div class="bar"><i style="background:#8b7bff"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t">◆ Claude Code — ~/my-agent</span></div>
+        <div class="tbody s2" id="t2body"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="trust"><div class="wrap">
+  <span>Built on <b>Terminal 3</b></span><span>Confidential compute · <b>Intel TDX</b></span>
+  <span><b>Open source</b> · MIT</span><span>One-line adoption</span><span>Self-serve in <b>~30s</b></span>
+</div></div>
+
+<!-- WHAT IS -->
+<section id="what">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">What is Blindfold?</span>
+      <h2>A vault your agent can <span class="c-use">use</span> but never <span class="c-read">read</span></h2>
+      <p class="lead">To do real work, AI agents need API keys. The moment a key sits in the agent's memory, a single prompt injection can talk it into leaking it. Blindfold removes the target entirely: the real key lives inside a hardware-isolated enclave, and your agent only ever holds a harmless placeholder — <span class="sentinel">__BLINDFOLD__</span>. The substitution happens <i>inside</i> the enclave, at the last moment, so the plaintext key is never on your machine or in the agent's context.</p>
+    </div>
+    <div class="concepts">
+      <div class="concept reveal"><b>🔒 Enclave</b><span>A region of RAM inside an Intel TDX chip that nobody — not the OS, not root, not the cloud host — can read.</span></div>
+      <div class="concept reveal"><b>🎭 Sentinel</b><span>The literal string <span class="sentinel">__BLINDFOLD__</span>. Your agent sends it thinking it's a key. It's just a placeholder.</span></div>
+      <div class="concept reveal"><b>🔁 In-enclave swap</b><span>The contract swaps the sentinel for the real key inside TDX RAM, calls the API, and returns only the response.</span></div>
+      <div class="concept reveal"><b>📄 Canonical copy</b><span>The one authoritative key lives only in the enclave. Every other copy on disk or in .env gets deleted.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW SEALING WORKS -->
+<section id="sealing" class="sub">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">How sealing works</span>
+      <h2>Follow the key — from your terminal to the API</h2>
+      <p class="lead">You touch the plaintext exactly once, at seal time. After that it lives in the enclave, and even <i>you</i> only ever get results, not the key.</p>
+    </div>
+    <div class="journey">
+      <div class="jstep reveal"><span class="jbadge you">You</span><div class="big-ic">🔑</div><h4>1 · Seal it</h4><p>Run register; type the key with input hidden (no echo, no shell history). Or seal straight from an env var.</p><code>blindfold register --name openai_api_key</code></div>
+      <div class="jstep reveal"><span class="jbadge enc">Enclave</span><div class="big-ic">🔒</div><h4>2 · It lives in TDX</h4><p>The value goes straight into the enclave's secrets map. Your machine drops it — nothing on disk. Confirm it's sealed:</p><code>blindfold status</code></div>
+      <div class="jstep reveal"><span class="jbadge you">Agent</span><div class="big-ic">🎭</div><h4>3 · Use the placeholder</h4><p>Your agent sends <span class="sentinel">__BLINDFOLD__</span> via the proxy, or you inject the key into one command.</p><code>blindfold use --name openai_api_key -- cmd</code></div>
+      <div class="jstep reveal"><span class="jbadge enc">Enclave</span><div class="big-ic">✅</div><h4>4 · Swap &amp; call</h4><p>Inside TDX, the sentinel becomes the real key, the API is called, and only the <b>result</b> comes back. Verify the code first:</p><code>blindfold attest</code></div>
+    </div>
+    <p class="archnote">The plaintext key exists on your machine for one moment (step 1) and inside the enclave for one call (step 4). Never in the agent, never in a log.</p>
+    <div class="cmdref reveal">
+      <div class="cmdref-head">
+        <span class="ct">The full command set <span class="hint">— tap any command to copy</span></span>
+        <button class="btn" id="cmdCopyAll" style="cursor:pointer">⧉ Copy all as a cheatsheet</button>
+      </div>
+      <div class="cmdgrid">
+        <div class="cmdcard">
+          <h4>🚀 Onboard &amp; check</h4>
+          <button class="cmditem" data-cmd="blindfold signup"><span class="cmdtop"><code>blindfold signup</code><span class="ci">⧉</span></span><span class="cd">create a funded testnet tenant</span></button>
+          <button class="cmditem" data-cmd="blindfold doctor"><span class="cmdtop"><code>blindfold doctor</code><span class="ci">⧉</span></span><span class="cd">check your key + tenant health</span></button>
+          <button class="cmditem" data-cmd="blindfold whoami"><span class="cmdtop"><code>blindfold whoami</code><span class="ci">⧉</span></span><span class="cd">tenant + where your key is stored</span></button>
+          <button class="cmditem" data-cmd="blindfold credit"><span class="cmdtop"><code>blindfold credit</code><span class="ci">⧉</span></span><span class="cd">token balance &amp; reservations</span></button>
+        </div>
+        <div class="cmdcard">
+          <h4>🔑 Seal &amp; manage</h4>
+          <button class="cmditem" data-cmd="blindfold register --name openai_api_key"><span class="cmdtop"><code>blindfold register --name k</code><span class="ci">⧉</span></span><span class="cd">seal a key — hidden prompt, never on disk</span></button>
+          <button class="cmditem" data-cmd="blindfold status"><span class="cmdtop"><code>blindfold status</code><span class="ci">⧉</span></span><span class="cd">list sealed secrets (metadata only)</span></button>
+          <button class="cmditem" data-cmd="blindfold rotate --name openai_api_key"><span class="cmdtop"><code>blindfold rotate --name k</code><span class="ci">⧉</span></span><span class="cd">replace a value — rollback-safe</span></button>
+          <button class="cmditem" data-cmd="blindfold delete --name openai_api_key"><span class="cmdtop"><code>blindfold delete --name k</code><span class="ci">⧉</span></span><span class="cd">remove a sealed secret</span></button>
+        </div>
+        <div class="cmdcard">
+          <h4>🔀 Use it</h4>
+          <button class="cmditem" data-cmd="blindfold proxy"><span class="cmdtop"><code>blindfold proxy</code><span class="ci">⧉</span></span><span class="cd">start the local proxy on :8787</span></button>
+          <button class="cmditem" data-cmd="blindfold use --name openai_api_key -- cmd"><span class="cmdtop"><code>blindfold use --name k -- cmd</code><span class="ci">⧉</span></span><span class="cd">run a command with the key injected</span></button>
+          <button class="cmditem" data-cmd="blindfold grant --host api.openai.com"><span class="cmdtop"><code>blindfold grant --host …</code><span class="ci">⧉</span></span><span class="cd">allow an upstream host (egress)</span></button>
+          <button class="cmditem" data-cmd="blindfold skill install"><span class="cmdtop"><code>blindfold skill install</code><span class="ci">⧉</span></span><span class="cd">install the Claude Code skill</span></button>
+        </div>
+        <div class="cmdcard">
+          <h4>📜 Verify &amp; help</h4>
+          <button class="cmditem" data-cmd="blindfold attest"><span class="cmdtop"><code>blindfold attest</code><span class="ci">⧉</span></span><span class="cd">verify the enclave — RTMR3 → Intel root CA</span></button>
+          <button class="cmditem" data-cmd="blindfold audit"><span class="cmdtop"><code>blindfold audit</code><span class="ci">⧉</span></span><span class="cd">reconcile the ledger vs the enclave</span></button>
+          <button class="cmditem" data-cmd="blindfold --help"><span class="cmdtop"><code>blindfold --help</code><span class="ci">⧉</span></span><span class="cd">full command help</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="arch">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Architecture</span>
+      <h2>The real stack — nested, not flat</h2>
+      <p class="lead">Your machine is untrusted. The key lives inside an enclave, inside an Intel TDX trust domain, inside the Terminal 3 network. Each boundary is real hardware/crypto isolation.</p>
+    </div>
+    <div class="arch reveal" id="arch">
+      <div class="apacket" id="apkt"><span id="ptok">🔑</span></div>
+      <!-- untrusted machine -->
+      <div class="zone local" id="z-local">
+        <span class="ztag">🚨 Your machine — untrusted for secrets</span>
+        <div class="nodes">
+          <div class="node" id="n-agent"><div class="nt">🤖 AI Agent</div><div class="nd">holds only <span class="sentinel">__BLINDFOLD__</span></div></div>
+          <div class="node" id="n-proxy"><div class="nt">🔀 Blindfold proxy / CLI</div><div class="nd">routes by URL, forwards the sentinel — never sees the key</div></div>
+        </div>
+      </div>
+      <div class="flowline"><span class="a">▼ agent → Blindfold proxy → sentinel over the tenant-authenticated session ▼</span></div>
+      <!-- terminal 3 -->
+      <div class="zone t3" id="z-t3">
+        <span class="ztag">☁️ Terminal 3 — confidential-compute network</span>
+        <div class="nodes" style="margin-top:6px">
+          <div class="node"><div class="nt">🪪 Tenant</div><div class="nd">your DID + eth key (secp256k1) — authenticates every call</div></div>
+          <div class="node"><div class="nt">📇 Contract registry</div><div class="nd">blindfold-proxy v0.5.6, published to your tenant</div></div>
+          <div class="node"><div class="nt">🚧 Egress allowlist</div><div class="nd">agent-auth-update — server-side, deny-by-default host ACL</div></div>
+          <div class="node"><div class="nt">💳 Token ledger</div><div class="nd">metered credits per enclave op (~20 tokens each)</div></div>
+        </div>
+        <!-- intel tdx -->
+        <div class="zone tdx" id="z-tdx" style="margin-top:10px">
+          <span class="ztag">🔐 Intel TDX — hardware trust domain</span>
+          <div class="nodes" style="margin-top:6px">
+            <div class="node"><div class="nt">🧊 Confidential VM</div><div class="nd">memory-encrypted RAM — opaque to the host, OS, and root</div></div>
+            <div class="node"><div class="nt">📏 RTMR3 measurement</div><div class="nd">runtime hash of the contract code — pin it with <code>attest</code></div></div>
+            <div class="node"><div class="nt">🧾 TDX quote</div><div class="nd">signed attestation; chains to the Intel SGX root CA</div></div>
+            <div class="node"><div class="nt">🧩 WASM runtime</div><div class="nd">runs the wasm32-wasip2 contract inside the enclave</div></div>
+          </div>
+          <!-- enclave -->
+          <div class="zone enc" id="z-enc" style="margin-top:8px">
+            <span class="ztag">🔒 Enclave — blindfold-proxy contract (Rust → WASM)</span>
+            <div class="nodes">
+              <div class="node" id="n-forward"><div class="nt">⚙️ forward()</div><div class="nd">swaps sentinel → real key, calls the API from inside TDX</div></div>
+              <div class="node"><div class="nt">🗝️ release-to-tenant()</div><div class="nd">returns plaintext to the authenticated tenant, for one call</div></div>
+              <div class="node" id="n-secrets"><div class="nt">📦 secrets map</div><div class="nd">z:&lt;tenant&gt;:secrets — the ONLY copy of your real key</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flowline"><span class="a">▼ real key substituted in-enclave — outbound HTTPS ▼</span></div>
+      <!-- upstream -->
+      <div class="zone api" id="z-api" style="border-style:solid">
+        <span class="ztag" style="color:var(--green)">✅ Upstream API</span>
+        <div class="nodes"><div class="node" id="n-api"><div class="nt">OpenAI · Stripe · GitHub · Google · …</div><div class="nd">authenticates the real key; only the response flows back — the key never returns</div></div></div>
+      </div>
+    </div>
+    <p class="archnote">Deny-by-default at two gates: the proxy 404s any unmapped API, and the enclave refuses any host not on your egress allowlist. Verify the enclave runs your exact code with <code>blindfold attest</code> (RTMR3 pin → Intel root CA). &nbsp;·&nbsp; <a href="https://github.com/FiscalMindset/Blindfold/blob/main/system_design.md" style="color:var(--accent2)" target="_blank" rel="noopener">Full system design →</a></p>
+
+    <div class="fcap" id="fcap" style="margin-top:26px">The token above travels the real path, on loop ↑</div>
+    <div class="fphase"><span data-p="seal">1 · Seal</span><span data-p="send">2 · Agent sends placeholder</span><span data-p="swap">3 · Swap in-enclave</span><span data-p="return">4 · Result returns</span></div>
+    <div class="fdetail" id="fdetail"><h4 id="fdtitle">Inside this step</h4><ul class="fdops" id="fdops"></ul></div>
+  </div>
+</section>
+
+<!-- SYSTEM DESIGN -->
+<section id="design" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">System design</span><h2>The complete picture — nothing hidden</h2><p class="lead">Every component, the exact request lifecycle, and the real contract interface. This is what actually runs — not a simplification.</p></div>
+    <div class="sd reveal">
+      <h4 style="margin:0 0 16px;font-size:14px;color:var(--accent2)">▸ Request lifecycle — proxy path (an agent HTTP call)</h4>
+      <div class="sysd">
+        <div class="sysd-flow" id="sysdFlow">
+          <div class="srow"><span class="szone local">Your machine<br/>untrusted</span>
+            <div class="snode local" id="sn-1"><span class="sic">🤖</span><div><b>AI Agent</b><i>holds only the placeholder <code>__BLINDFOLD__</code> — never a real key</i></div></div></div>
+          <div class="srow"><span class="szone local"></span>
+            <div class="snode local" id="sn-2"><span class="sic">🔀</span><div><b>Blindfold proxy · <code>proxy.ts</code></b><i>routes by URL prefix → provider (host · secret · auth scheme). Unmapped host → 404</i></div></div></div>
+          <div class="srow"><span class="szone t3">Terminal 3</span>
+            <div class="snode t3" id="sn-3"><span class="sic">☁️</span><div><b>Tenant session · <code>t3-client.ts</code></b><i>eth-signed RPC → your contract <code>blindfold-proxy v0.5.6</code>. Egress allowlist checked · ≈20 tokens metered</i></div></div></div>
+          <div class="srow"><span class="szone tdx">Intel TDX</span>
+            <div class="snode tdx" id="sn-4"><span class="sic">🔐</span><div><b>Confidential VM</b><i>memory-encrypted RAM · RTMR3-measured · opaque to host, OS &amp; root</i></div></div></div>
+          <div class="srow"><span class="szone enc">Enclave</span>
+            <div class="snode enc" id="sn-5"><span class="sic">⚙️</span><div><b><code>forward()</code> — Rust→WASM contract</b><i><code>kv::get z:&lt;tenant&gt;:secrets</code> → swap sentinel → apply auth (bearer/basic/sigv4/webhook) → <code>http::call</code></i></div></div></div>
+          <div class="srow"><span class="szone api">Upstream</span>
+            <div class="snode api" id="sn-6"><span class="sic">🌐</span><div><b>Upstream API · OpenAI · Stripe · GitHub · …</b><i>authenticates with the real key; only the response flows back — the key never returns</i></div></div></div>
+          <svg class="sysd-wires" id="sysdWires" aria-hidden="true"></svg>
+        </div>
+      </div>
+      <div class="sysd-legend">
+        <i style="color:var(--accent2)"><span class="sw"></span> request path — steps 1→7</i>
+        <i style="color:var(--green)"><span class="sw"></span> response — step 8 · only the result returns, the key stays in the enclave</i>
+      </div>
+      <div class="sd-cols">
+        <div class="sd-panel">
+          <h4>🧩 Components</h4>
+          <div class="sd-row"><b>proxy.ts</b><span>local router — sentinel enforcement, URL→provider mapping</span></div>
+          <div class="sd-row"><b>t3-client.ts</b><span>tenant-authenticated RPC to Terminal 3 (forward / release)</span></div>
+          <div class="sd-row"><b>forward()</b><span>Rust→WASM contract fn — in-enclave swap + upstream call</span></div>
+          <div class="sd-row"><b>release-to-tenant()</b><span>returns plaintext to the authenticated tenant, one call</span></div>
+          <div class="sd-row"><b>secrets map</b><span>z:&lt;tenant&gt;:secrets — the only copy of the real key</span></div>
+          <div class="sd-row"><b>egress ACL</b><span>agent-auth-update — server-side host allowlist, deny-by-default</span></div>
+          <div class="sd-row"><b>sealed ledger</b><span>~/.blindfold/sealed.jsonl — HMAC hash-chained metadata</span></div>
+        </div>
+        <div class="sd-panel">
+          <h4>📐 Contract &amp; trust</h4>
+          <div class="sd-row"><b>runtime</b><span>wasm32-wasip2 module, contract tail blindfold-proxy v0.5.6</span></div>
+          <div class="sd-row"><b>interface</b><span>WIT — forward(req) · release-to-tenant(name)</span></div>
+          <div class="sd-row"><b>auth schemes</b><span>bearer · basic · sigv4 · webhook</span></div>
+          <div class="sd-row"><b>identity</b><span>tenant DID + secp256k1 eth key signs every call</span></div>
+          <div class="sd-row"><b>attestation</b><span>RTMR3 measurement → TDX quote → Intel SGX root CA</span></div>
+          <div class="sd-row"><b>isolation</b><span>memory-encrypted VM — opaque to host, OS, and root</span></div>
+          <div class="sd-row"><b>metering</b><span>≈20 tokens / op (1 token = 1,000,000 base units)</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="archnote">Two deny-by-default gates: the proxy 404s any unmapped API, the enclave refuses any host off your allowlist. &nbsp;·&nbsp; <a href="https://github.com/FiscalMindset/Blindfold/blob/main/system_design.md" style="color:var(--accent2)" target="_blank" rel="noopener">Full system_design.md — 11 diagrams →</a></p>
+  </div>
+</section>
+
+<!-- THREE PATHS -->
+<section id="paths" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">Three ways to use a sealed key</span><h2>One sealed key, three call styles</h2><p class="lead">All three keep the key out of your <b>agent's</b> memory. They differ in <b>where the plaintext briefly appears</b>: the proxy never lets it leave the enclave, release borrows it for one command, and register is the one-time seal.</p></div>
+    <div class="grid3">
+      <div class="card reveal pathc p-strong">
+        <div class="phd"><span class="pnum">1</span><h3>Proxy / forward</h3><span class="tag strong">🔒 strongest</span></div>
+        <p class="pwhere">Plaintext lives: <b>only inside the enclave</b> — never on your machine.</p>
+        <p>Your agent sends the sentinel to the local proxy; the key-swap <i>and</i> the real API call happen inside Intel TDX. The best choice for autonomous agents that make HTTP calls.</p>
+<pre class="mini"><span class="cmt"># 1 · run these once</span>
+<span class="pr">$</span> blindfold proxy
+<span class="pr">$</span> blindfold grant --host api.openai.com
+
+<span class="cmt"># 2 · point your agent at the proxy — it sends</span>
+<span class="cmt">#     the sentinel in place of the real key:</span>
+<span class="cmt">base URL:</span> http://127.0.0.1:8787/openai
+<span class="cmt">header:</span>   Authorization: Bearer __BLINDFOLD__</pre>
+        <p class="pgood">✓ The real key never touches your machine — a prompt injection has nothing to steal.</p>
+      </div>
+      <div class="card reveal pathc p-flex">
+        <div class="phd"><span class="pnum">2</span><h3>Release for one command</h3><span class="tag mid">⚡ flexible</span></div>
+        <p class="pwhere">Plaintext lives: <b>on your machine, for a single command</b>.</p>
+        <p>Blindfold pulls the real key from the enclave and injects it as an <b>env var into just one command</b> — then it's gone. Your shell and your agent never keep it. Use it for non-HTTP tools, CLIs and batch jobs the proxy can't front.</p>
+<pre class="mini"><span class="cmt"># one command — run it, key is injected, then gone</span>
+<span class="pr">$</span> blindfold use --name openai_api_key --as OPENAI_API_KEY -- python app.py
+
+<span class="cmt"># --name  the sealed key to release</span>
+<span class="cmt"># --as    the env var it becomes ($OPENAI_API_KEY)</span>
+<span class="cmt"># --      your command — receives the key, nothing else does</span></pre>
+        <p class="pnote">⚠️ Unlike the proxy, the plaintext <b>does</b> briefly touch your local process. Keep your tenant key (<code>T3N_API_KEY</code>) out of the agent's reach so only <b>you</b> can release.</p>
+      </div>
+      <div class="card reveal pathc p-seal">
+        <div class="phd"><span class="pnum">3</span><h3>Register / seal</h3><span class="tag mid">🔑 one-time</span></div>
+        <p class="pwhere">Plaintext lives: <b>in your terminal, once — at seal time</b>.</p>
+        <p>The one unavoidable moment you hold the key: typed with input hidden (no echo, no shell history), sent straight to the enclave, then dropped. Rotate or delete anytime.</p>
+<pre class="mini"><span class="cmt"># hidden prompt — no echo, no shell history</span>
+<span class="pr">$</span> blindfold register --name openai_api_key
+
+<span class="cmt"># …or seal straight from an env var</span>
+<span class="pr">$</span> blindfold register --name aws_secret --from-env AWS_SECRET
+
+<span class="cmt"># replace a value later, rollback-safe</span>
+<span class="pr">$</span> blindfold rotate --name openai_api_key</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVIDERS -->
+<section id="providers" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">Supported providers</span><h2>First-class integrations, not a generic passthrough</h2><p class="lead">Each provider is a real entry with its exact upstream host and the auth scheme the enclave applies. Add your own in one line.</p></div>
+    <div class="prov reveal">
+      <div class="pv"><div class="pn">OpenAI</div><div class="ph">api.openai.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">Anthropic</div><div class="ph">api.anthropic.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">Google Gemini</div><div class="ph">generativelanguage.googleapis.com</div><span class="pa">x-goog-api-key</span></div>
+      <div class="pv"><div class="pn">Groq</div><div class="ph">api.groq.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">xAI · Grok</div><div class="ph">api.x.ai</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">Stripe</div><div class="ph">api.stripe.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">GitHub</div><div class="ph">api.github.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">SendGrid</div><div class="ph">api.sendgrid.com</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">Slack</div><div class="ph">slack.com/api</div><span class="pa">bearer</span></div>
+      <div class="pv"><div class="pn">Twilio</div><div class="ph">api.twilio.com</div><span class="pa">basic</span></div>
+      <div class="pv"><div class="pn">AWS · SES / S3</div><div class="ph">*.amazonaws.com</div><span class="pa">sigv4</span></div>
+      <div class="pv"><div class="pn">Discord</div><div class="ph">discord.com/api</div><span class="pa">webhook</span></div>
+    </div>
+    <p class="provnote">Anything with a Bearer / Basic / SigV4 / webhook scheme works. Not listed? <code>blindfold grant --host your.api.com</code> plus a one-line provider entry — that's the whole change.</p>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">Live proof</span><h2>An agent read a 2,000-row Google Sheet<br/>with a key it never actually saw</h2><p class="lead">The key was released only into the python subprocess, used once, and dropped. This is a real run — the numbers below are the actual output.</p></div>
+    <div class="term reveal" style="max-width:840px;margin:0 auto">
+      <div class="bar"><i style="background:#ff6b63"></i><i style="background:#f0b429"></i><i style="background:#3fd07a"></i><span class="t">zsh — blindfold (release path)</span></div>
+<pre><span class="kw">$</span> blindfold use --name google_sheet_api_key --as GKEY -- \
+    python3 read_sheet.py <span class="str">1N5xuy8j8ny-…-HaX4o</span>
+
+<span class="ok">✓ released "google_sheet_api_key" (39 B) → injecting $GKEY (never printed)</span>
+<span class="cmt">  · Terminal 3 → Intel TDX enclave → release-to-tenant (metered ~20 tokens)</span>
+
+TITLE: <span class="amb">raksha-farmer-query</span>   (2003 rows × 14 cols)
+HEADERS: StateName | DistrictName | Sector | QueryType | QueryText | …
+  <span class="cmt">KARNATAKA   | HUBBALLI | HORTICULTURE | Market | Sowing time of Onion?</span>
+  <span class="cmt">MAHARASHTRA | AKOLA    | HORTICULTURE | Market | Fertilizer doses for Citrus?</span>
+
+<span class="kw">▸</span> agent's answer: <span class="str">2,003 farmer queries · top sector HORTICULTURE · most-asked: sowing time &amp; fertilizer doses</span>
+<span class="ok">✓ the agent saw the data — never the key.</span></pre>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><b>2,003</b><span>rows read</span></div>
+      <div class="stat"><b>14</b><span>columns parsed</span></div>
+      <div class="stat"><b>39 B</b><span>key size</span></div>
+      <div class="stat zero"><b>0</b><span>times the agent saw the key</span></div>
+      <div class="stat"><b>~20</b><span>tokens metered</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">How it compares</span><h2>Blindfold vs. every other option</h2><p class="lead">Vaults, managers and HSMs solve <i>storage &amp; rotation</i> — but they all decrypt the key into the process that makes the call, so a prompt-injected agent can still leak it. Blindfold solves <i>use</i>: the agent calls the API without ever holding the key.</p></div>
+    <div class="center reveal" style="margin:-24px auto 18px"><button class="btn cmpcopy" id="cmpCopy">⧉ Copy comparison</button></div>
+    <div class="card reveal cmpwrap" style="padding:0;overflow-x:auto">
+      <table class="cmp cmp-rich">
+        <thead><tr>
+          <th>Approach</th>
+          <th>Plaintext at call time</th>
+          <th>Agent holds the raw key?</th>
+          <th>Prompt-injection can leak it?</th>
+          <th>Enclave makes the API call?</th>
+          <th>Hardware TEE for the key in use?</th>
+          <th>Also does storage / rotation?</th>
+          <th>Setup</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><b>.env / env vars</b></td>
+            <td>agent process memory</td>
+            <td class="bad">Yes</td>
+            <td class="bad">Yes — trivially</td>
+            <td class="mut">No</td>
+            <td class="mut">No</td>
+            <td class="mut">No</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td><b>Password manager / keychain</b><br/><span class="sublbl">1Password · Bitwarden · macOS Keychain</span></td>
+            <td>agent process, after autofill/read</td>
+            <td class="bad">Yes</td>
+            <td class="bad">Yes</td>
+            <td class="mut">No</td>
+            <td class="mut">No*</td>
+            <td class="good">Yes</td>
+            <td>vault app</td>
+          </tr>
+          <tr>
+            <td><b>Secrets manager</b><br/><span class="sublbl">AWS / GCP Secrets Manager</span></td>
+            <td>agent process, after fetch</td>
+            <td class="bad">Yes</td>
+            <td class="bad">Yes</td>
+            <td class="mut">No</td>
+            <td class="mut">No</td>
+            <td class="good">Yes</td>
+            <td>SDK + IAM</td>
+          </tr>
+          <tr>
+            <td><b>HashiCorp Vault</b></td>
+            <td>agent process, after fetch</td>
+            <td class="bad">Yes</td>
+            <td class="bad">Yes</td>
+            <td class="mut">No</td>
+            <td class="mut">No</td>
+            <td class="good">Yes</td>
+            <td>server + policies</td>
+          </tr>
+          <tr>
+            <td><b>KMS / HSM</b><br/><span class="sublbl">AWS KMS · hardware key store</span></td>
+            <td>process (decrypt); key material stays for crypto</td>
+            <td class="warn">Partly</td>
+            <td class="warn">Partly — not for API keys</td>
+            <td class="mut">No</td>
+            <td class="good">Yes</td>
+            <td class="good">Yes</td>
+            <td>keys + IAM</td>
+          </tr>
+          <tr class="hl">
+            <td><b>🛡️ Blindfold</b><br/><span class="sublbl">proxy path</span></td>
+            <td class="good"><b>only inside the TDX enclave</b></td>
+            <td class="good">No — never</td>
+            <td class="good">No — the key isn't there</td>
+            <td class="good">Yes</td>
+            <td class="good">Yes (Intel TDX)</td>
+            <td class="warn">Complements a vault</td>
+            <td><code>npm i -g</code> + signup</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmpscroll">← swipe the table to see all columns →</p>
+    <p class="archnote">* A keychain may hold its own <i>master</i> key in a secure element, but your API key is still decrypted into the app/process that uses it. &nbsp;·&nbsp; Blindfold is the only row where the agent <b>never</b> holds the plaintext for its actual use — calling OpenAI, Stripe, GitHub, etc. Keep your vault for storage; put Blindfold in front of the agent.</p>
+  </div>
+</section>
+
+<!-- COST -->
+<section id="cost" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">What it costs</span><h2>Free to start · metered by the token</h2></div>
+    <div class="cost-grid">
+      <div class="card reveal"><div class="ic">🎁</div><h3>Free on testnet</h3><p><code>blindfold signup</code> mints a funded testnet tenant (~20,000 welcome tokens) — enough to seal and run thousands of ops before you pay anything.</p></div>
+      <div class="card reveal"><div class="ic">🪙</div><h3>≈20 tokens per op</h3><p>Each enclave operation (seal, forward, release) meters about 20 tokens — measured live. 1 token = 1,000,000 base units on the Terminal 3 ledger.</p></div>
+      <div class="card reveal"><div class="ic">📊</div><h3>See it anytime</h3><p>Balance and reservations are always visible with <code>blindfold credit</code>. No seats, no invented subscription — you pay for enclave compute you actually use.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">Pricing</span><h2>Free on testnet today</h2><p class="lead">Blindfold runs on Terminal 3 enclave compute. Right now it's testnet — the real product, the real enclave, at zero cost. Paid plans arrive once Terminal 3 sets production pricing.</p></div>
+    <div class="pricing-stack reveal">
+      <div class="tiers locked" id="tiers" aria-hidden="true">
+        <div class="tier">
+          <div class="tname">Open source</div>
+          <div class="tprice">$0 <small>/ forever</small></div>
+          <div class="tsub">Self-host, MIT licensed — everything you need to seal keys yourself.</div>
+          <ul>
+            <li>Full CLI + SDK + local proxy</li>
+            <li>In-enclave substitution + release broker</li>
+            <li><b style="color:var(--ink)">~20,000 free tokens</b> on signup ≈ <b style="color:var(--ink)">~1,000 enclave ops</b></li>
+            <li>Remote attestation + audit ledger</li>
+            <li>Community support on GitHub</li>
+          </ul>
+          <a class="tbtn" href="https://www.npmjs.com/package/@fiscalmindset/blindfold" target="_blank" rel="noopener">Install from npm</a>
+        </div>
+        <div class="tier feat">
+          <span class="tflag">Planned</span>
+          <div class="tname">Team</div>
+          <div class="tprice">Usage <small>· later</small></div>
+          <div class="tsub">Managed enclave, team key sharing, priority help — priced on the Terminal 3 compute you actually use.</div>
+          <ul>
+            <li>Everything in Open source</li>
+            <li>Managed hosting — no infra to run</li>
+            <li>Share sealed keys across your team (forward-only)</li>
+            <li>Priority support + onboarding</li>
+            <li>Usage dashboards &amp; alerts</li>
+          </ul>
+          <a class="tbtn" href="mailto:npdimagine@gmail.com?subject=Blindfold%20Team%20—%20early%20access">Register interest</a>
+        </div>
+        <div class="tier">
+          <div class="tname">Enterprise</div>
+          <div class="tprice">Custom</div>
+          <div class="tsub">For teams with compliance, scale, and security-review requirements.</div>
+          <ul>
+            <li>Everything in Team</li>
+            <li>SSO, audit logs, and an SLA</li>
+            <li>Dedicated support + security review</li>
+            <li>Custom providers &amp; deployment</li>
+            <li>Volume pricing</li>
+          </ul>
+          <a class="tbtn" href="mailto:npdimagine@gmail.com?subject=Blindfold%20Enterprise">Contact sales</a>
+        </div>
+      </div>
+      <div class="testnet-overlay" id="tnOverlay">
+        <div class="testnet-card">
+          <span class="testnet-badge"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span> Live on testnet · free</span>
+          <h3>~1,000 enclave operations, on the house</h3>
+          <p><code style="font-family:'JetBrains Mono',monospace;color:#c9d4ff">blindfold signup</code> mints a funded testnet tenant automatically — no card, no waiting, no manual token.</p>
+          <div class="tn-stats">
+            <div class="tn-stat"><b>~20,000</b><span>welcome tokens</span></div>
+            <div class="tn-stat"><b>~1,000</b><span>enclave operations</span></div>
+            <div class="tn-stat"><b>$0</b><span>cost on testnet</span></div>
+          </div>
+          <div class="tn-calc">
+            I need <input id="opsIn" type="number" min="0" value="1000" /> operations →
+            <span class="out"><span id="tokOut">20,000</span> tokens</span>
+            <div class="cover" id="coverMsg"></div>
+            <div style="font-size:11.5px;color:var(--dim);margin-top:7px">1 token = 1,000,000 base units · ~20 tokens per op (measured live). Ops = seal · proxy call · release.</div>
+          </div>
+          <div class="tn-cta">
+            <a class="btn primary" href="https://www.npmjs.com/package/@fiscalmindset/blindfold" target="_blank" rel="noopener">Install &amp; sign up free</a>
+            <a class="btn" href="mailto:npdimagine@gmail.com?subject=More%20Credit%20Request">Request more credit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="pricenote">Production $/token is Terminal 3's to set — we won't quote a number we can't stand behind. Need more testnet credit? <a href="mailto:npdimagine@gmail.com?subject=More%20Credit%20Request" style="color:var(--accent2)">email with subject "More Credit Request"</a>. &nbsp;·&nbsp; <button class="tn-toggle" id="tnToggle">Preview the planned tiers →</button></p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">What you get</span><h2>Everything to run agents safely</h2></div>
+    <div class="grid3">
+      <div class="card reveal"><div class="ic">🔀</div><h3>In-enclave proxy</h3><p>Agent sends the sentinel; the enclave swaps in the real key and makes the call. Deny-by-default routing + egress allowlist.</p></div>
+      <div class="card reveal"><div class="ic">🗝️</div><h3>Release broker</h3><p>Need the value locally? Release it for one command, injected as an env var — never back in your environment.</p></div>
+      <div class="card reveal"><div class="ic">📜</div><h3>Remote attestation</h3><p>Verify the enclave runs your exact code (RTMR3 pin → Intel root CA) before you trust it with a secret.</p></div>
+      <div class="card reveal"><div class="ic">🧾</div><h3>Tamper-evident ledger</h3><p>HMAC hash-chained record of what's sealed. <code>audit</code> reconciles it against the enclave — the source of truth.</p></div>
+      <div class="card reveal"><div class="ic">👥</div><h3>Team sharing</h3><p>Let a teammate's agent use your sealed key for a host — forward-only. They call, never see the key.</p></div>
+      <div class="card reveal"><div class="ic">⚡</div><h3>Self-serve, one line</h3><p><code>npm i -g</code> + <code>signup</code> and you're sealing keys in ~30s. Works with any stack.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="sub">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">FAQ</span><h2>The questions everyone asks</h2></div>
+    <div class="faq reveal">
+      <details class="qa"><summary>Can Blindfold — or you — see my key?</summary><div class="ab">No. At seal time the value goes straight from your terminal into the enclave's secrets map; it's never printed, logged, or written to disk. After that the plaintext only ever exists inside the TDX enclave during a single call. The proxy, the CLI, and the maintainer never see it.</div></details>
+      <details class="qa"><summary>What actually stops a prompt injection?</summary><div class="ab">The agent's process only ever holds the placeholder <code>__BLINDFOLD__</code>. There's no real key in its memory or context to exfiltrate — convincing the agent to "print the key" prints the sentinel. The substitution happens inside the enclave, after the request has already left the agent.</div></details>
+      <details class="qa"><summary>Is it production-ready?</summary><div class="ab">It's live on npm (<code>@fiscalmindset/blindfold</code>, MIT), runs on Terminal 3's Intel TDX, and is self-serve. It's early and open source. The strongest guarantee is the <b>proxy path</b>, where the key never leaves the enclave. The release path returns plaintext into your local process for one command, so keep your tenant key off the agent's reachable env.</div></details>
+      <details class="qa"><summary>How do I know the enclave runs the real code?</summary><div class="ab">Remote attestation. <code>blindfold attest</code> pins the RTMR3 code measurement and verifies the TDX quote, which chains to the Intel SGX root CA. You confirm the enclave is running your exact contract before trusting it with a secret.</div></details>
+      <details class="qa"><summary>What if Terminal 3 is unavailable?</summary><div class="ab">Calls that need the enclave (proxy/forward, release) fail closed — they error rather than fall back to an unprotected path. Your sealed keys stay in the enclave; nothing leaks. You retry when it's back.</div></details>
+      <details class="qa"><summary>What does it cost?</summary><div class="ab">Free on testnet — <code>signup</code> mints ~20,000 tokens. Each enclave op meters about 20 tokens (1 token = 1,000,000 base units). Check anytime with <code>blindfold credit</code>. See the <a href="#cost" style="color:var(--accent2)">cost section</a>.</div></details>
+      <details class="qa"><summary>Which languages and stacks work?</summary><div class="ab">Any. The proxy is a plain local HTTP endpoint, so anything that makes an HTTP request — Node, Python, Go, curl, your agent framework — works by pointing at it and sending the sentinel. The release path wraps any command with an injected env var.</div></details>
+      <div style="text-align:center;margin-top:22px"><a class="btn" href="/faq" style="display:inline-flex">See all questions →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- GET STARTED -->
+<section id="start">
+  <div class="wrap">
+    <div class="center reveal"><span class="eyebrow">Get started</span><h2>Three commands to un-leakable keys</h2></div>
+    <div class="steps">
+      <div class="step reveal"><div class="n">1</div><h3>Create a tenant</h3><p>Self-serve — a funded Terminal 3 testnet tenant. No manual setup.</p><code>blindfold signup --email you@x.com</code></div>
+      <div class="step reveal"><div class="n">2</div><h3>Seal a key</h3><p>Hidden prompt. The value goes to the enclave and is dropped.</p><code>blindfold register --name openai_api_key</code></div>
+      <div class="step reveal"><div class="n">3</div><h3>Use it safely</h3><p>Point your agent at the proxy, or inject into one command.</p><code>blindfold proxy</code></div>
+    </div>
+    <div class="final reveal" style="margin-top:26px">
+      <h2 style="font-size:clamp(24px,3.4vw,34px)">Seal your first key in 30 seconds</h2>
+      <p class="lead" style="margin:8px auto 0">Free on testnet · Open source · No config files.</p>
+      <div class="cmd" style="margin:24px auto 0"><code>npm i -g @fiscalmindset/blindfold&nbsp;&amp;&amp;&nbsp;blindfold signup</code><button class="cp" data-cmd="npm i -g @fiscalmindset/blindfold && blindfold signup --email you@example.com">Copy</button></div>
+      <div class="cta-row" style="justify-content:center">
+        <a class="btn primary" href="https://www.npmjs.com/package/@fiscalmindset/blindfold" target="_blank" rel="noopener">Install from npm</a>
+        <a class="btn" href="https://github.com/FiscalMindset/Blindfold" target="_blank" rel="noopener">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="founder sub">
+  <div class="wrap">
+    <div class="center reveal" style="margin-bottom:22px"><span class="eyebrow">Who's building this</span></div>
+    <div class="fcard reveal">
+      <img class="favatar" src="https://github.com/FiscalMindset.png" alt="FiscalMindset avatar" width="78" height="78" loading="lazy" />
+      <div>
+        <div class="fname">Built by <b>FiscalMindset</b></div>
+        <p>Solo founder — building un-leakable secret infrastructure for AI agents on Terminal 3 (Intel TDX). Open source, published to npm, and shipped in the open. If your agents touch real keys, I'd love your feedback.</p>
+        <div class="flinks">
+          <a href="https://github.com/FiscalMindset" target="_blank" rel="noopener">🐙 github.com/FiscalMindset</a>
+          <a href="mailto:npdimagine@gmail.com">✉️ npdimagine@gmail.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap foot">
+  <div><span class="brand" style="font-size:15px"><span class="mark">🛡️</span> Blindfold</span> &nbsp; <span style="color:var(--dim)">Your AI agent can't leak the API key it never had.</span></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <a href="https://www.npmjs.com/package/@fiscalmindset/blindfold" target="_blank" rel="noopener">npm</a>
+    <a href="https://github.com/FiscalMindset/Blindfold" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/FiscalMindset/Blindfold/blob/main/system_design.md" target="_blank" rel="noopener">System design</a>
+    <a href="https://terminal3.io" target="_blank" rel="noopener">Terminal 3</a>
+    <a href="https://github.com/FiscalMindset" target="_blank" rel="noopener">FiscalMindset</a>
+    <a href="mailto:npdimagine@gmail.com">Contact</a>
+    <span style="color:var(--dim)">MIT © FiscalMindset</span>
+  </div>
+</div></footer>
+
+<script>
+  document.querySelectorAll('.cp').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.cmd);const t=b.textContent;b.textContent='Copied ✓';b.style.color='#3fd07a';setTimeout(()=>{b.textContent=t;b.style.color='';},1400);}catch(e){}}));
+  /* mobile nav toggle */
+  (function(){
+    const t=document.getElementById('navToggle'), m=document.getElementById('navLinks'); if(!t||!m) return;
+    const set=o=>{m.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');t.textContent=o?'✕':'☰';};
+    t.addEventListener('click',()=>set(!m.classList.contains('open')));
+    m.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>set(false)));
+    document.addEventListener('click',e=>{ if(!m.contains(e.target)&&!t.contains(e.target)) set(false); });
+  })();
+  /* pricing: testnet overlay + ops calculator */
+  (function(){
+    const tiers=document.getElementById('tiers'), ov=document.getElementById('tnOverlay'), tog=document.getElementById('tnToggle');
+    const opsIn=document.getElementById('opsIn'), tokOut=document.getElementById('tokOut'), cover=document.getElementById('coverMsg');
+    if(!tiers||!ov||!tog) return;
+    let showing=false;
+    tog.addEventListener('click',()=>{
+      showing=!showing;
+      tiers.classList.toggle('locked',!showing);
+      tiers.setAttribute('aria-hidden', showing?'false':'true');
+      ov.style.display=showing?'none':'flex';
+      tog.textContent=showing?'← Back to what you get now':'Preview the planned tiers →';
+    });
+    function calc(){
+      const ops=Math.max(0, parseInt(opsIn.value,10)||0);
+      const tokens=ops*20;
+      tokOut.textContent=tokens.toLocaleString();
+      if(ops<=1000) cover.innerHTML='<span style="color:var(--green)">✓ covered by your free ~20,000-token welcome grant</span>';
+      else cover.innerHTML='<span style="color:var(--amber)">beyond the free grant — <a href="mailto:npdimagine@gmail.com?subject=More%20Credit%20Request" style="color:var(--accent2)">request more credit</a></span>';
+    }
+    if(opsIn){ opsIn.addEventListener('input',calc); calc(); }
+  })();
+  /* copy comparison as a markdown table */
+  (function(){
+    const CMP='Blindfold vs. every other option — where does your API key live when the agent calls the API?\n\n'
+      +'| Approach | Plaintext at call time | Agent holds raw key? | Injection can leak it? | Enclave makes the call? | Hardware TEE? | Storage/rotation? | Setup |\n'
+      +'|---|---|---|---|---|---|---|---|\n'
+      +'| .env / env vars | agent process memory | Yes | Yes | No | No | No | none |\n'
+      +'| Password manager / keychain | agent process | Yes | Yes | No | No* | Yes | vault app |\n'
+      +'| Secrets manager (AWS/GCP) | agent process | Yes | Yes | No | No | Yes | SDK + IAM |\n'
+      +'| HashiCorp Vault | agent process | Yes | Yes | No | No | Yes | server + policies |\n'
+      +'| KMS / HSM | process (decrypt) | Partly | Partly (not API keys) | No | Yes | Yes | keys + IAM |\n'
+      +'| Blindfold (proxy path) | only inside the TDX enclave | No | No | Yes | Yes | complements a vault | npm i -g + signup |\n\n'
+      +'* A keychain may hold its own master key in a secure element, but your API key is still decrypted into the process.\n'
+      +'More: https://blindfold-rho.vercel.app';
+    document.querySelectorAll('.cmpcopy').forEach(b=>b.addEventListener('click',async()=>{
+      try{ await navigator.clipboard.writeText(CMP); const t=b.textContent; b.textContent='Copied ✓'; b.style.borderColor='var(--green)'; b.style.color='var(--green)'; setTimeout(()=>{b.textContent=t;b.style.borderColor='';b.style.color='';},1600);}catch(e){}
+    }));
+  })();
+  /* command reference: tap-to-copy + copy-all cheatsheet */
+  (function(){
+    document.querySelectorAll('.cmditem').forEach(b=>b.addEventListener('click',async()=>{
+      try{ await navigator.clipboard.writeText(b.dataset.cmd); b.classList.add('copied'); const ci=b.querySelector('.ci'); const o=ci.textContent; ci.textContent='✓'; setTimeout(()=>{b.classList.remove('copied');ci.textContent=o;},1300);}catch(e){}
+    }));
+    const all=document.getElementById('cmdCopyAll');
+    if(all) all.addEventListener('click',async()=>{
+      const rows=[].slice.call(document.querySelectorAll('.cmditem')).map(b=>[b.dataset.cmd, b.querySelector('.cd').textContent]);
+      const w=Math.max.apply(null,rows.map(r=>r[0].length));
+      const txt='# Blindfold — command reference\n'+rows.map(r=>r[0]+' '.repeat(w-r[0].length+2)+'# '+r[1]).join('\n')+'\n\n# docs: https://blindfold-rho.vercel.app';
+      try{ await navigator.clipboard.writeText(txt); const t=all.textContent; all.textContent='Copied ✓'; all.style.borderColor='var(--green)'; all.style.color='var(--green)'; setTimeout(()=>{all.textContent=t;all.style.borderColor='';all.style.color='';},1600);}catch(e){}
+    });
+  })();
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  /* ── system-design flow diagram: draw request + response wires, recompute on resize ── */
+  (function(){
+    const flow=document.getElementById('sysdFlow'), svg=document.getElementById('sysdWires');
+    if(!flow||!svg) return;
+    const ids=['sn-1','sn-2','sn-3','sn-4','sn-5','sn-6'];
+    const steps=['1','2·3','4','5','6·7'];  // 5 gaps between 6 nodes
+    function build(){
+      const cr=flow.getBoundingClientRect(), W=flow.clientWidth, H=flow.clientHeight;
+      const a=ids.map(id=>{const n=document.getElementById(id).getBoundingClientRect();
+        return {cx:n.left+n.width/2-cr.left, top:n.top-cr.top, bot:n.bottom-cr.top, right:n.right-cr.left, cy:n.top+n.height/2-cr.top};});
+      svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('width',W); svg.setAttribute('height',H);
+      let s='';
+      for(let i=0;i<a.length-1;i++){
+        const x=a[i].cx, y1=a[i].bot+2, y2=a[i+1].top-2, my=(y1+y2)/2;
+        s+='<path class="fwd" d="M'+x+' '+y1+' L'+x+' '+(y2-6)+'"/>';
+        s+='<path class="head" d="M'+(x-5)+' '+(y2-8)+' L'+(x+5)+' '+(y2-8)+' L'+x+' '+y2+' Z"/>';
+        s+='<circle class="chip" cx="'+x+'" cy="'+my+'" r="12"/>';
+        s+='<text class="num" x="'+x+'" y="'+(my+4)+'" text-anchor="middle">'+steps[i]+'</text>';
+      }
+      const last=a[a.length-1], first=a[0], rx=W-13;
+      s+='<path class="ret" d="M'+last.right+' '+last.cy+' C'+rx+' '+last.cy+', '+rx+' '+first.cy+', '+(first.right+7)+' '+first.cy+'"/>';
+      s+='<path class="head g" d="M'+(first.right+9)+' '+(first.cy-5)+' L'+(first.right+9)+' '+(first.cy+5)+' L'+(first.right+1)+' '+first.cy+' Z"/>';
+      svg.innerHTML=s;
+    }
+    build();
+    if(window.ResizeObserver) new ResizeObserver(build).observe(flow);
+    window.addEventListener('resize',build);
+    window.addEventListener('load',build);
+  })();
+
+  /* ── hero: TWO real terminals — setup shell, then a live Claude Code session ── */
+  (function(){
+    const b1=document.getElementById('t1body'), b2=document.getElementById('t2body'), w2=document.getElementById('term2');
+    if(!b1||!b2||!w2) return;
+    const wait=ms=>new Promise(r=>setTimeout(r,ms));
+    // s1 = your shell. s2 = the Claude Code session it launches.
+    // Every out: line is a real captured output from an actual run.
+    const s1=[
+      {cmd:'npm i -g @fiscalmindset/blindfold'},
+      {out:['dim','added 133 packages in 6s']},
+      {out:['ok','+ @fiscalmindset/blindfold@0.4.6']},
+      {cmd:'blindfold signup --email you@example.com'},
+      {out:['dim','  a verification code is emailed → you enter it']},
+      {out:['ok','✓ Tenant created: did:t3n:36506da58d1…']},
+      {out:['ok','  Welcome credits minted: 20000000000 base units']},
+      {cmd:'blindfold register --name google_sheet_api_key'},
+      {out:['dim','  Value for "google_sheet_api_key" (hidden): ••••••••••••']},
+      {out:['ok','✓ Registered "google_sheet_api_key" — value lives only in the enclave.']},
+      {cmd:'blindfold skill install'},
+      {out:['dim','  ✓ this project (Claude Code) → .claude/skills/blindfold/SKILL.md']},
+      {out:['ok','✓ Blindfold skill installed (1 target)']},
+      {cmd:'claude'},
+      {out:['dim','  ↑ opening a Claude Code session…']},
+    ];
+    const s2=[
+      {ann:'◆ Claude Code — Blindfold skill loaded (.claude/skills/blindfold/SKILL.md)'},
+      {you:'Read what’s inside my Google Sheet, I sealed the key already:'},
+      {you:'https://docs.google.com/spreadsheets/d/1N5xuy8j…/edit'},
+      {cl:'I’ll use your sealed key through Blindfold — I never read the key myself.'},
+      {cmd:'blindfold use --name google_sheet_api_key --as GKEY -- \\'},
+      {cmd2:'python3 read_sheet.py 1N5xuy8j…'},
+      {ann:'⟨ under the hood ⟩  Terminal 3  →  tenant-authenticated RPC (eth-signed session)'},
+      {ann:'⟨ under the hood ⟩  Intel TDX enclave  →  release-to-tenant reads z:tenant:secrets'},
+      {ann:'⟨ under the hood ⟩  real key returned over the encrypted session, used once, dropped'},
+      {out:['ok','✓ released "google_sheet_api_key" (39 B) → injecting $GKEY (never printed)']},
+      {out:['','TITLE: raksha-farmer-query   (2003 rows × 14 cols)']},
+      {out:['amb','  KARNATAKA | HUBBALLI | HORTICULTURE | Sowing time of Onion?']},
+      {cl:'Done — 2,003 rows across 14 columns. I used your key but never saw it.'},
+    ];
+    function line(body,cls,txt){const d=document.createElement('div');d.className='l '+(cls||'');d.textContent=txt;body.appendChild(d);body.scrollTop=body.scrollHeight;}
+    async function typeCmd(body,s,prompt,cls){
+      const d=document.createElement('div');d.className='l';
+      const pr=document.createElement('span');pr.className=cls||'p';pr.textContent=prompt;d.appendChild(pr);
+      const sp=document.createElement('span');sp.className='cmd';d.appendChild(sp);
+      const cur=document.createElement('span');cur.className='cursor';d.appendChild(cur);
+      body.appendChild(d);body.scrollTop=body.scrollHeight;
+      for(const ch of s){ sp.textContent+=ch; body.scrollTop=body.scrollHeight; await wait(20+Math.random()*32); }
+      cur.remove();
+    }
+    async function runScript(body, steps){
+      for(const st of steps){
+        if(st.cmd){ await typeCmd(body,st.cmd,'$ ','p'); await wait(st.cmd.endsWith('\\')?110:420); }
+        else if(st.cmd2){ await typeCmd(body,st.cmd2,'  ','dim'); await wait(560); }
+        else if(st.you){ line(body,'you','❯ '+st.you); await wait(560); }
+        else if(st.cl){ line(body,'cl','◆ Claude  '+st.cl); await wait(880); }
+        else if(st.ann){ line(body,'ann',st.ann); await wait(520); }
+        else if(st.out){ line(body,st.out[0],st.out[1]); await wait(300); }
+      }
+    }
+    let running=false;
+    async function play(){
+      running=true;
+      for(;;){
+        b1.innerHTML=''; b2.innerHTML=''; w2.classList.add('idle');
+        await runScript(b1, s1);
+        await wait(450); w2.classList.remove('idle'); await wait(350);
+        await runScript(b2, s2);
+        await wait(3400);
+      }
+    }
+    const vo=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting && !running){ play(); } }),{threshold:.15});
+    vo.observe(document.getElementById('term1'));
+  })();
+
+  /* ── packet FLOWS ALONG WIRES through the nested architecture ── */
+  (function(){
+    const arch=document.getElementById('arch'); if(!arch) return;
+    const pk=document.getElementById('apkt'), tok=document.getElementById('ptok'), cap=document.getElementById('fcap');
+    const phases=[...document.querySelectorAll('.fphase span')];
+    const zones=[...arch.querySelectorAll('.zone')];
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg'); svg.setAttribute('class','wires'); arch.appendChild(svg);
+    const C={amber:['rgba(240,180,41,.20)','#f0b429'],blue:['rgba(88,166,255,.20)','#58a6ff'],key:['rgba(61,123,253,.22)','#3d7bfd'],green:['rgba(63,208,122,.20)','#3fd07a']};
+    const NID={agent:'n-agent',proxy:'n-proxy',secrets:'n-secrets',forward:'n-forward',api:'n-api'};
+    const ZID={agent:'z-local',proxy:'z-local',secrets:'z-enc',forward:'z-enc',t3:'z-t3',tdx:'z-tdx',api:'z-api'};
+    function pt(key){
+      const isZone=(key==='t3'||key==='tdx');
+      const el=document.getElementById(isZone?ZID[key]:NID[key]); if(!el)return{x:0,y:0};
+      const a=arch.getBoundingClientRect(), r=el.getBoundingClientRect();
+      return {x:r.left-a.left+r.width/2, y:isZone? r.top-a.top+18 : r.top-a.top+r.height/2};
+    }
+    const SEG=[['agent','secrets'],['agent','proxy'],['proxy','t3'],['t3','tdx'],['tdx','forward'],['forward','api'],['api','agent']];
+    const paths={}; let pos={};
+    function curve(a,b){const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,k=Math.min(48,L*.24);
+      const cx=(a.x+b.x)/2+(-dy/L)*k, cy=(a.y+b.y)/2+(dx/L)*k; return `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`;}
+    function build(){
+      pos={}; ['agent','proxy','secrets','forward','api','t3','tdx'].forEach(k=>pos[k]=pt(k));
+      const w=arch.clientWidth,h=arch.clientHeight; svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.setAttribute('width',w); svg.setAttribute('height',h);
+      SEG.forEach(([f,t])=>{const key=f+'>'+t; let p=paths[key]; if(!p){p=document.createElementNS(NS,'path');p.setAttribute('class','wire');svg.appendChild(p);paths[key]=p;} p.setAttribute('d',curve(pos[f],pos[t]));});
+    }
+    const steps=[
+      {tp:'agent',tok:'🔑',c:'amber',p:'seal',teleport:1,cap:'<b>You seal the key</b> — <code>blindfold register</code>. Input hidden, never touches disk.',
+        dt:{h:'register.ts — the one plaintext line', ops:['read the value from the hidden prompt (or --from-env)','executeControl("map-entry-set", { map, key, value })','drop the value from scope immediately']}},
+      {seg:'agent>secrets',tok:'🔑',c:'amber',p:'seal',cap:'It flows into the <b>enclave’s secrets map</b> — the only copy of your real key.',
+        dt:{h:'secrets map — z:<tenant>:secrets', ops:['value written inside the TDX enclave','this becomes the canonical copy','record metadata only (name, length) in the local ledger']}},
+      {tp:'agent',tok:'🎭',c:'blue',p:'send',teleport:1,cap:'Later, the <b>agent sends the placeholder</b> <span style="color:#58a6ff">__BLINDFOLD__</span> — not the key.',
+        dt:{h:'AI Agent', ops:['builds the API request','sets Authorization: Bearer __BLINDFOLD__','sends it to the local proxy on 127.0.0.1:8787']}},
+      {seg:'agent>proxy',tok:'🎭',c:'blue',p:'send',cap:'The <b>Blindfold proxy</b> routes it by URL — never sees the real key.',
+        dt:{h:'proxy.ts', ops:['overwrite any Authorization with the sentinel','match the URL prefix → provider (host, secret_key, auth scheme)','build a ForwardRequest and forward it to the enclave']}},
+      {seg:'proxy>t3',tok:'🎭',c:'blue',p:'send',cap:'Into <b>Terminal 3</b>, over your tenant-authenticated session.',
+        dt:{h:'Terminal 3', ops:['tenant-authenticated RPC (eth-signed session)','route to your contract: blindfold-proxy v0.5.6','check the egress allowlist — meter ~20 tokens']}},
+      {seg:'t3>tdx',tok:'🎭',c:'blue',p:'send',cap:'Into the <b>Intel TDX</b> trust domain — isolated from OS, host, even root.',
+        dt:{h:'Intel TDX', ops:['request enters the memory-encrypted confidential VM','RTMR3 measures the running contract code','host / OS / root cannot read this memory']}},
+      {seg:'tdx>forward',tok:'🎭',arrive:'🔑',ac:'key',c:'blue',p:'swap',cap:'<b>forward():</b> <span style="color:#58a6ff">__BLINDFOLD__</span> → your real key. The only place the swap happens.',
+        dt:{h:'forward() — contract/src/forward.rs', ops:['kv::get → read the sealed key from the secrets map','replace __BLINDFOLD__ with the real key','apply the auth scheme (bearer / basic / sigv4 / webhook)','http::call the upstream — from inside TDX']}},
+      {seg:'forward>api',tok:'🔑',c:'key',p:'swap',cap:'The <b>real API call</b> is made from inside the enclave.',
+        dt:{h:'Upstream API', ops:['authenticates with the real key','returns the response','the key never leaves the enclave']}},
+      {seg:'api>agent',tok:'✅',c:'green',p:'return',cap:'Only the <b>result</b> returns — the key stayed sealed the whole time.',
+        dt:{h:'response path', ops:['only the response body flows back','the sealed secret is redacted from the body','your agent gets the result — never the key']}},
+    ];
+    const fdt=document.getElementById('fdtitle'), fdo=document.getElementById('fdops');
+    function detail(dt){ if(!dt||!fdt)return; fdt.textContent=dt.h; fdo.innerHTML=''; dt.ops.forEach(o=>{const li=document.createElement('li');li.textContent=o;fdo.appendChild(li);}); }
+    function tickOps(){ const items=[...fdo.children]; if(!items.length)return; let k=0; items.forEach(x=>x.classList.remove('on')); items[0]&&items[0].classList.add('on');
+      const iv=setInterval(()=>{ items.forEach(x=>x.classList.remove('on')); k=(k+1)%items.length; items[k].classList.add('on'); },520); setTimeout(()=>clearInterval(iv),1200); }
+    const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    function setColor(c){pk.style.background=C[c][0];pk.style.borderColor=C[c][1];pk.style.boxShadow='0 0 26px -2px '+C[c][1];}
+    function put(x,y){pk.style.left=x+'px';pk.style.top=y+'px';}
+    function light(key){ zones.forEach(z=>z.classList.remove('lit')); document.querySelectorAll('.node.lit').forEach(n=>n.classList.remove('lit'));
+      const z=document.getElementById(ZID[key]); if(z)z.classList.add('lit'); const n=NID[key]&&document.getElementById(NID[key]); if(n)n.classList.add('lit'); }
+    function trail(x,y,col){ const d=document.createElement('div'); d.className='trail'; d.style.cssText+=`left:${x}px;top:${y}px;background:${col};box-shadow:0 0 10px ${col}`; arch.appendChild(d);
+      requestAnimationFrame(()=>{d.style.opacity='0';d.style.transform='translate(-50%,-50%) scale(.35)';}); setTimeout(()=>d.remove(),520); }
+    let si=0,raf=null,started=false,fc=0;
+    function run(){
+      const st=steps[si];
+      phases.forEach(ph=>ph.classList.toggle('on',ph.dataset.p===st.p)); cap.innerHTML=st.cap;
+      detail(st.dt); tickOps();
+      tok.textContent=st.tok; setColor(st.c);
+      const next=()=>{ si=(si+1)%steps.length; setTimeout(run,380); };
+      if(st.teleport){ pk.style.opacity='0';
+        setTimeout(()=>{ const a=pos[st.tp]; put(a.x,a.y); light(st.tp); pk.style.opacity='1'; setTimeout(next,650); },260); return; }
+      const [f,t]=st.seg.split('>'); const path=paths[st.seg]; if(!path){next();return;}
+      light(f); path.classList.add('active');
+      const L=path.getTotalLength(), dur=1250, t0=performance.now();
+      (function frame(now){ let k=Math.min(1,(now-t0)/dur); const q=path.getPointAtLength(ease(k)*L); put(q.x,q.y);
+        if((fc++%2)===0) trail(q.x,q.y,C[st.c][1]);
+        if(k<1){ raf=requestAnimationFrame(frame); }
+        else { path.classList.remove('active'); light(t); if(st.arrive){tok.textContent=st.arrive;setColor(st.ac);} setTimeout(next,300); }
+      })(performance.now());
+    }
+    function start(){ build(); const a=pt('agent'); put(a.x,a.y); if(!started){started=true; run();} }
+    const ro=new ResizeObserver(build); ro.observe(arch);
+    window.addEventListener('resize',build);
+    const vo=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting && !started){ setTimeout(start,120); } }),{threshold:.15});
+    vo.observe(arch);
+  })();
+</script>
+</body>
+</html>
